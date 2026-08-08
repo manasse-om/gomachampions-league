@@ -1,0 +1,103 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="admin-card">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+      <h3 class="mb-1">Tirage Ligue (8 adversaires) — Live</h3>
+      <div class="text-light" style="opacity:.75;">
+        Équipes prises en compte: <strong>Validées</strong> uniquement.
+      </div>
+      <div class="text-light" style="opacity:.75;">
+        Équipes: <strong>{{ teams_count }}</strong> • Paires créées: <strong>{{ pairs_count }}</strong> (attendu final: 144)
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-light">← Dashboard</a>
+      <a href="{% url 'league_draw_global' %}" class="btn btn-warning">Tirage global (garanti 8/8)</a>
+      <a href="{% url 'league_generate_8_matchdays' %}" class="btn btn-outline-success">Générer 8 Journées (2/jour)</a>
+      <a href="{% url 'league_draw_reset' %}" class="btn btn-danger">Reset tirage</a>
+    </div>
+  </div>
+
+  <hr class="border-secondary my-4">
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="p-3 rounded" style="background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);">
+        <h5 class="mb-3">1) Choisir une équipe puis Random 8 adversaires</h5>
+
+        <div class="table-responsive">
+          <table class="table table-dark table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Équipe</th>
+                <th class="text-center">Adversaires</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in teams %}
+              <tr>
+                <td><strong>[{{ t.abbreviation }}]</strong> {{ t.team_name }}</td>
+                <td class="text-center">
+                  {% if t.draw_count >= 8 %}
+                    <span class="badge bg-success">{{ t.draw_count }}/8</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">{{ t.draw_count }}/8</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-success btn-sm" href="{% url 'league_draw_random8' t.id %}">
+                    Random 8
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="small text-light mt-3" style="opacity:.75;">
+          Astuce: fais équipe par équipe pendant l’appel WhatsApp (partage écran).
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="p-3 rounded" style="background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);">
+        <h5 class="mb-3">2) Dernières paires créées</h5>
+
+        {% if pairs %}
+          <ul class="list-group">
+            {% for p in pairs %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><strong>{{ p.team_a.abbreviation }}</strong> vs <strong>{{ p.team_b.abbreviation }}</strong></span>
+                <span class="text-muted small">{{ p.created_at|date:"d/m H:i" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-light" style="opacity:.75;">Aucune paire créée.</div>
+        {% endif %}
+
+        <hr class="border-secondary my-4">
+
+        {% if done %}
+          <a href="{% url 'league_draw_generate_matches' %}" class="btn btn-ucl-gold w-100">
+            Générer Phase League + Matchs (144)
+          </a>
+        {% else %}
+          <button class="btn btn-secondary w-100" disabled>
+            Tirage incomplet : toutes les équipes doivent être à 8/8
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

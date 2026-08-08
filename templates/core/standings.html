@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Classement - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="ucl-section py-4 py-md-5">
+  <div class="container">
+
+    <!-- HEADER / TITRE -->
+    <div class="text-center mb-4 mb-md-5">
+      <h1 class="ucl-main-title mb-1">Classement</h1>
+      {% if competition %}
+        <p class="ucl-subtitle mb-1">{{ competition.name }}</p>
+      {% endif %}
+      {% if fmt %}
+        <p class="ucl-format-label mb-0">{{ fmt.label }}</p>
+      {% endif %}
+    </div>
+
+    <!-- LÉGENDE -->
+    {% if fmt %}
+    <div class="d-flex gap-2 gap-md-3 flex-wrap justify-content-center mb-4">
+      <div class="legend-pill legend-pill--direct">
+        <span class="legend-dot dot-direct"></span> Top {{ direct_end }} &rarr; Qualification directe
+      </div>
+      <div class="legend-pill legend-pill--playoff">
+        <span class="legend-dot dot-playoff"></span> Pos. {{ direct_end|add:1 }}–{{ playoff_end }} &rarr; Barrages
+      </div>
+      {% if fmt.eliminated_after_league > 0 %}
+      <div class="legend-pill legend-pill--eliminated">
+        <span class="legend-dot dot-eliminated"></span> Pos. {{ playoff_end|add:1 }}+ &rarr; Éliminés
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- TABLEAU DE CLASSEMENT -->
+    <div class="standings-wrap">
+      <div class="table-responsive">
+        <table class="table standings-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="text-center th-pos">Pos</th>
+              <th class="th-team">Équipe</th>
+              <th class="text-center">MJ</th>
+              <th class="text-center">V</th>
+              <th class="text-center">N</th>
+              <th class="text-center">D</th>
+              <th class="text-center col-optional">BP</th>
+              <th class="text-center col-optional">BC</th>
+              <th class="text-center col-optional">Diff</th>
+              <th class="text-center th-pts">Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in teams %}
+            <tr class="
+              {% if forloop.counter <= direct_end %}
+                row-direct
+              {% elif forloop.counter <= playoff_end %}
+                row-playoff
+              {% else %}
+                row-eliminated
+              {% endif %}
+            ">
+              <td class="text-center">
+                <span class="pos-num
+                  {% if forloop.counter <= direct_end %}pos-direct
+                  {% elif forloop.counter <= playoff_end %}pos-playoff
+                  {% else %}pos-eliminated{% endif %}
+                ">{{ forloop.counter }}</span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="team-pill">{{ team.abbreviation }}</span>
+                  <div class="team-info">
+                    <div class="team-name">{{ team.team_name }}</div>
+                    <div class="player-name">{{ team.player_name }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center fw-semibold text-cell">{{ team.played }}</td>
+              <td class="text-center stat-win">{{ team.wins }}</td>
+              <td class="text-center text-cell">{{ team.draws }}</td>
+              <td class="text-center stat-loss">{{ team.losses }}</td>
+              <td class="text-center col-optional text-cell">{{ team.goals_for }}</td>
+              <td class="text-center col-optional text-cell">{{ team.goals_against }}</td>
+              <td class="text-center col-optional fw-bold
+                {% if team.goal_difference > 0 %}stat-win
+                {% elif team.goal_difference < 0 %}stat-loss
+                {% else %}text-cell
+                {% endif %}">
+                {{ team.goal_difference|stringformat:"+d" }}
+              </td>
+              <td class="text-center th-pts stat-pts">
+                {{ team.points }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="10" class="text-center py-5 empty-msg">
+                Aucune équipe validée pour le moment.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+/* ==========================================================================
+   DESIGN SOMBRE PREMIUM - STYLE CHAMPIONS LEAGUE
+   ========================================================================== */
+
+.ucl-section {
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #030712 0%, #0b132b 50%, #030712 100%);
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.ucl-main-title {
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.ucl-subtitle {
+  color: #ffcc00;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+}
+
+.ucl-format-label {
+  color: #94a3b8;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+/* Container & Tableau */
+.standings-wrap {
+  background: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.standings-table {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+/* En-tête */
+.standings-table thead th {
+  background: #090d16 !important;
+  color: #94a3b8 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.75rem;
+  border: none;
+  padding: 16px 12px;
+  font-weight: 800;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.standings-table thead th.th-pts {
+  color: #ffcc00 !important;
+}
+
+/* Corps du Tableau */
+.standings-table tbody tr {
+  background-color: #0f172a !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  transition: background 0.15s ease;
+}
+
+.standings-table tbody tr:hover {
+  background-color: #1e293b !important;
+}
+
+.standings-table tbody td {
+  padding: 14px 12px;
+  border: none;
+  background-color: transparent !important;
+}
+
+/* Texte des cellules */
+.text-cell {
+  color: #cbd5e1 !important;
+  font-size: 0.95rem;
+}
+
+/* Indicateurs latéraux */
+.row-direct {
+  border-left: 4px solid #00f2fe !important;
+}
+
+.row-playoff {
+  border-left: 4px solid #ffcc00 !important;
+}
+
+.row-eliminated {
+  border-left: 4px solid #ef4444 !important;
+  opacity: 0.75;
+}
+
+/* Badges positions */
+.pos-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.pos-direct {
+  background: rgba(0, 242, 254, 0.15);
+  color: #00f2fe;
+}
+
+.pos-playoff {
+  background: rgba(255, 204, 0, 0.15);
+  color: #ffcc00;
+}
+
+.pos-eliminated {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Abréviation Équipe */
+.team-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+  min-width: 42px;
+  flex-shrink: 0;
+}
+
+.team-name {
+  font-weight: 700;
+  color: #ffffff !important;
+  font-size: 0.95rem;
+}
+
+.player-name {
+  font-size: 0.78rem;
+  color: #94a3b8 !important;
+  font-weight: 500;
+}
+
+/* Couleurs des chiffres */
+.stat-win {
+  color: #34d399 !important;
+  font-weight: 700;
+}
+
+.stat-loss {
+  color: #f87171 !important;
+  font-weight: 700;
+}
+
+.stat-pts {
+  font-weight: 900;
+  color: #ffcc00 !important;
+  font-size: 1.1rem;
+}
+
+.empty-msg {
+  color: #94a3b8 !important;
+  font-style: italic;
+}
+
+/* Légende */
+.legend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-direct { background: #00f2fe; box-shadow: 0 0 6px #00f2fe; }
+.dot-playoff { background: #ffcc00; box-shadow: 0 0 6px #ffcc00; }
+.dot-eliminated { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .col-optional {
+    display: none !important;
+  }
+  
+  .standings-table thead th, 
+  .standings-table tbody td {
+    padding: 10px 6px;
+  }
+}
+</style>
+{% endblock %}

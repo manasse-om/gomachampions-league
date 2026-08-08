@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Paiements en attente - Dashboard Admin{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-hourglass-half me-2"></i>
+                    PAIEMENTS EN ATTENTE DE VALIDATION
+                </h1>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour au Dashboard
+                </a>
+            </div>
+        </div>
+        
+        {% if pending_teams %}
+        <div class="alert alert-warning">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>{{ pending_teams.count }}</strong> inscription(s) en attente de validation.
+        </div>
+        
+        <div class="row g-4">
+            {% for team in pending_teams %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-circle me-2"></i>
+                            {{ team.player_name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <strong><i class="fas fa-shield-alt me-2"></i>Équipe :</strong> {{ team.team_name }}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="fas fa-tag me-2"></i>Abréviation :</strong> {{ team.abbreviation }}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="fab fa-whatsapp me-2"></i>WhatsApp :</strong> {{ team.whatsapp }}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="far fa-calendar me-2"></i>Inscrit le :</strong> {{ team.created_at|date:"d/m/Y à H:i" }}
+                        </p>
+                        
+                        <hr>
+                        
+                        <h6><i class="fas fa-receipt me-2"></i>Preuve de paiement :</h6>
+                        {% if team.payment_proof %}
+                        <a href="{{ team.payment_proof.url }}" target="_blank">
+                            <img src="{{ team.payment_proof.url }}" alt="Preuve de paiement" class="img-fluid rounded" style="max-height: 200px; cursor: pointer;">
+                        </a>
+                        {% else %}
+                        <p class="text-danger">Aucune preuve uploadée</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'validate_payment' team.id %}" class="btn btn-success w-100">
+                            <i class="fas fa-check-circle me-2"></i>
+                            EXAMINER ET DÉCIDER
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+            <h3>Aucun paiement en attente</h3>
+            <p class="text-muted">Tous les paiements ont été traités. 👍</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+</style>
+{% endblock %}

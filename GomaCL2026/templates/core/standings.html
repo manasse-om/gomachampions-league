@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Classement - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="st-page py-4">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="text-center mb-3">
+      <h1 class="st-title mb-1">
+        <i class="fas fa-trophy me-2"></i>Classement général
+      </h1>
+      <p class="st-subtitle mb-0">Phase de ligue • Équipes validées</p>
+    </div>
+
+    <!-- LÉGENDE (ABRÉVIATIONS) -->
+    <div class="st-legend mb-3">
+      <div class="st-legend__icon"><i class="fas fa-circle-info"></i></div>
+      <div class="st-legend__body">
+        <div class="st-legend__title">Signification des abréviations</div>
+        <div class="st-legend__text">
+          <strong>Pts</strong> = Points • <strong>J</strong> = Matchs joués •
+          <strong>G</strong> = Gagnés • <strong>N</strong> = Nuls • <strong>P</strong> = Perdus •
+          <strong>BM</strong> = Buts marqués • <strong>BE</strong> = Buts encaissés •
+          <strong>Diff</strong> = Différence de buts
+        </div>
+      </div>
+    </div>
+
+    {% if teams %}
+      <div class="st-card">
+        <div class="table-responsive st-tablewrap">
+          <table class="table table-dark table-striped align-middle st-table mb-0">
+            <thead class="st-thead">
+              <tr>
+                <th class="st-col-pos">#</th>
+                <th class="st-col-team">Équipe</th>
+
+                <th class="text-center st-col-pts">Pts</th>
+                <th class="text-center">J</th>
+
+                {# Colonnes détails: cachées sur mobile, visibles sur écran large #}
+                <th class="text-center d-none d-lg-table-cell">G</th>
+                <th class="text-center d-none d-lg-table-cell">N</th>
+                <th class="text-center d-none d-lg-table-cell">P</th>
+
+                <th class="text-center d-none d-md-table-cell">BM</th>
+                <th class="text-center d-none d-md-table-cell">BE</th>
+                <th class="text-center">Diff</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for team in teams %}
+                <tr class="{% if forloop.counter == 1 %}st-leader{% endif %}">
+                  <!-- POS -->
+                  <td class="st-pos">{{ forloop.counter }}</td>
+
+                  <!-- TEAM -->
+                  <td class="st-team">
+                    <div class="st-team__row">
+                      {% if team.logo %}
+                        <img src="{{ team.logo.url }}" class="st-team__logo" alt="{{ team.team_name }}">
+                      {% else %}
+                        <div class="st-team__logo st-team__logo--letter">
+                          {{ team.team_name|slice:":1"|upper }}
+                        </div>
+                      {% endif %}
+
+                      <div class="st-team__meta">
+                        <div class="st-team__name">{{ team.team_name }}</div>
+                        <div class="st-team__sub">
+                          Joueur : {{ team.player_name }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- PTS -->
+                  <td class="text-center st-pts">{{ team.points }}</td>
+
+                  <!-- J -->
+                  <td class="text-center st-num">{{ team.played }}</td>
+
+                  <!-- DETAILS (lg+) -->
+                  <td class="text-center st-num d-none d-lg-table-cell">{{ team.wins }}</td>
+                  <td class="text-center st-num d-none d-lg-table-cell">{{ team.draws }}</td>
+                  <td class="text-center st-num d-none d-lg-table-cell">{{ team.losses }}</td>
+
+                  <!-- BM/BE (md+) -->
+                  <td class="text-center st-num d-none d-md-table-cell">{{ team.goals_for }}</td>
+                  <td class="text-center st-num d-none d-md-table-cell">{{ team.goals_against }}</td>
+
+                  <!-- DIFF -->
+                  <td class="text-center">
+                    <span class="st-diff
+                      {% if team.goal_difference > 0 %}is-plus
+                      {% elif team.goal_difference < 0 %}is-minus
+                      {% else %}is-zero{% endif %}">
+                      {{ team.goal_difference|stringformat:"+d" }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+
+          </table>
+        </div>
+
+        <!-- HINT MOBILE -->
+        <div class="st-hint d-md-none">
+          Astuce : fais glisser le tableau horizontalement si nécessaire.
+        </div>
+      </div>
+
+    {% else %}
+      <div class="st-empty text-center py-5">
+        <i class="fas fa-info-circle me-2"></i>Aucune équipe inscrite.
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+/* BG */
+.st-page{
+  background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+}
+
+.st-title{
+  color: #fff;
+  font-weight: 1000;
+  letter-spacing: .5px;
+}
+.st-subtitle{
+  color: #e6c200;
+  font-weight: 750;
+}
+
+/* Legend */
+.st-legend{
+  display:flex;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,167,225,.10);
+}
+.st-legend__icon{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  color: #0a0e17;
+  flex: 0 0 auto;
+}
+.st-legend__title{ color:#e6c200; font-weight: 950; }
+.st-legend__text{ color: rgba(255,255,255,.86); line-height: 1.35; }
+
+/* Table card */
+.st-card{
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,.25);
+  backdrop-filter: blur(10px);
+}
+.st-tablewrap{ padding: 10px; }
+
+.st-thead th{
+  border: none !important;
+  background: rgba(0,61,130,.35) !important;
+  color: #e6c200 !important;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  font-size: .78rem;
+  white-space: nowrap;
+}
+
+.st-table td{
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+}
+
+.st-col-pos{ width: 54px; }
+.st-col-pts{ width: 72px; }
+.st-col-team{ min-width: 220px; }
+
+.st-leader{
+  background: rgba(230,194,0,.08) !important;
+  box-shadow: inset 3px 0 0 rgba(230,194,0,.9);
+}
+
+/* Team cell */
+.st-team__row{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 0;
+}
+.st-team__logo{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+.st-team__logo--letter{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 1000;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  color: #0a0e17;
+}
+.st-team__meta{ min-width:0; }
+.st-team__name{
+  font-weight: 950;
+  color: rgba(255,255,255,.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.st-team__sub{
+  font-size: .82rem;
+  color: rgba(255,255,255,.68);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Numbers */
+.st-pos{
+  font-weight: 1000;
+  color: #e6c200;
+}
+.st-pts{
+  font-weight: 1000;
+  color: #e6c200;
+}
+.st-num{
+  color: rgba(255,255,255,.88);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Diff */
+.st-diff{
+  display:inline-block;
+  min-width: 58px;
+  text-align:center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 1000;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+}
+.st-diff.is-plus{ color: #47d18c; border-color: rgba(71,209,140,.35); background: rgba(71,209,140,.10); }
+.st-diff.is-minus{ color: #ff6b6b; border-color: rgba(255,107,107,.35); background: rgba(255,107,107,.10); }
+.st-diff.is-zero{ color: rgba(255,255,255,.85); }
+
+/* Mobile hint */
+.st-hint{
+  padding: 10px 14px 14px;
+  color: rgba(255,255,255,.70);
+  font-weight: 700;
+  font-size: .92rem;
+}
+
+/* Mobile adjustments */
+@media (max-width: 576px){
+  .st-col-team{ min-width: 200px; }
+  .st-team__logo{ width: 30px; height: 30px; border-radius: 10px; }
+  .st-team__name{ font-size: .95rem; }
+  .st-team__sub{ font-size: .78rem; }
+}
+</style>
+{% endblock %}

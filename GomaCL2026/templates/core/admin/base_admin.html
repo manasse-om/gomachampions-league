@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5 admin-bg">
+<div class="container">
+
+<h2 class="admin-title mb-4">
+    {{ title }}
+</h2>
+
+{% block admin_content %}{% endblock %}
+
+</div>
+</section>
+
+<style>
+.admin-bg {
+    background: linear-gradient(135deg,#0b1423,#00142d);
+    color:#e6edf7;
+    min-height:100vh;
+}
+
+.admin-title {
+    color:#ffd700;
+    font-weight:700;
+}
+
+.admin-card {
+    background:#111c2f;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 0 25px rgba(0,61,130,0.25);
+}
+</style>
+{% endblock %}

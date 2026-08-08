@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Résultats - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="rs2-page py-4">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="text-center mb-3">
+      <h1 class="rs2-title mb-1">
+        <i class="fas fa-list-check me-2"></i>Résultats
+      </h1>
+      <p class="rs2-subtitle mb-0">Matchs joués • Mise à jour automatique</p>
+    </div>
+
+    {% if matches %}
+      <div class="rs2-wrap">
+
+        {% for match in matches %}
+          <div class="rs2-item">
+
+            <!-- META LINE -->
+            <div class="rs2-meta">
+              <div class="rs2-phase">
+                {{ match.phase.get_name_display }}
+                {% if match.match_leg != 'unique' %} • {{ match.get_match_leg_display }}{% endif %}
+              </div>
+
+              <div class="rs2-date">
+                {% language 'fr' %}
+                  {{ match.played_date|date:"d/m/Y" }} • {{ match.played_date|date:"H:i" }}
+                {% endlanguage %}
+              </div>
+            </div>
+
+            <!-- MAIN MATCH LINE -->
+            <div class="rs2-main">
+              <div class="rs2-team rs2-team--home" title="{{ match.home_team.team_name }}">
+                {{ match.home_team.team_name }}
+              </div>
+
+              <div class="rs2-scorebox">
+                <div class="rs2-score">
+                  <span class="{% if match.home_score > match.away_score %}is-win{% endif %}">{{ match.home_score }}</span>
+                  <span class="rs2-sep">-</span>
+                  <span class="{% if match.away_score > match.home_score %}is-win{% endif %}">{{ match.away_score }}</span>
+                </div>
+
+                <div class="rs2-status">
+                  {% if match.is_forfeit %}
+                    <span class="rs2-badge rs2-badge--danger">FORFAIT</span>
+                  {% else %}
+                    <span class="rs2-badge rs2-badge--success">FT</span>
+                  {% endif %}
+                </div>
+
+                {% if match.home_penalties is not None and match.away_penalties is not None %}
+                  <div class="rs2-subscore">
+                    TAB {{ match.home_penalties }}-{{ match.away_penalties }}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="rs2-team rs2-team--away text-end" title="{{ match.away_team.team_name }}">
+                {{ match.away_team.team_name }}
+              </div>
+            </div>
+
+            {% if match.notes %}
+              <div class="rs2-notes">
+                <i class="fas fa-comment me-2"></i>{{ match.notes }}
+              </div>
+            {% endif %}
+
+          </div>
+        {% endfor %}
+
+      </div>
+
+    {% else %}
+      <div class="rs2-empty text-center py-5">
+        <i class="fas fa-info-circle me-2"></i>
+        Aucun résultat disponible pour le moment.
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+/* PAGE BG */
+.rs2-page{
+  background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+}
+
+.rs2-title{
+  font-weight: 1000;
+  color: #fff;
+  letter-spacing: .4px;
+  margin: 0;
+}
+.rs2-subtitle{
+  color: #e6c200;
+  font-weight: 750;
+  opacity: .95;
+}
+
+/* WRAP (table-like list, not cards) */
+.rs2-wrap{
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(17,28,47,.45);
+  box-shadow: 0 18px 50px rgba(0,0,0,.22);
+  backdrop-filter: blur(10px);
+}
+
+.rs2-item{
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.rs2-item:last-child{ border-bottom: none; }
+
+/* META */
+.rs2-meta{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.rs2-phase{
+  font-weight: 900;
+  color: rgba(255,255,255,.88);
+  font-size: .92rem;
+}
+.rs2-date{
+  font-weight: 850;
+  color: rgba(255,255,255,.70);
+  font-size: .86rem;
+  white-space: nowrap;
+}
+
+/* MAIN LINE */
+.rs2-main{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+/* TEAM NAMES: wrap allowed */
+.rs2-team{
+  font-weight: 950;
+  color: rgba(255,255,255,.92);
+  line-height: 1.15;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* SCORE BOX */
+.rs2-scorebox{
+  text-align:center;
+  min-width: 86px;
+}
+.rs2-score{
+  font-weight: 1000;
+  color: #e6c200;
+  font-size: 1.35rem;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.rs2-sep{ margin: 0 6px; opacity: .85; }
+.rs2-score .is-win{ color: #47d18c; }
+
+.rs2-status{ margin-top: 6px; }
+
+.rs2-badge{
+  display:inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 1000;
+  font-size: .78rem;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+}
+.rs2-badge--success{ border-color: rgba(40,167,69,.35); background: rgba(40,167,69,.12); }
+.rs2-badge--danger{ border-color: rgba(220,53,69,.35); background: rgba(220,53,69,.12); }
+
+.rs2-subscore{
+  margin-top: 6px;
+  font-size: .78rem;
+  color: rgba(255,255,255,.75);
+  font-weight: 850;
+}
+
+/* NOTES */
+.rs2-notes{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.82);
+  font-weight: 700;
+  font-size: .92rem;
+  word-break: break-word;
+}
+
+/* EMPTY */
+.rs2-empty{
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.78);
+}
+
+/* MOBILE tuning */
+@media (max-width: 576px){
+  .rs2-item{ padding: 12px 10px; }
+  .rs2-meta{ margin-bottom: 8px; }
+  .rs2-date{ font-size: .82rem; }
+  .rs2-phase{ font-size: .88rem; }
+
+  .rs2-score{ font-size: 1.25rem; }
+  .rs2-scorebox{ min-width: 78px; }
+
+  /* Important: allow more room to teams */
+  .rs2-main{
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+</style>
+{% endblock %}

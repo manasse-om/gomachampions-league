@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Règlement Officiel – Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="rules-section py-5">
+    <div class="container">
+
+        <!-- EN-TÊTE SOBRE ET PRO -->
+        <div class="text-center mb-5">
+            <h1 class="rules-title fw-bold">
+                RÈGLEMENT OFFICIEL
+            </h1>
+            <p class="rules-subtitle text-gold">
+                Goma Champions League • Première édition 2026
+            </p>
+        </div>
+
+        <!-- BOUTONS -->
+        <div class="text-center mb-5">
+            <a href="{% url 'download_rules_pdf' %}" class="btn btn-danger btn-sm me-3">
+                <i class="fas fa-file-pdf me-2"></i>Télécharger PDF
+            </a>
+            <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto" target="_blank" class="btn btn-success btn-sm">
+                <i class="fab fa-whatsapp me-2"></i>Rejoindre le groupe WhatsApp
+            </a>
+        </div>
+
+        <div class="rules-content">
+
+            <!-- 1. PRÉSENTATION -->
+            <div class="rule-block">
+                <h3 class="rule-number">1</h3>
+                <h4 class="rule-heading">Présentation</h4>
+                <p>
+                    La <strong>Goma Champions League 2026</strong> est une compétition officielle eFootball 2026 sur mobile,<br>
+                    organisée à Goma (RDC) avec un format inspiré de la UEFA Champions League.
+                </p>
+                <ul class="rule-list">
+                    <li>Nombre maximum d’équipes : <strong>36</strong></li>
+                    <li>Frais d’inscription : <strong>1 000 FC</strong></li>
+                    <li>Jeu : <strong>eFootball 2026 Mobile</strong></li>
+                </ul>
+            </div>
+
+            <!-- 2. INSCRIPTION -->
+            <div class="rule-block highlight">
+                <h3 class="rule-number">2</h3>
+                <h4 class="rule-heading">Inscription (étapes obligatoires)</h4>
+                <ol class="numbered-list">
+                    <li>Aller sur <a href="https://gomacl.onrender.com/register/" target="_blank" class="text-gold">gomacl.onrender.com/register/</a></li>
+                    <li>Remplir le formulaire (nom, équipe, WhatsApp)</li>
+                    <li>Payer <strong>1 000 FC</strong> via Airtel Money au :<br>
+                        <strong class="phone">+243 99 284 8365</strong> (Manassé Ombeni)
+                    </li>
+                    <li>Envoyer la <strong>preuve de paiement dans le groupe WhatsApp officiel</strong> :<br>
+                        <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto" target="_blank" class="whatsapp-link">
+                            <i class="fab fa-whatsapp"></i> Clique ici pour rejoindre le groupe
+                        </a>
+                    </li>
+                    <li>Attendre la validation (maximum 24h)</li>
+                </ol>
+                <div class="alert-pro success">
+                    <strong>Important :</strong> L’inscription n’est définitive qu’après réception et validation du paiement dans le groupe WhatsApp.
+                </div>
+            </div>
+
+            <!-- 3. RÉGLAGES MATCH -->
+            <div class="rule-block">
+                <h3 class="rule-number">3</h3>
+                <h4 class="rule-heading">Réglages obligatoires du match</h4>
+                <div class="settings-grid">
+                    <div>Durée : <strong>10 minutes</strong> (15 en finale)</div>
+                    <div>Commande manette : <strong>Activée</strong></div>
+                    <div>Forme domicile/extérieur : <strong>Excellente</strong></div>
+                    <div>Mode : <strong>Match d’amis</strong></div>
+                    <div>Salle : <strong>Privée obligatoire</strong></div>
+                </div>
+            </div>
+
+            <!-- 4. FORMAT -->
+            <div class="rule-block">
+                <h3 class="rule-number">4</h3>
+                <h4 class="rule-heading">Format de la compétition</h4>
+                <p><strong>Phase de ligue :</strong> 8 matchs par équipe → 3 pts victoire, 1 pt nul</p>
+                <ul class="rule-list">
+                    <li>1er → 8e : qualifiés directs en 8es</li>
+                    <li>9e → 24e : barrages</li>
+                    <li>25e → 36e : éliminés</li>
+                </ul>
+                <p class="mt-3"><strong>Phases finales :</strong> Aller/Retour (sauf finale) • Prolongations au retour • TAB si égalité • Finale en 15 minutes</p>
+            </div>
+
+            <!-- 5. RÈGLE 48H -->
+            <div class="rule-block danger">
+                <h3 class="rule-number">5</h3>
+                <h4 class="rule-heading">Règle des 48 heures</h4>
+                <p>Match non joué dans les <strong>48h</strong> après la date prévue = forfait automatique 0-3.</p>
+                <p class="mb-0"><strong>Procédure :</strong> Aller dans "Mes matchs" → "Signaler un problème" → choisir la raison.</p>
+            </div>
+
+            <!-- 6. RÉCOMPENSES -->
+            <div class="rule-block reward">
+                <h3 class="rule-number">6</h3>
+                <h4 class="rule-heading">Récompenses (36 000 FC redistribués)</h4>
+                <div class="rewards">
+                    <div class="reward-line champion"><span class="medal">1er</span> Champion → <strong>18 000 FC</strong></div>
+                    <div class="reward-line vice"><span class="medal">2e</span> Vice-champion → <strong>10 000 FC</strong></div>
+                    <div class="reward-line semi"><span class="medal">3e/4e</span> Demi-finalistes → <strong>4 000 FC chacun</strong></div>
+                </div>
+            </div>
+
+            <!-- 7. DISCIPLINE -->
+            <div class="rule-block">
+                <h3 class="rule-number">7</h3>
+                <h4 class="rule-heading">Discipline</h4>
+                <p>Respect, fair-play et ponctualité exigés.<br>
+                Insultes, triche ou abandon = <strong>exclusion immédiate sans remboursement</strong>.</p>
+            </div>
+
+        </div>
+
+        <div class="text-center mt-5 pt-4">
+            <p class="text-gold fw-bold">
+                Manassé Ombeni<br>
+                <small class="text-light">Organisateur principal</small>
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<style>
+.rules-section {
+    background: linear-gradient(135deg, #0b1423 0%, #00142d 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+.rules-title {
+    font-size: 2.4rem;
+    color: #e6c200;
+    letter-spacing: 2px;
+}
+
+.rules-subtitle {
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+}
+
+.rule-block {
+    background: #111c2f;
+    padding: 28px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    border-left: 4px solid #243552;
+    position: relative;
+}
+
+.rule-block.highlight { border-left-color: #28a745; }
+.rule-block.danger { border-left-color: #dc3545; }
+.rule-block.reward { border-left-color: #e6c200; }
+
+.rule-number {
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: #0b1423;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #e6c200;
+    border: 3px solid #e6c200;
+}
+
+.rule-heading {
+    margin-left: 70px;
+    margin-bottom: 18px;
+    font-size: 1.35rem;
+    color: white;
+}
+
+.rule-list, .numbered-list {
+    padding-left: 20px;
+    line-height: 1.9;
+    font-size: 1.02rem;
+}
+
+.numbered-list {
+    counter-reset: step;
+    padding-left: 0;
+    list-style: none;
+}
+
+.numbered-list li {
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 18px;
+}
+
+.numbered-list li:before {
+    content: counter(step);
+    counter-increment: step;
+    position: absolute;
+    left: 0;
+    background: #e6c200;
+    color: black;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.phone {
+    font-size: 1.25rem;
+    color: #e6c200;
+}
+
+.whatsapp-link {
+    color: #25d366 !important;
+    font-weight: 600;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+    font-size: 1rem;
+}
+
+.alert-pro {
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 20px;
+    font-size: 0.98rem;
+    text-align: center;
+}
+
+.alert-pro.success {
+    background: rgba(40,167,69,0.15);
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+.rewards {
+    background: rgba(230,194,0,0.08);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(230,194,0,0.3);
+}
+
+.reward-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 1.05rem;
+}
+
+.reward-line.champion {
+    background: rgba(230,194,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.medal {
+    font-size: 1.4rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .rules-title { font-size: 2rem; }
+    .rule-heading { font-size: 1.25rem; }
+    .numbered-list li { padding-left: 40px; }
+}
+</style>
+{% endblock %}

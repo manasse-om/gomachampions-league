@@ -1,0 +1,178 @@
+{% load i18n %}
+
+<div class="bk-tie" data-match-date="{{ t.match.scheduled_date|date:'Y-m-d' }}"
+     data-match-id="{{ t.match.id }}"
+     data-is-played="{{ t.match.is_played|yesno:'true,false' }}">
+
+  <!-- COUNTDOWN -->
+  {% if not t.match.is_played %}
+    <div class="bk-tie__cd" id="cd-bk-{{ t.match.id }}">
+      <span><i class="fas fa-circle-notch fa-spin" style="font-size:.7rem;"></i></span>
+    </div>
+  {% endif %}
+
+  <!-- ÉQUIPE A -->
+  <div class="bk-tie__row {% if t.winner_id == t.team_a.id %}bk-tie__row--win{% endif %}">
+    <div class="bk-tie__name">
+      {% if t.team_a.abbreviation == 'TBD' %}
+        <span style="opacity:.5;">À déterminer</span>
+      {% else %}
+        {{ t.team_a.team_name }}
+      {% endif %}
+    </div>
+    <div class="bk-tie__scores">
+      {% if t.leg1_a is not None %}
+        <span class="bk-score bk-score--leg1">{{ t.leg1_a }}</span>
+      {% else %}
+        <span class="bk-score bk-score--empty">-</span>
+      {% endif %}
+      {% if t.leg2_a is not None %}
+        <span class="bk-score bk-score--leg2">{{ t.leg2_a }}</span>
+      {% else %}
+        <span class="bk-score bk-score--empty">-</span>
+      {% endif %}
+      {% if t.agg_a is not None %}
+        <span class="bk-score bk-score--agg">{{ t.agg_a }}</span>
+      {% endif %}
+      {% if t.pen_a is not None %}
+        <span class="bk-score bk-score--pen">({{ t.pen_a }})</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ÉQUIPE B -->
+  <div class="bk-tie__row {% if t.winner_id == t.team_b.id %}bk-tie__row--win{% endif %}">
+    <div class="bk-tie__name">
+      {% if t.team_b.abbreviation == 'TBD' %}
+        <span style="opacity:.5;">À déterminer</span>
+      {% else %}
+        {{ t.team_b.team_name }}
+      {% endif %}
+    </div>
+    <div class="bk-tie__scores">
+      {% if t.leg1_b is not None %}
+        <span class="bk-score bk-score--leg1">{{ t.leg1_b }}</span>
+      {% else %}
+        <span class="bk-score bk-score--empty">-</span>
+      {% endif %}
+      {% if t.leg2_b is not None %}
+        <span class="bk-score bk-score--leg2">{{ t.leg2_b }}</span>
+      {% else %}
+        <span class="bk-score bk-score--empty">-</span>
+      {% endif %}
+      {% if t.agg_b is not None %}
+        <span class="bk-score bk-score--agg">{{ t.agg_b }}</span>
+      {% endif %}
+      {% if t.pen_b is not None %}
+        <span class="bk-score bk-score--pen">({{ t.pen_b }})</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- META -->
+  <div class="bk-tie__meta">
+    {% language 'fr' %}
+      <i class="far fa-calendar me-1"></i>{{ t.match.scheduled_date|date:"d/m/Y" }}
+    {% endlanguage %}
+    {% if t.is_forfeit %}
+      <span class="bk-badge bk-badge--danger">Forfait</span>
+    {% elif t.match.is_played %}
+      <span class="bk-badge bk-badge--success">Terminé</span>
+    {% else %}
+      <span class="bk-badge">Retour</span>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.bk-tie{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bk-tie__cd{
+  text-align: center;
+  margin-bottom: 4px;
+  font-size: .72rem;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.80);
+}
+.bk-tie__cd.is-live{
+  border-color: rgba(40,167,69,.45);
+  background: rgba(40,167,69,.12);
+  color: #47d18c;
+}
+.bk-tie__cd.is-soon{
+  border-color: rgba(255,193,7,.35);
+  background: rgba(255,193,7,.08);
+  color: #ffd700;
+}
+.bk-tie__row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 8px;
+}
+.bk-tie__row--win{
+  background: rgba(230,194,0,.12);
+  border: 1px solid rgba(230,194,0,.25);
+}
+.bk-tie__name{
+  font-weight: 900;
+  font-size: .85rem;
+  color: rgba(255,255,255,.90);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bk-tie__row--win .bk-tie__name{ color: #e6c200; }
+.bk-tie__scores{ display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+.bk-score{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-weight: 900;
+  font-size: .78rem;
+}
+.bk-score--leg1{ background: rgba(0,167,225,.15); color: #fff; }
+.bk-score--leg2{ background: rgba(0,167,225,.25); color: #fff; }
+.bk-score--agg{ background: rgba(230,194,0,.20); color: #e6c200; font-size: .88rem; min-width: 24px; height: 22px; }
+.bk-score--pen{ color: rgba(255,255,255,.60); font-size: .75rem; }
+.bk-score--empty{ color: rgba(255,255,255,.30); }
+.bk-tie__meta{
+  margin-top: 4px;
+  font-size: .72rem;
+  color: rgba(255,255,255,.55);
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.bk-badge{
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: .68rem;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.80);
+}
+.bk-badge--success{ background: rgba(40,167,69,.15); border-color: rgba(40,167,69,.30); color: #47d18c; }
+.bk-badge--danger{ background: rgba(220,53,69,.15); border-color: rgba(220,53,69,.30); color: #ff6b6b; }
+</style>

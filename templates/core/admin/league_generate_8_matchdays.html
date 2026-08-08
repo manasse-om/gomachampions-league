@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #0a0e17, #0f1a2d); min-height: 100vh;">
+  <div class="container" style="max-width: 700px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 style="color:#e6c200; font-weight:900; margin:0;">
+        <i class="fas fa-calendar-days me-2"></i>Générer la Phase Ligue
+      </h2>
+      <a href="{% url 'league_draw_live' %}" class="btn btn-outline-light btn-sm rounded-pill">
+        ← Retour tirage
+      </a>
+    </div>
+
+    <!-- FORMAT DÉTECTÉ -->
+    {% if fmt %}
+    <div style="background:rgba(230,194,0,.10); border:1px solid rgba(230,194,0,.35); border-radius:16px; padding:20px; margin-bottom:24px;">
+      <h5 style="color:#e6c200; font-weight:900; margin-bottom:16px;">
+        <i class="fas fa-chart-bar me-2"></i>Format détecté automatiquement
+      </h5>
+
+      <!-- Stats rapides -->
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3 text-center">
+          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.n_teams }}</div>
+          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Équipes</div>
+        </div>
+        <div class="col-6 col-md-3 text-center">
+          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.matchdays }}</div>
+          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Journées</div>
+        </div>
+        <div class="col-6 col-md-3 text-center">
+          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.opponents_per_team }}</div>
+          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Adv./équipe</div>
+        </div>
+        <div class="col-6 col-md-3 text-center">
+          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.total_league_matches }}</div>
+          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Total matchs</div>
+        </div>
+      </div>
+
+      <!-- Zones -->
+      <div class="row g-2">
+        <div class="col-md-4">
+          <div style="background:rgba(40,167,69,.12); border:1px solid rgba(40,167,69,.30); border-radius:10px; padding:10px; text-align:center;">
+            <div style="color:#47d18c; font-weight:900;">🟢 Top {{ fmt.direct_qualified }}</div>
+            <div style="font-size:.75rem; color:rgba(255,255,255,.60);">Qualifiés directs</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div style="background:rgba(255,193,7,.10); border:1px solid rgba(255,193,7,.30); border-radius:10px; padding:10px; text-align:center;">
+            <div style="color:#ffd700; font-weight:900;">🟡 {{ fmt.playoff_ties }} barrages</div>
+            <div style="font-size:.75rem; color:rgba(255,255,255,.60);">
+              Pos. {{ fmt.direct_qualified|add:1 }} → {{ fmt.n_teams }}
+              ({{ fmt.playoff_participants }} équipes)
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div style="background:rgba(40,167,69,.08); border:1px solid rgba(40,167,69,.20); border-radius:10px; padding:10px; text-align:center;">
+            {% if fmt.eliminated_after_league > 0 %}
+              <div style="color:#ff6b6b; font-weight:900;">🔴 {{ fmt.eliminated_after_league }} éliminés</div>
+            {% else %}
+              <div style="color:#47d18c; font-weight:900;">✅ 0 élimination</div>
+            {% endif %}
+            <div style="font-size:.75rem; color:rgba(255,255,255,.60);">Après la ligue</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3" style="color:rgba(255,255,255,.65); font-size:.85rem;">
+        <i class="fas fa-info-circle me-2" style="color:#e6c200;"></i>
+        {{ fmt.label }}
+        — 2 journées/jour (00:00 & 00:01)
+        — Fenêtre de jeu : 12h00 → 12h59 du lendemain
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- FORMULAIRE -->
+    <div style="background:rgba(17,28,47,.65); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:24px;">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-4">
+          <label class="form-label" style="font-weight:900; color:#fff;">
+            <i class="fas fa-calendar me-2" style="color:#e6c200;"></i>
+            Date de début (Journée 1)
+          </label>
+          <input type="date"
+                 name="start_date"
+                 class="form-control"
+                 style="background:rgba(15,26,44,.92); border:1px solid rgba(255,255,255,.14); color:#fff; border-radius:12px;"
+                 required>
+          <div class="mt-2" style="font-size:.80rem; color:rgba(255,255,255,.55);">
+            Jour 1 : J1=00:00 et J2=00:01 •
+            Jour 2 : J3=00:00 et J4=00:01 • ...
+          </div>
+        </div>
+
+        <div class="d-flex gap-3">
+          <button type="submit"
+                  class="btn btn-lg flex-fill"
+                  style="background:linear-gradient(45deg,#e6c200,#ffed4e); color:#0a0e17; font-weight:900; border-radius:999px;">
+            <i class="fas fa-bolt me-2"></i>Générer maintenant
+          </button>
+          <a href="{% url 'dashboard' %}"
+             class="btn btn-outline-light btn-lg rounded-pill px-4">
+            Dashboard
+          </a>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

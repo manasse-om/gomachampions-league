@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Appliquer un forfait - Dashboard Admin{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h3 class="mb-0">
+                            <i class="fas fa-gavel me-2"></i>
+                            DÉCISION : APPLIQUER UN FORFAIT
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Infos du match -->
+                        <div class="match-info mb-4">
+                            <h5>Match concerné :</h5>
+                            <div class="match-display p-3 bg-light rounded">
+                                <div class="row text-center">
+                                    <div class="col-5">
+                                        <img src="{% if match.home_team.logo %}{{ match.home_team.logo.url }}{% else %}{% static 'images/default-logo.png' %}{% endif %}" 
+                                             alt="{{ match.home_team.team_name }}" 
+                                             style="width: 80px; height: 80px; object-fit: contain;">
+                                        <h5 class="mt-2">{{ match.home_team.abbreviation }}</h5>
+                                        <p class="text-muted small mb-0">{{ match.home_team.team_name }}</p>
+                                        <p class="text-muted small">{{ match.home_team.player_name }}</p>
+                                        <p class="text-muted small">
+                                            <i class="fab fa-whatsapp me-1"></i>{{ match.home_team.whatsapp }}
+                                        </p>
+                                    </div>
+                                    <div class="col-2 d-flex align-items-center justify-content-center">
+                                        <h3 class="text-primary">VS</h3>
+                                    </div>
+                                    <div class="col-5">
+                                        <img src="{% if match.away_team.logo %}{{ match.away_team.logo.url }}{% else %}{% static 'images/default-logo.png' %}{% endif %}" 
+                                             alt="{{ match.away_team.team_name }}" 
+                                             style="width: 80px; height: 80px; object-fit: contain;">
+                                        <h5 class="mt-2">{{ match.away_team.abbreviation }}</h5>
+                                        <p class="text-muted small mb-0">{{ match.away_team.team_name }}</p>
+                                        <p class="text-muted small">{{ match.away_team.player_name }}</p>
+                                        <p class="text-muted small">
+                                            <i class="fab fa-whatsapp me-1"></i>{{ match.away_team.whatsapp }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <hr>
+                                <p class="text-center mb-0">
+                                    <i class="far fa-calendar me-2"></i>
+                                    <strong>Date prévue :</strong> {{ match.scheduled_date|date:"d/m/Y à H:i" }}
+                                </p>
+                                <p class="text-center mb-0">
+                                    <i class="fas fa-layer-group me-2"></i>
+                                    <strong>Phase :</strong> {{ match.phase.get_name_display }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Infos du signalement -->
+                        {% if match.reported %}
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-flag me-2"></i>Signalement :</h6>
+                            <p class="mb-1">
+                                <strong>Signalé par :</strong> {{ match.reported_by.team_name }} ({{ match.reported_by.abbreviation }})
+                            </p>
+                            <p class="mb-1">
+                                <strong>Raison :</strong> 
+                                {% if match.report_reason == 'adversaire_absent' %}Adversaire absent
+                                {% elif match.report_reason == 'adversaire_injoignable' %}Adversaire injoignable
+                                {% elif match.report_reason == 'probleme_technique' %}Problème technique
+                                {% else %}Autre
+                                {% endif %}
+                            </p>
+                            {% if match.report_details %}
+                            <p class="mb-0">
+                                <strong>Détails :</strong> {{ match.report_details }}
+                            </p>
+                            {% endif %}
+                            <p class="mb-0 mt-2">
+                                <small class="text-muted">
+                                    <i class="far fa-clock me-1"></i>
+                                    Signalé le {{ match.report_date|date:"d/m/Y à H:i" }}
+                                </small>
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Formulaire de décision -->
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-hand-point-right me-2"></i>
+                                    <strong>Quelle équipe a forfait ?</strong>
+                                </label>
+                                
+                                <div class="d-grid gap-2">
+                                    <button type="submit" name="forfeit_team" value="{{ match.home_team.id }}" 
+                                            class="btn btn-outline-danger btn-lg"
+                                            onclick="return confirm('⚠️ Confirmer le forfait pour {{ match.home_team.team_name }} ?\n\nRésultat : 0-3 (victoire pour {{ match.away_team.team_name }})')">
+                                        <i class="fas fa-times-circle me-2"></i>
+                                        FORFAIT POUR {{ match.home_team.abbreviation }} ({{ match.home_team.team_name }})
+                                        <br>
+                                        <small class="text-muted">Résultat : 0-3 (Victoire pour {{ match.away_team.abbreviation }})</small>
+                                    </button>
+                                    
+                                    <button type="submit" name="forfeit_team" value="{{ match.away_team.id }}" 
+                                            class="btn btn-outline-danger btn-lg"
+                                            onclick="return confirm('⚠️ Confirmer le forfait pour {{ match.away_team.team_name }} ?\n\nRésultat : 3-0 (victoire pour {{ match.home_team.team_name }})')">
+                                        <i class="fas fa-times-circle me-2"></i>
+                                        FORFAIT POUR {{ match.away_team.abbreviation }} ({{ match.away_team.team_name }})
+                                        <br>
+                                        <small class="text-muted">Résultat : 3-0 (Victoire pour {{ match.home_team.abbreviation }})</small>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Note :</strong> En appliquant un forfait :
+                                <ul class="mb-0 mt-2">
+                                    <li>Le match sera marqué comme "Joué"</li>
+                                    <li>L'équipe fautive perdra 0-3</li>
+                                    <li>Les statistiques seront mises à jour automatiquement</li>
+                                    <li>Cette action est <strong>IRRÉVERSIBLE</strong></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'reported_matches' %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Annuler (retour)
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

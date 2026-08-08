@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+<div class="container">
+
+<h2>Modifier mes informations</h2>
+
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}
+
+<button type="submit" class="btn btn-primary">
+    Mettre à jour
+</button>
+
+</form>
+
+</div>
+</section>
+{% endblock %}

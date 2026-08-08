@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load roles %}
+
+{% block content %}
+<section class="mm-admin-page py-4">
+  <div class="container">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <div>
+        <h2 class="mb-1">Gestion des Matchs</h2>
+        <div class="text-light" style="opacity:.75;">
+          Encoder • Annuler • Reporter (reprogrammer) les matchs.
+        </div>
+      </div>
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-sm">← Dashboard</a>
+    </div>
+
+    <!-- DESKTOP TABLE -->
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-dark table-striped align-middle mb-0 mm-admin-table">
+        <thead>
+          <tr>
+            <th style="min-width:140px;">Date</th>
+            <th>Match</th>
+            <th style="min-width:140px;">Phase</th>
+            <th class="text-center" style="width:110px;">Statut</th>
+            <th class="text-end" style="min-width:260px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for match in matches %}
+            <tr class="{% if match.is_late and not match.is_played and not match.is_forfeit %}mm-row-late{% endif %}">
+              <td>
+                <div class="fw-bold">
+                  {{ match.scheduled_date|date:"d/m/Y" }}
+                </div>
+                <div class="text-light" style="opacity:.7;">
+                  {{ match.scheduled_date|date:"H:i" }}
+                </div>
+
+                {% if match.rescheduled_from %}
+                  <div class="badge bg-info text-dark mt-2">Reporté</div>
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="mm-matchline">
+                  <span class="mm-team">{{ match.home_team.team_name }}</span>
+                  <span class="mm-vs">vs</span>
+                  <span class="mm-team">{{ match.away_team.team_name }}</span>
+                </div>
+
+                {% if match.rescheduled_reason %}
+                  <div class="small text-light mt-1" style="opacity:.75;">
+                    <strong>Raison :</strong> {{ match.rescheduled_reason }}
+                  </div>
+                {% endif %}
+              </td>
+
+              <td>
+                <span class="badge bg-secondary">{{ match.phase.get_name_display }}</span>
+                {% if match.phase.name == 'league' %}
+                  <span class="badge bg-warning text-dark ms-1">J{{ match.matchday }}</span>
+                {% endif %}
+              </td>
+
+              <td class="text-center">
+                {% if match.is_forfeit %}
+                  <span class="badge bg-danger">Forfait</span>
+                {% elif match.is_played %}
+                  <span class="badge bg-success">Terminé</span>
+                {% elif match.is_late %}
+                  <span class="badge bg-warning text-dark">Retard</span>
+                {% else %}
+                  <span class="badge bg-info text-dark">À jouer</span>
+                {% endif %}
+              </td>
+
+              <td class="text-end">
+                <div class="d-inline-flex flex-wrap gap-2 justify-content-end">
+                  <a href="{% url 'encode_result' match.id %}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                    {% if match.is_played %}Modifier{% else %}Encoder{% endif %}
+                  </a>
+
+                  {% if match.is_played %}
+                    <a href="{% url 'cancel_result' match.id %}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                      Annuler
+                    </a>
+                  {% endif %}
+
+                  {% if not match.is_played %}
+                    <a href="{% url 'reschedule_match' match.id %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                      Reporter
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">Aucun match trouvé.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MOBILE LIST (cards compactes) -->
+    <div class="d-md-none mm-mobile-list">
+      {% for match in matches %}
+        <div class="mm-mobile-item {% if match.is_late and not match.is_played and not match.is_forfeit %}mm-mobile-late{% endif %}">
+          <div class="mm-mobile-top">
+            <div class="mm-mobile-date">
+              <i class="far fa-calendar me-2"></i>{{ match.scheduled_date|date:"d/m/Y" }}
+              <span class="ms-2 text-gold">{{ match.scheduled_date|date:"H:i" }}</span>
+            </div>
+
+            <div>
+              {% if match.is_forfeit %}
+                <span class="badge bg-danger">Forfait</span>
+              {% elif match.is_played %}
+                <span class="badge bg-success">Terminé</span>
+              {% elif match.is_late %}
+                <span class="badge bg-warning text-dark">Retard</span>
+              {% else %}
+                <span class="badge bg-info text-dark">À jouer</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mm-mobile-mid">
+            <div class="mm-mobile-match">
+              <div class="mm-mobile-team">{{ match.home_team.team_name }}</div>
+              <div class="mm-mobile-vs">vs</div>
+              <div class="mm-mobile-team">{{ match.away_team.team_name }}</div>
+            </div>
+
+            <div class="mm-mobile-meta">
+              <span class="badge bg-secondary">{{ match.phase.get_name_display }}</span>
+              {% if match.phase.name == 'league' %}
+                <span class="badge bg-warning text-dark ms-1">J{{ match.matchday }}</span>
+              {% endif %}
+
+              {% if match.rescheduled_from %}
+                <span class="badge bg-info text-dark ms-1">Reporté</span>
+              {% endif %}
+            </div>
+
+            {% if match.rescheduled_reason %}
+              <div class="mm-mobile-reason">
+                <strong>Raison :</strong> {{ match.rescheduled_reason }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mm-mobile-actions">
+            <a href="{% url 'encode_result' match.id %}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+              {% if match.is_played %}Modifier{% else %}Encoder{% endif %}
+            </a>
+
+            {% if match.is_played %}
+              <a href="{% url 'cancel_result' match.id %}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                Annuler
+              </a>
+            {% endif %}
+
+            {% if not match.is_played %}
+              <a href="{% url 'reschedule_match' match.id %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                Reporter
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-center text-muted py-4">Aucun match trouvé.</div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+<style>
+.mm-admin-page{
+  background: linear-gradient(135deg,#0b1423,#00142d);
+  min-height: 100vh;
+  color:#e6edf7;
+}
+.text-gold{ color:#e6c200; }
+
+/* Desktop table */
+.mm-admin-table thead th{
+  border: none !important;
+  background: rgba(0,61,130,.35) !important;
+  color: #e6c200 !important;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  font-size: .78rem;
+}
+.mm-admin-table td{
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+}
+.mm-row-late{
+  box-shadow: inset 3px 0 0 rgba(220,53,69,.9);
+}
+
+.mm-matchline{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+.mm-team{
+  font-weight: 900;
+  color: rgba(255,255,255,.92);
+  word-break: break-word;
+}
+.mm-vs{
+  font-weight: 1000;
+  color:#e6c200;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Mobile list */
+.mm-mobile-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mm-mobile-item{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(17,28,47,.55);
+  border-radius: 18px;
+  padding: 12px;
+  backdrop-filter: blur(10px);
+}
+.mm-mobile-late{
+  box-shadow: inset 3px 0 0 rgba(220,53,69,.9);
+}
+.mm-mobile-top{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items:center;
+}
+.mm-mobile-date{
+  font-weight: 900;
+  color: rgba(255,255,255,.86);
+}
+.mm-mobile-mid{
+  margin-top: 10px;
+}
+.mm-mobile-match{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items:center;
+}
+.mm-mobile-team{
+  font-weight: 950;
+  color: rgba(255,255,255,.92);
+  line-height: 1.15;
+  white-space: normal;
+  word-break: break-word;
+}
+.mm-mobile-vs{
+  font-weight: 1000;
+  color:#e6c200;
+}
+.mm-mobile-meta{
+  margin-top: 10px;
+}
+.mm-mobile-reason{
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.82);
+  font-weight: 700;
+  word-break: break-word;
+}
+.mm-mobile-actions{
+  margin-top: 10px;
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content:flex-end;
+}
+</style>
+{% endblock %}

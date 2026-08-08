@@ -1,0 +1,59 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+
+<div class="admin-card">
+
+<h4 class="mb-4">Modifier utilisateur</h4>
+
+<div class="mb-3">
+    <strong>Username :</strong> {{ user_obj.username }}
+</div>
+
+<div class="mb-3">
+    <strong>Email :</strong> {{ user_obj.email }}
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label">Rôle :</label>
+        <select name="role" class="form-select">
+
+            <option value="superadmin"
+            {% if profile.role == "superadmin" %}selected{% endif %}>
+                Super Admin
+            </option>
+
+            <option value="organisateur"
+            {% if profile.role == "organisateur" %}selected{% endif %}>
+                Organisateur
+            </option>
+
+            <option value="paiement"
+            {% if profile.role == "paiement" %}selected{% endif %}>
+                Modérateur Paiements
+            </option>
+
+            <option value="match"
+            {% if profile.role == "match" %}selected{% endif %}>
+                Gestionnaire Matchs
+            </option>
+
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Enregistrer
+    </button>
+
+    <a href="{% url 'manage_users' %}" class="btn btn-secondary ms-2">
+        Annuler
+    </a>
+
+</form>
+
+</div>
+
+{% endblock %}

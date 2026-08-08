@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ season.name }} - Archives{% endblock %}
+
+{% block content %}
+<section class="py-4" style="background: linear-gradient(135deg, #0a0e17, #0f1a2d); min-height: 100vh; color:rgba(255,255,255,.92);">
+  <div class="container">
+
+    <!-- RETOUR -->
+    <a href="{% url 'season_history' %}" class="btn btn-outline-light btn-sm rounded-pill mb-4">
+      <i class="fas fa-arrow-left me-2"></i>Retour à l'historique
+    </a>
+
+    <!-- TITRE -->
+    <div class="text-center mb-5">
+      <h1 style="color:#e6c200; font-weight:900;">{{ season.name }}</h1>
+      <p style="color:rgba(255,255,255,.72);">
+        <i class="far fa-calendar me-2"></i>
+        {{ season.start_date|date:"d/m/Y" }}
+        {% if season.end_date %} → {{ season.end_date|date:"d/m/Y" }}{% endif %}
+      </p>
+    </div>
+
+    <!-- CHAMPION -->
+    {% if champion %}
+    <div class="champion-banner mb-5">
+      <div class="glory-glow"></div>
+      <div class="text-center position-relative" style="z-index:2;">
+        <i class="fas fa-trophy" style="font-size:3rem; color:#e6c200;"></i>
+        <h2 class="mt-2 mb-1" style="color:#fff; font-weight:900;">CHAMPION</h2>
+        <h1 style="color:#e6c200; font-weight:900; font-size:2.5rem;">{{ champion.team_name }}</h1>
+        <p style="color:rgba(255,255,255,.75);">{{ champion.player_name }}</p>
+        {% if final_match %}
+          <p style="color:rgba(255,255,255,.60);">
+            Victoire en finale :
+            {{ final_match.home_score }} - {{ final_match.away_score }}
+            contre
+            {% if final_match.home_team == champion %}
+              {{ final_match.away_team.team_name }}
+            {% else %}
+              {{ final_match.home_team.team_name }}
+            {% endif %}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- TABLEAU D'HONNEUR -->
+    <div class="row g-4 mb-5">
+      <div class="col-md-4">
+        <div class="honor-card">
+          <i class="fas fa-fire honor-icon"></i>
+          <div class="honor-label">Meilleure Attaque</div>
+          {% if best_attack %}
+            <div class="honor-team">{{ best_attack.team_name }}</div>
+            <div class="honor-value">{{ best_attack.goals_for }} buts</div>
+          {% else %}
+            <div class="honor-team">—</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="honor-card honor-card--gold">
+          <i class="fas fa-crown honor-icon"></i>
+          <div class="honor-label">Serial Winner</div>
+          {% if top_winner %}
+            <div class="honor-team">{{ top_winner.team_name }}</div>
+            <div class="honor-value">{{ top_winner.wins }} victoires</div>
+          {% else %}
+            <div class="honor-team">—</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="honor-card">
+          <i class="fas fa-shield-halved honor-icon"></i>
+          <div class="honor-label">Meilleure Défense</div>
+          {% if best_defense %}
+            <div class="honor-team">{{ best_defense.team_name }}</div>
+            <div class="honor-value">{{ best_defense.goals_against }} buts encaissés</div>
+          {% else %}
+            <div class="honor-team">—</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASSEMENT FINAL -->
+    <div class="archive-card mb-5">
+      <h4 class="archive-title">
+        <i class="fas fa-list-ol me-2"></i>Classement Final
+      </h4>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped mb-0">
+          <thead>
+            <tr style="background:rgba(0,61,130,.45);">
+              <th style="color:#e6c200;">Pos</th>
+              <th style="color:#e6c200;">Équipe</th>
+              <th class="text-center" style="color:#e6c200;">J</th>
+              <th class="text-center" style="color:#e6c200;">V</th>
+              <th class="text-center" style="color:#e6c200;">N</th>
+              <th class="text-center" style="color:#e6c200;">D</th>
+              <th class="text-center" style="color:#e6c200;">BP</th>
+              <th class="text-center" style="color:#e6c200;">BC</th>
+              <th class="text-center" style="color:#e6c200;">Diff</th>
+              <th class="text-center" style="color:#e6c200;">Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in standings %}
+            <tr {% if champion and team == champion %}style="background:rgba(230,194,0,.12); box-shadow: inset 3px 0 0 #e6c200;"{% endif %}>
+              <td style="font-weight:900; color:#e6c200;">{{ forloop.counter }}</td>
+              <td>
+                <strong>{{ team.team_name }}</strong>
+                <small class="ms-2" style="color:rgba(255,255,255,.55);">{{ team.abbreviation }}</small>
+                {% if champion and team == champion %}
+                  <i class="fas fa-trophy ms-2" style="color:#e6c200;"></i>
+                {% endif %}
+              </td>
+              <td class="text-center">{{ team.played }}</td>
+              <td class="text-center" style="color:#47d18c;">{{ team.wins }}</td>
+              <td class="text-center">{{ team.draws }}</td>
+              <td class="text-center" style="color:#ff6b6b;">{{ team.losses }}</td>
+              <td class="text-center">{{ team.goals_for }}</td>
+              <td class="text-center">{{ team.goals_against }}</td>
+              <td class="text-center" style="font-weight:900; {% if team.goal_difference > 0 %}color:#47d18c;{% elif team.goal_difference < 0 %}color:#ff6b6b;{% endif %}">
+                {{ team.goal_difference|stringformat:"+d" }}
+              </td>
+              <td class="text-center" style="font-weight:900; color:#e6c200;">{{ team.points }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="archive-card">
+      <h4 class="archive-title">
+        <i class="fas fa-futbol me-2"></i>Tous les résultats
+      </h4>
+
+      {% regroup matches_played by phase as phases_list %}
+      {% for phase_group in phases_list %}
+        <h6 class="phase-label mt-3">{{ phase_group.grouper.get_name_display }}</h6>
+        {% for match in phase_group.list %}
+          <div class="result-item">
+            <div class="result-team text-end">{{ match.home_team.team_name }}</div>
+            <div class="result-score">{{ match.home_score }} - {{ match.away_score }}</div>
+            <div class="result-team">{{ match.away_team.team_name }}</div>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+<style>
+.champion-banner {
+  position: relative;
+  background: rgba(17,28,47,.72);
+  border: 2px solid rgba(230,194,0,.4);
+  border-radius: 24px;
+  padding: 40px 20px;
+  overflow: hidden;
+}
+.glory-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 250px; height: 250px;
+  background: #e6c200;
+  filter: blur(100px);
+  opacity: .15;
+}
+.honor-card {
+  background: rgba(17,28,47,.72);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 24px;
+  text-align: center;
+  height: 100%;
+}
+.honor-card--gold { border-color: rgba(230,194,0,.35); }
+.honor-icon { font-size: 2rem; color: #e6c200; margin-bottom: 10px; display: block; }
+.honor-label {
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,.55);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.honor-team { font-size: 1.15rem; font-weight: 900; color: #fff; }
+.honor-value { font-size: .95rem; color: #00a7e1; font-weight: 700; margin-top: 4px; }
+.honor-card--gold .honor-value { color: #ffed4e; }
+
+.archive-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+.archive-title {
+  color: #e6c200;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+.phase-label {
+  color: rgba(255,255,255,.55);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: .78rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.result-item {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  margin-bottom: 6px;
+}
+.result-team { font-weight: 900; color: rgba(255,255,255,.90); }
+.result-score {
+  text-align: center;
+  font-weight: 900;
+  color: #e6c200;
+  font-size: 1.05rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Signaler un problème - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h3 class="mb-0">
+                            <i class="fas fa-flag me-2"></i>
+                            SIGNALER UN PROBLÈME
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Infos du match -->
+                        <div class="match-info mb-4">
+                            <h5>Match concerné :</h5>
+                            <div class="match-display">
+                                <strong>{{ match.home_team.abbreviation }}</strong> vs <strong>{{ match.away_team.abbreviation }}</strong>
+                            </div>
+                            <p class="text-muted">
+                                <i class="far fa-calendar me-2"></i>
+                                Prévu le {{ match.scheduled_date|date:"d/m/Y à H:i" }}
+                            </p>
+                        </div>
+                        
+                        <!-- Formulaire -->
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label for="reason" class="form-label">
+                                    <i class="fas fa-question-circle me-2"></i>
+                                    Raison du signalement *
+                                </label>
+                                <select name="reason" id="reason" class="form-select" required>
+                                    <option value="">-- Choisir une raison --</option>
+                                    <option value="adversaire_absent">Mon adversaire ne s'est pas présenté</option>
+                                    <option value="adversaire_injoignable">Mon adversaire est injoignable</option>
+                                    <option value="probleme_technique">Problème technique de mon côté</option>
+                                    <option value="autre">Autre raison</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="details" class="form-label">
+                                    <i class="fas fa-comment me-2"></i>
+                                    Détails (optionnel)
+                                </label>
+                                <textarea name="details" id="details" class="form-control" rows="4" placeholder="Expliquez la situation..."></textarea>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                L'admin examinera votre signalement et décidera de la suite à donner.
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-warning btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>
+                                    ENVOYER LE SIGNALEMENT
+                                </button>
+                                <a href="{% url 'my_matches' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>
+                                    Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

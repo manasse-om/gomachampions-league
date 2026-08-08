@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load roles %}
+
+{% block content %}
+<div class="container py-5">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h2 class="mb-1">Gestion des Équipes</h2>
+      <div class="text-muted small">
+        Astuce : <strong>Rôle</strong> sert à promouvoir un joueur en admin (organisateur / match / paiement) ou le remettre en <strong>Joueur</strong>.
+      </div>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-sm">← Retour dashboard</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Abréviation</th>
+          <th>Validé</th>
+          <th>Compte</th>
+          <th>Rôle</th>
+          <th style="min-width: 360px;">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      {% for team in teams %}
+        <tr>
+          <td>{{ team.team_name }}</td>
+
+          <td><strong>{{ team.abbreviation }}</strong></td>
+
+          <td>
+            {% if team.payment_validated %}
+              <span class="badge bg-success">Oui</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Non</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if team.user %}
+              <span class="badge bg-info text-dark">{{ team.user.username }}</span>
+            {% else %}
+              <span class="text-muted">Aucun</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if team.user and team.user.userprofile %}
+              {% if team.user.userprofile.role == "player" %}
+                <span class="badge bg-secondary">Joueur</span>
+              {% elif team.user.userprofile.role == "organisateur" %}
+                <span class="badge bg-warning text-dark">Organisateur</span>
+              {% elif team.user.userprofile.role == "match" %}
+                <span class="badge bg-primary">Gestionnaire Matchs</span>
+              {% elif team.user.userprofile.role == "paiement" %}
+                <span class="badge bg-success">Modérateur Paiements</span>
+              {% elif team.user.userprofile.role == "superadmin" %}
+                <span class="badge bg-danger">Super Admin</span>
+              {% else %}
+                <span class="badge bg-light text-dark">{{ team.user.userprofile.get_role_display }}</span>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+
+          <td class="d-flex flex-wrap gap-2">
+            <a href="{% url 'edit_team' team.pk %}" class="btn btn-warning btn-sm">Modifier</a>
+            <a href="{% url 'team_delete' team.pk %}" class="btn btn-danger btn-sm"
+               onclick="return confirm('Supprimer l’équipe {{ team.team_name }} ?');">
+              Supprimer
+            </a>
+
+            {% if team.user %}
+              <a href="{% url 'edit_user_role' team.user.id %}" class="btn btn-secondary btn-sm">
+                Rôle
+              </a>
+
+              <a href="{% url 'reset_team_user_password' team.id %}" class="btn btn-info btn-sm">
+                Mot de passe
+              </a>
+
+              {% if not team.payment_validated %}
+                <span class="badge bg-warning text-dark align-self-center">Paiement en attente</span>
+              {% endif %}
+            {% else %}
+              <span class="text-muted align-self-center">Aucun compte lié</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            Aucune équipe trouvée.
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load roles %}
+{% load i18n %}
+
+{% block title %}Calendrier - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="fx-page py-4">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="text-center mb-3">
+      <h1 class="fx-title mb-1">Calendrier officiel</h1>
+      <p class="fx-subtitle mb-0">Phase Ligue • 8 journées • Jouable 00:00 → 23:59</p>
+    </div>
+
+    <!-- NOTE -->
+    <div class="fx-note mb-3">
+      <div class="fx-note__icon"><i class="fas fa-circle-info"></i></div>
+      <div class="fx-note__body">
+        <div class="fx-note__title">Important</div>
+        <div class="fx-note__text">
+          Les heures <strong>00:00</strong> et <strong>00:01</strong> servent à repérer la journée.
+          Les matchs sont jouables pendant la journée entière. Forfait possible après <strong>48h</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF (admin roles) -->
+    {% if user|has_role:"superadmin,organisateur,match" %}
+      <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'download_calendar_pdf' %}" class="fx-btn fx-btn--pdf">
+          <i class="fas fa-file-pdf me-2"></i>PDF calendrier
+        </a>
+      </div>
+    {% endif %}
+
+    {% if phases %}
+      {% for phase in phases %}
+        <div class="fx-phase mb-4">
+
+          <div class="fx-phase__head">
+            <div class="fx-phase__left">
+              <div class="fx-phase__badge">
+                <i class="fas fa-layer-group me-2"></i>{{ phase.get_name_display }}
+              </div>
+              <div class="fx-phase__hint">Liste officielle des matchs</div>
+            </div>
+          </div>
+
+          {% if phase.matches.all %}
+            {% regroup phase.matches.all by matchday as matchdays %}
+
+            <!-- NAV JOURNÉES -->
+            {% if matchdays|length > 1 %}
+              <div class="fx-days" data-phase="{{ phase.id }}">
+                <div class="fx-days__track" role="tablist" aria-label="Journées">
+
+                  {# ✅ 1 SEUL TAB AUJOURD'HUI #}
+                  {% if phase.today_matches %}
+                    <button
+                      type="button"
+                      class="fx-daytab is-active is-today"
+                      data-target="phase{{ phase.id }}-today"
+                      role="tab"
+                      aria-selected="true">
+                      {% language 'fr' %}
+                        <div class="fx-daytab__top">Aujourd’hui</div>
+                        <div class="fx-daytab__bottom">{{ today|date:"d M" }}</div>
+                      {% endlanguage %}
+                    </button>
+                  {% endif %}
+
+                  {# Tabs J1..J8 #}
+                  {% for day in matchdays %}
+                    {% with first_match=day.list.0 %}
+                      <button
+                        type="button"
+                        class="fx-daytab {% if not phase.today_matches and forloop.first %}is-active{% endif %}"
+                        data-target="phase{{ phase.id }}-day{{ day.grouper }}"
+                        role="tab"
+                        aria-selected="{% if not phase.today_matches and forloop.first %}true{% else %}false{% endif %}">
+                        {% language 'fr' %}
+                          <div class="fx-daytab__top">J{{ day.grouper }}</div>
+                          <div class="fx-daytab__bottom">{{ first_match.scheduled_date|date:"d M" }}</div>
+                        {% endlanguage %}
+                      </button>
+                    {% endwith %}
+                  {% endfor %}
+
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- PANELS -->
+            <div class="fx-panels" data-phase-panels="{{ phase.id }}">
+
+              {% if phase.today_matches %}
+                <div id="phase{{ phase.id }}-today" class="fx-panel is-active">
+                  <div class="fx-panel__title">
+                    {% language 'fr' %}
+                      <div class="fx-panel__pill fx-panel__pill--today">Aujourd’hui</div>
+                      <div class="fx-panel__date">
+                        <i class="far fa-calendar me-2"></i>{{ today|date:"l d F Y" }}
+                      </div>
+                    {% endlanguage %}
+                  </div>
+
+                  <div class="fx-list">
+                    {% for match in phase.today_matches %}
+                      {% include "core/partials/_fixture_item.html" with match=match show_matchday=1 %}
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+
+              {% for day in matchdays %}
+                {% with first_match=day.list.0 %}
+                  <div
+                    id="phase{{ phase.id }}-day{{ day.grouper }}"
+                    class="fx-panel {% if not phase.today_matches and forloop.first %}is-active{% endif %}">
+
+                    <div class="fx-panel__title">
+                      {% language 'fr' %}
+                        <div class="fx-panel__pill">J{{ day.grouper }}</div>
+                        <div class="fx-panel__date">
+                          <i class="far fa-calendar me-2"></i>{{ first_match.scheduled_date|date:"l d F Y" }}
+                        </div>
+                      {% endlanguage %}
+                    </div>
+
+                    <div class="fx-list">
+                      {% for match in day.list %}
+                        {% include "core/partials/_fixture_item.html" with match=match show_matchday=0 %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+
+            </div>
+
+          {% else %}
+            <div class="fx-empty">Aucun match programmé pour cette phase.</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="fx-empty">Le calendrier sera publié très prochainement.</div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+/* ===== PAGE ===== */
+.fx-page{
+  background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+}
+.fx-title{ font-weight: 1000; letter-spacing: .6px; color:#fff; margin:0; }
+.fx-subtitle{ color:#e6c200; font-weight:700; opacity:.95; }
+
+/* NOTE */
+.fx-note{ display:flex; gap:12px; padding:12px; border-radius:16px; border:1px solid rgba(255,255,255,.12); background: rgba(0,167,225,.10); }
+.fx-note__icon{ width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center; background: linear-gradient(45deg,#e6c200,#ffed4e); color:#0a0e17; }
+.fx-note__title{ color:#e6c200; font-weight:900; }
+.fx-note__text{ color: rgba(255,255,255,.86); line-height:1.35; }
+
+/* PDF */
+.fx-btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; font-weight:900; text-decoration:none; border:1px solid rgba(255,255,255,.12); }
+.fx-btn--pdf{ background: linear-gradient(135deg,#dc3545,#c82333); color:#fff; }
+.fx-btn--pdf:hover{ opacity:.92; color:#fff; }
+
+/* PHASE */
+.fx-phase{ border:1px solid rgba(255,255,255,.10); background: rgba(17,28,47,.45); border-radius:18px; padding:14px; backdrop-filter: blur(10px); }
+.fx-phase__badge{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; font-weight:1000; background: rgba(230,194,0,.12); border:1px solid rgba(230,194,0,.26); color:#ffed4e; }
+.fx-phase__hint{ margin-top:6px; color: rgba(255,255,255,.72); font-weight:650; font-size:.95rem; }
+
+/* DAYS */
+.fx-days{ margin: 10px 0 12px; }
+.fx-days__track{ display:flex; gap:10px; overflow:auto; padding-bottom:6px; scrollbar-width: thin; }
+.fx-daytab{
+  min-width: 96px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.86);
+  border-radius:14px;
+  padding:10px;
+  text-align:left;
+  font-weight:900;
+}
+.fx-daytab__top{ font-size:.95rem; color:#e6c200; }
+.fx-daytab__bottom{ font-size:.82rem; opacity:.85; margin-top:2px; }
+.fx-daytab.is-active{ background: rgba(230,194,0,.14); border-color: rgba(230,194,0,.35); }
+.fx-daytab.is-today{ border-color: rgba(0,167,225,.45); box-shadow: inset 0 0 0 1px rgba(0,167,225,.30); }
+
+/* PANELS */
+.fx-panel{ display:none; }
+.fx-panel.is-active{ display:block; }
+.fx-panel__title{ display:flex; align-items:center; gap:10px; padding:8px 4px 12px; }
+.fx-panel__pill{ padding:6px 10px; border-radius:999px; font-weight:1000; background: rgba(0,167,225,.12); border:1px solid rgba(0,167,225,.25); color:#fff; }
+.fx-panel__pill--today{ background: rgba(230,194,0,.14); border-color: rgba(230,194,0,.35); color:#ffed4e; }
+.fx-panel__date{ color: rgba(255,255,255,.75); font-weight:800; }
+
+/* LIST */
+.fx-list{ display:flex; flex-direction:column; gap:8px; } /* compact */
+.fx-empty{ padding:18px; border-radius:16px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); color: rgba(255,255,255,.78); text-align:center; }
+
+/* ===== MATCH ITEM ===== */
+.fx-item{
+  display:grid;
+  grid-template-columns: minmax(0,1fr) 110px minmax(0,1fr);
+  gap: 8px;
+  align-items:start;
+  padding: 10px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+}
+.fx-item.is-late{ box-shadow: inset 3px 0 0 rgba(220,53,69,.9); }
+
+.fx-team{ min-width:0; }
+.fx-team--right{ display:flex; justify-content:flex-end; }
+
+.fx-team__stack{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.fx-team__name{
+  font-weight: 950;
+  color: rgba(255,255,255,.92);
+  line-height: 1.12;
+  white-space: normal;
+  word-break: break-word;
+  font-size: .96rem;
+}
+
+/* WhatsApp icon only */
+.fx-wa{
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border: 1px solid rgba(37,211,102,.35);
+  background: rgba(37,211,102,.10);
+  color: rgba(255,255,255,.92);
+  text-decoration: none;
+}
+.fx-wa:hover{ background: rgba(37,211,102,.18); color:#fff; }
+.fx-wa--right{ margin-left:auto; }
+
+/* Mid */
+.fx-mid{ text-align:center; }
+.fx-mid__main{ font-weight: 1000; color:#e6c200; line-height:1.05; }
+.fx-mid__score{ font-size: 1.05rem; }
+.fx-mid__time{ font-size: .86rem; }
+.fx-mid__sub{ margin-top: 4px; }
+
+.fx-tag{
+  display:inline-flex;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: .78rem;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+}
+.fx-tag--success{ border-color: rgba(40,167,69,.35); background: rgba(40,167,69,.12); }
+.fx-tag--danger{ border-color: rgba(220,53,69,.35); background: rgba(220,53,69,.12); }
+.fx-tag--warn{ border-color: rgba(255,193,7,.45); background: rgba(255,193,7,.14); color: #fff; }
+.fx-tag--info{ border-color: rgba(0,167,225,.35); background: rgba(0,167,225,.12); }
+.fx-tag--rescheduled{ border-color: rgba(0,167,225,.35); background: rgba(0,167,225,.12); }
+
+/* Reported (compact) */
+.fx-rescheduled{ margin-top: 5px; }
+.fx-rescheduled__reason{
+  margin-top: 3px;
+  font-size: .75rem;
+  color: rgba(255,255,255,.72);
+  font-weight: 750;
+
+  /* 1 ligne max sur mobile pour garder la hauteur basse */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Admin buttons */
+.fx-admin{
+  grid-column: 1 / -1;
+  display:flex;
+  justify-content:flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+.fx-admin__btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: .85rem;
+  text-decoration:none;
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+}
+.fx-admin__btn--gold{
+  border:none;
+  background: linear-gradient(45deg,#e6c200,#ffed4e);
+  color:#0a0e17;
+}
+.fx-admin__btn--danger{
+  border-color: rgba(220,53,69,.45);
+  background: rgba(220,53,69,.14);
+}
+.fx-admin__btn--light{
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06);
+}
+
+/* Mobile: plus compact -> plus de matchs visibles */
+@media (max-width: 576px){
+  .fx-phase{ padding: 12px; }
+  .fx-note{ padding: 10px; }
+  .fx-item{
+    grid-template-columns: minmax(0,1fr) 76px minmax(0,1fr);
+    padding: 8px 8px;
+    gap: 6px;
+  }
+  .fx-team__name{ font-size: .92rem; }
+  .fx-mid__score{ font-size: 1.0rem; }
+  .fx-mid__time{ font-size: .82rem; }
+  .fx-wa{ width: 26px; height: 26px; }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".fx-days").forEach(daysNav => {
+    const phaseId = daysNav.getAttribute("data-phase");
+    const panelsWrap = document.querySelector('[data-phase-panels="' + phaseId + '"]');
+    if (!panelsWrap) return;
+
+    const tabs = Array.from(daysNav.querySelectorAll(".fx-daytab"));
+
+    const setActive = (targetId) => {
+      tabs.forEach(t => {
+        const isActive = t.getAttribute("data-target") === targetId;
+        t.classList.toggle("is-active", isActive);
+        t.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panelsWrap.querySelectorAll(".fx-panel").forEach(p => {
+        p.classList.toggle("is-active", p.id === targetId);
+      });
+
+      const activeTab = daysNav.querySelector('.fx-daytab.is-active');
+      if (activeTab) activeTab.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"});
+    };
+
+    const active = daysNav.querySelector(".fx-daytab.is-active");
+    if (active) setActive(active.getAttribute("data-target"));
+
+    tabs.forEach(tab => tab.addEventListener("click", () => setActive(tab.getAttribute("data-target"))));
+  });
+});
+</script>
+{% endblock %}

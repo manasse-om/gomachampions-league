@@ -1,0 +1,207 @@
+{% extends "core/admin/base_admin.html" %}
+{% load i18n %}
+
+{% block admin_content %}
+<div class="admin-card rm-card">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h3 class="mb-1">
+        <i class="fas fa-calendar-plus me-2 text-warning"></i>Reporter un match
+      </h3>
+      <div class="text-light" style="opacity:.78;">
+        Reprogrammer la date pour éviter un forfait (48h) et garder une trace de la décision.
+      </div>
+    </div>
+    <a href="{% url 'manage_matches' %}" class="btn btn-outline-light rounded-pill px-3">
+      ← Retour
+    </a>
+  </div>
+
+  <!-- MATCH INFOS -->
+  <div class="rm-info mb-3">
+    <div class="rm-info__row">
+      <div class="rm-pill">Match</div>
+      <div class="rm-info__main">
+        <strong>{{ match.home_team.team_name }}</strong>
+        <span class="rm-vs">vs</span>
+        <strong>{{ match.away_team.team_name }}</strong>
+      </div>
+    </div>
+
+    <div class="rm-info__row">
+      <div class="rm-pill">Phase</div>
+      <div class="rm-info__main">
+        {{ match.phase.get_name_display }}
+        {% if match.phase.name == "league" %}
+          <span class="badge bg-warning text-dark ms-2">J{{ match.matchday }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="rm-info__row">
+      <div class="rm-pill">Ancienne date</div>
+      <div class="rm-info__main">
+        {{ match.scheduled_date|date:"d/m/Y H:i" }}
+      </div>
+    </div>
+
+    {% if match.rescheduled_from %}
+      <div class="rm-info__row">
+        <div class="rm-pill rm-pill--info">Déjà reporté</div>
+        <div class="rm-info__main">
+          depuis <strong>{{ match.rescheduled_from|date:"d/m/Y H:i" }}</strong>
+          {% if match.rescheduled_at %}
+            <span class="text-light ms-2" style="opacity:.75;">
+              (le {{ match.rescheduled_at|date:"d/m/Y H:i" }})
+            </span>
+          {% endif %}
+          {% if match.rescheduled_by %}
+            <span class="text-light ms-2" style="opacity:.75;">
+              par <strong>{{ match.rescheduled_by.username }}</strong>
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if match.rescheduled_reason %}
+      <div class="rm-reason mt-2">
+        <strong>Raison précédente :</strong> {{ match.rescheduled_reason }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="alert rm-alert">
+    <strong><i class="fas fa-circle-info me-2"></i>Note :</strong>
+    le match ne sera plus considéré “en retard” si la date est déplacée dans le futur.
+  </div>
+
+  <!-- FORM -->
+  <form method="post" class="mt-3">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label text-light fw-semibold">
+          Nouvelle date / heure
+        </label>
+        {{ form.scheduled_date }}
+        {% if form.scheduled_date.errors %}
+          <div class="text-danger small mt-1">{{ form.scheduled_date.errors }}</div>
+        {% endif %}
+        <small class="text-light d-block mt-2" style="opacity:.7;">
+          Choisis une date future. (Ex: demain 18:00)
+        </small>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label text-light fw-semibold">
+          Raison du report
+        </label>
+        {{ form.rescheduled_reason }}
+        {% if form.rescheduled_reason.errors %}
+          <div class="text-danger small mt-1">{{ form.rescheduled_reason.errors }}</div>
+        {% endif %}
+        <small class="text-light d-block mt-2" style="opacity:.7;">
+          Exemple : coupure courant / problème réseau / accord des 2 joueurs.
+        </small>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+      <button type="submit" class="btn btn-ucl-gold btn-lg rounded-pill px-4">
+        <i class="fas fa-save me-2"></i>Enregistrer le report
+      </button>
+      <a href="{% url 'manage_matches' %}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+        Annuler
+      </a>
+    </div>
+  </form>
+
+</div>
+
+<style>
+/* Card style aligned with your admin theme */
+.rm-card{
+  background: rgba(17,28,47,.78);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 18px 50px rgba(0,0,0,.28);
+  backdrop-filter: blur(10px);
+}
+
+/* Info panel */
+.rm-info{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  padding: 14px;
+}
+.rm-info__row{
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(255,255,255,.10);
+}
+.rm-info__row:last-child{ border-bottom: none; }
+.rm-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 950;
+  letter-spacing: .6px;
+  background: rgba(230,194,0,.12);
+  border: 1px solid rgba(230,194,0,.28);
+  color: #ffed4e;
+  width: fit-content;
+}
+.rm-pill--info{
+  background: rgba(0,167,225,.12);
+  border-color: rgba(0,167,225,.28);
+  color: rgba(255,255,255,.90);
+}
+.rm-info__main{
+  color: rgba(255,255,255,.90);
+  font-weight: 750;
+  word-break: break-word;
+}
+.rm-vs{
+  color:#e6c200;
+  font-weight: 1000;
+  margin: 0 8px;
+}
+
+/* Reason */
+.rm-reason{
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.85);
+  font-weight: 700;
+}
+
+/* Alert */
+.rm-alert{
+  border-radius: 16px;
+  border: 1px solid rgba(0,167,225,.30);
+  background: rgba(0,167,225,.10);
+  color: rgba(255,255,255,.92);
+}
+
+/* Responsive */
+@media (max-width: 576px){
+  .rm-info__row{
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "core/admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-card">
+
+  <h3 class="mb-2">{{ title }}</h3>
+  <p class="text-light" style="opacity:.8;">
+    Compétition : <strong>{{ competition.name }}</strong><br>
+    Cette action met la même date à tous les barrages <strong>ALLER</strong> et la même date à tous les barrages <strong>RETOUR</strong>.
+  </p>
+
+  <form method="post" class="row g-3">
+    {% csrf_token %}
+
+    <div class="col-md-6">
+      <label class="form-label text-light fw-semibold">Date des matchs ALLER</label>
+      <input type="date" name="aller_date" class="form-control" required>
+      <small class="text-light" style="opacity:.7;">Heure repère : 00:00</small>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label text-light fw-semibold">Date des matchs RETOUR</label>
+      <input type="date" name="retour_date" class="form-control">
+      <small class="text-light" style="opacity:.7;">Si vide : par défaut le lendemain (00:00).</small>
+    </div>
+
+    <div class="col-12">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="1" id="same_day" name="same_day">
+        <label class="form-check-label text-light" for="same_day">
+          Retour le même jour (repère 00:01)
+        </label>
+      </div>
+    </div>
+
+    <div class="col-12 d-flex flex-wrap gap-2 mt-2">
+      <button class="btn btn-ucl-gold rounded-pill px-4">Enregistrer</button>
+      <a href="{% url 'knockout_tools' %}" class="btn btn-outline-light rounded-pill px-4">Annuler</a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

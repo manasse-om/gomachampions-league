@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+
+<h2>Gestion des Compétitions</h2>
+
+<a href="{% url 'competition_create' %}" class="btn btn-success mb-3">
+    + Créer une compétition
+</a>
+
+<table class="table table-dark table-striped">
+<thead>
+<tr>
+<th>Nom</th>
+<th>Format</th>
+<th>Actif</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for comp in competitions %}
+<tr>
+<td>{{ comp.name }}</td>
+<td>{{ comp.get_format_type_display }}</td>
+<td>{{ comp.is_active }}</td>
+<td>
+<a href="{% url 'competition_edit' comp.pk %}" class="btn btn-warning btn-sm">Modifier</a>
+<a href="{% url 'competition_delete' comp.pk %}" class="btn btn-danger btn-sm">Supprimer</a>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+</div>
+{% endblock %}

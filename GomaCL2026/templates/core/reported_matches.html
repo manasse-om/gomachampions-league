@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Matchs signalés - Dashboard Admin{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-flag me-2"></i>
+                    MATCHS SIGNALÉS & EN RETARD
+                </h1>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour au Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <!-- Matchs signalés -->
+        <div class="row mb-5">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            MATCHS SIGNALÉS PAR LES JOUEURS ({{ reported_matches.count }})
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        {% if reported_matches %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-warning">
+                                    <tr>
+                                        <th>Date prévue</th>
+                                        <th>Match</th>
+                                        <th>Signalé par</th>
+                                        <th>Raison</th>
+                                        <th>Détails</th>
+                                        <th>Date signalement</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in reported_matches %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">
+                                                {{ match.scheduled_date|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ match.home_team.abbreviation }}</strong> vs <strong>{{ match.away_team.abbreviation }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ match.phase.get_name_display }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ match.reported_by.abbreviation }}
+                                            </span>
+                                            <br>
+                                            <small>{{ match.reported_by.team_name }}</small>
+                                        </td>
+                                        <td>
+                                            {% if match.report_reason == 'adversaire_absent' %}
+                                            <span class="badge bg-danger">Adversaire absent</span>
+                                            {% elif match.report_reason == 'adversaire_injoignable' %}
+                                            <span class="badge bg-warning text-dark">Adversaire injoignable</span>
+                                            {% elif match.report_reason == 'probleme_technique' %}
+                                            <span class="badge bg-secondary">Problème technique</span>
+                                            {% else %}
+                                            <span class="badge bg-dark">Autre</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if match.report_details %}
+                                            <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#detailsModal{{ match.id }}">
+                                                <i class="fas fa-eye me-1"></i>Voir
+                                            </button>
+                                            
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="detailsModal{{ match.id }}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Détails du signalement</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p><strong>Match :</strong> {{ match.home_team.abbreviation }} vs {{ match.away_team.abbreviation }}</p>
+                                                            <p><strong>Signalé par :</strong> {{ match.reported_by.team_name }}</p>
+                                                            <hr>
+                                                            <p>{{ match.report_details }}</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ match.report_date|date:"d/m/Y H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'apply_forfeit_manual' match.id %}" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-gavel me-1"></i>Décider
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="text-muted">Aucun match signalé pour le moment. 👍</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Matchs en retard (non signalés) -->
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>
+                            MATCHS EN RETARD (Plus de 48h) - NON SIGNALÉS ({{ late_matches.count }})
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        {% if late_matches %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Ces matchs sont en retard mais n'ont pas été signalés par les joueurs. Vous pouvez décider d'appliquer un forfait.
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-danger">
+                                    <tr>
+                                        <th>Date prévue</th>
+                                        <th>Retard</th>
+                                        <th>Match</th>
+                                        <th>Phase</th>
+                                        <th>Contacts</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in late_matches %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-danger">
+                                                {{ match.scheduled_date|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% load custom_filters %}
+                                            <span class="badge bg-dark">
+                                                {{ match.scheduled_date|timesince }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ match.home_team.abbreviation }}</strong> vs <strong>{{ match.away_team.abbreviation }}</strong>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ match.phase.get_name_display }}</small>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                <strong>{{ match.home_team.abbreviation }}:</strong> {{ match.home_team.whatsapp }}<br>
+                                                <strong>{{ match.away_team.abbreviation }}:</strong> {{ match.away_team.whatsapp }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'apply_forfeit_manual' match.id %}" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-gavel me-1"></i>Décider
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="text-muted">Aucun match en retard. Tout est à jour ! 🎉</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+</style>
+{% endblock %}

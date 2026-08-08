@@ -1,0 +1,39 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="admin-card">
+
+  <h3 class="mb-2">Générer Phase League + Matchs</h3>
+  <p class="text-light" style="opacity:.8;">
+    Paires détectées: <strong>{{ pairs_count }}</strong> (attendu: 144).<br>
+    Les matchs seront créés en <strong>match unique</strong> et programmés automatiquement à partir de <strong>00:00</strong> (placeholders).
+    Tu pourras ensuite modifier les heures manuellement.
+  </p>
+
+  <hr class="border-secondary my-4">
+
+  <form method="post" class="row g-3">
+    {% csrf_token %}
+
+    <div class="col-md-6">
+      <label class="form-label text-light">Date de début (jour 1)</label>
+      <input type="date" name="start_date" class="form-control" required>
+      <small class="text-light" style="opacity:.7;">Heure automatiquement fixée à 00:00.</small>
+    </div>
+
+    <div class="col-12 d-flex gap-2 mt-2">
+      <button type="submit" class="btn btn-ucl-gold">
+        Générer maintenant
+      </button>
+      <a href="{% url 'league_draw_live' %}" class="btn btn-outline-light">
+        ← Retour tirage
+      </a>
+    </div>
+  </form>
+
+  <div class="alert alert-warning mt-4">
+    <strong>Important :</strong> Après génération, ajuste rapidement les dates/heures pour éviter que certains matchs deviennent “en retard” (forfait 48h).
+  </div>
+
+</div>
+{% endblock %}

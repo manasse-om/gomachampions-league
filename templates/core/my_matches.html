@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes matchs - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="mm-page py-4">
+  <div class="container">
+
+    <!-- TITLE -->
+    <div class="text-center mb-3">
+      <h1 class="mm-title mb-1">
+        <i class="fas fa-futbol me-2"></i>Mes matchs
+      </h1>
+      <p class="mm-subtitle mb-0">Votre calendrier personnel</p>
+    </div>
+
+    <!-- PAYMENT STATUS -->
+    {% if not team.payment_validated %}
+      <div class="alert alert-warning text-center mb-4">
+        <i class="fas fa-hourglass-half me-2"></i>
+        <strong>Inscription en attente de validation.</strong><br>
+        Envoyez la preuve de paiement dans le groupe WhatsApp officiel.
+      </div>
+    {% else %}
+      <div class="alert alert-success text-center mb-4">
+        <i class="fas fa-check-circle me-2"></i>
+        <strong>Paiement validé ✅ Vous pouvez jouer vos matchs.</strong>
+      </div>
+    {% endif %}
+
+    <!-- TEAM INFO -->
+    <div class="mm-card mb-3">
+      <div class="mm-teamhead">
+        <div class="mm-teamlogo">{{ team.team_name|slice:":1"|upper }}</div>
+        <div class="mm-teammeta">
+          <div class="mm-teamname">{{ team.team_name }}</div>
+          <div class="mm-teamsub">
+            Joueur : <strong>{{ team.player_name }}</strong>
+          </div>
+        </div>
+        <div class="mm-chip">
+          {{ team.abbreviation }}
+        </div>
+      </div>
+    </div>
+
+    {% if team.payment_validated %}
+
+      <!-- UPCOMING -->
+      <div class="mm-sectionhead">
+        <h4 class="mb-0">Matchs à venir</h4>
+        <small class="text-light" style="opacity:.72;">
+          Cliquez sur WhatsApp pour contacter l’adversaire.
+        </small>
+      </div>
+
+      {% if upcoming_matches %}
+        <div class="mm-list mb-4">
+          {% for match in upcoming_matches %}
+            <div class="mm-item {% if match.is_late and not match.is_played and not match.is_forfeit %}is-late{% endif %}">
+              <div class="mm-top">
+                <div class="mm-date">
+                  <i class="far fa-calendar me-2"></i>{{ match.scheduled_date|date:"d/m/Y" }}
+                </div>
+                <div class="mm-time">
+                  {% with t=match.scheduled_date|time:"H:i" %}
+                    {% if t == "00:00" or t == "00:01" %}
+                      Toute la journée
+                    {% else %}
+                      {{ t }}
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              </div>
+
+              <div class="mm-mid">
+                <!-- HOME -->
+                <div class="mm-side">
+                  <div class="mm-badge">{{ match.home_team.team_name|slice:":1"|upper }}</div>
+                  <div class="mm-name" title="{{ match.home_team.team_name }}">{{ match.home_team.team_name }}</div>
+
+                  {% if match.home_team.whatsapp %}
+                    <a class="mm-wa" href="https://wa.me/{{ match.home_team.whatsapp|cut:'+' }}" target="_blank" rel="noopener">
+                      <i class="fab fa-whatsapp"></i>
+                      <span>{{ match.home_team.whatsapp }}</span>
+                    </a>
+                  {% endif %}
+                </div>
+
+                <!-- CENTER -->
+                <div class="mm-center">
+                  <div class="mm-vs">VS</div>
+                  {% if match.is_late %}
+                    <div class="mm-tag mm-tag--warn">Retard</div>
+                  {% else %}
+                    <div class="mm-tag mm-tag--info">À jouer</div>
+                  {% endif %}
+                </div>
+
+                <!-- AWAY -->
+                <div class="mm-side mm-side--right">
+                  <div class="mm-name text-end" title="{{ match.away_team.team_name }}">{{ match.away_team.team_name }}</div>
+                  <div class="mm-badge mm-badge--alt">{{ match.away_team.team_name|slice:":1"|upper }}</div>
+
+                  {% if match.away_team.whatsapp %}
+                    <a class="mm-wa mm-wa--right" href="https://wa.me/{{ match.away_team.whatsapp|cut:'+' }}" target="_blank" rel="noopener">
+                      <i class="fab fa-whatsapp"></i>
+                      <span>{{ match.away_team.whatsapp }}</span>
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if not match.is_played %}
+                <div class="mm-actions">
+                  {% if not match.reported %}
+                    <a href="{% url 'report_match' match.id %}" class="btn btn-warning btn-sm rounded-pill px-3">
+                      <i class="fas fa-flag me-2"></i>Signaler un problème
+                    </a>
+                  {% else %}
+                    <span class="badge bg-info">Signalé</span>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="mm-empty mb-4">Aucun match à venir.</div>
+      {% endif %}
+
+      <!-- PLAYED -->
+      <div class="mm-sectionhead mt-4">
+        <h4 class="mb-0">Matchs joués</h4>
+        <small class="text-light" style="opacity:.72;">Derniers résultats</small>
+      </div>
+
+      {% if played_matches %}
+        <div class="mm-card">
+          <div class="table-responsive">
+            <table class="table table-dark table-striped align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Match</th>
+                  <th class="text-center">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for match in played_matches %}
+                  <tr>
+                    <td>{{ match.played_date|date:"d/m/Y" }}</td>
+                    <td class="mm-playedmatch">
+                      <span class="mm-playedname" title="{{ match.home_team.team_name }}">{{ match.home_team.team_name }}</span>
+                      <span class="mx-2 text-gold">vs</span>
+                      <span class="mm-playedname" title="{{ match.away_team.team_name }}">{{ match.away_team.team_name }}</span>
+                    </td>
+                    <td class="text-center fw-bold text-gold">{{ match.home_score }} - {{ match.away_score }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mm-hint d-md-none">
+            Astuce : glissez horizontalement si le tableau dépasse.
+          </div>
+        </div>
+      {% else %}
+        <div class="mm-empty">Aucun match joué.</div>
+      {% endif %}
+
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-lock fa-4x text-danger mb-3"></i>
+        <p class="text-danger mb-0">
+          Vous ne pouvez pas accéder aux matchs tant que votre paiement n’est pas validé.
+        </p>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+.mm-page{
+  background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+}
+.text-gold{ color:#e6c200 !important; }
+
+.mm-title{
+  font-weight: 1000;
+  color:#fff;
+  letter-spacing:.4px;
+}
+.mm-subtitle{
+  color:#e6c200;
+  font-weight: 750;
+  opacity:.95;
+}
+
+/* card */
+.mm-card{
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.25);
+  backdrop-filter: blur(10px);
+}
+.mm-teamhead{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+.mm-teamlogo{
+  width: 44px; height: 44px;
+  border-radius: 16px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight: 1000;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  color: #0a0e17;
+  flex: 0 0 auto;
+}
+.mm-teammeta{ min-width:0; }
+.mm-teamname{
+  font-weight: 1000;
+  color: rgba(255,255,255,.95);
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+.mm-teamsub{
+  color: rgba(255,255,255,.70);
+  font-weight: 750;
+  margin-top: 4px;
+}
+.mm-chip{
+  margin-left:auto;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.88);
+  font-weight: 950;
+  letter-spacing:.8px;
+}
+
+/* section head */
+.mm-sectionhead{
+  display:flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 14px 0 10px;
+}
+.mm-sectionhead h4{ color:#fff; font-weight: 1000; }
+
+/* list */
+.mm-list{ display:flex; flex-direction:column; gap: 10px; }
+.mm-item{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 12px;
+}
+.mm-item.is-late{ box-shadow: inset 3px 0 0 rgba(220,53,69,.9); }
+
+.mm-top{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mm-date{
+  color: rgba(255,255,255,.78);
+  font-weight: 850;
+  font-size: .92rem;
+}
+.mm-time{
+  color: #e6c200;
+  font-weight: 1000;
+  font-size: .92rem;
+}
+
+.mm-mid{
+  display:grid;
+  grid-template-columns: 1fr 90px 1fr;
+  gap: 10px;
+  align-items:start;
+}
+
+.mm-side{
+  display:flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width:0;
+}
+.mm-side--right{
+  align-items:flex-end;
+}
+.mm-badge{
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 1000;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  color: #0a0e17;
+}
+.mm-badge--alt{
+  background: linear-gradient(135deg, rgba(0,167,225,.95), rgba(0,61,130,.85));
+  color:#fff;
+}
+.mm-name{
+  font-weight: 950;
+  color: rgba(255,255,255,.92);
+  line-height: 1.15;
+  /* ✅ on veut afficher le nom entier => pas d'ellipsis */
+  white-space: normal;
+  word-break: break-word;
+}
+
+.mm-center{
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 8px;
+  padding-top: 2px;
+}
+.mm-vs{
+  font-weight: 1000;
+  color:#e6c200;
+  letter-spacing: 1px;
+}
+.mm-tag{
+  display:inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: .82rem;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+}
+.mm-tag--warn{ border-color: rgba(255,193,7,.45); background: rgba(255,193,7,.14); }
+.mm-tag--info{ border-color: rgba(0,167,225,.35); background: rgba(0,167,225,.12); }
+
+/* whatsapp button */
+.mm-wa{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(37,211,102,.35);
+  background: rgba(37,211,102,.10);
+  color: rgba(255,255,255,.92);
+  font-weight: 900;
+  font-size: .80rem;
+  text-decoration:none;
+  width: fit-content;
+  max-width: 100%;
+}
+.mm-wa:hover{ background: rgba(37,211,102,.18); color:#fff; }
+.mm-wa--right{ margin-left:auto; }
+
+.mm-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top: 10px;
+}
+
+/* played match text */
+.mm-playedmatch{
+  color: rgba(255,255,255,.88);
+}
+.mm-playedname{
+  font-weight: 850;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* empty */
+.mm-empty{
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(255,255,255,.78);
+  text-align:center;
+}
+
+/* hint */
+.mm-hint{
+  padding-top: 10px;
+  color: rgba(255,255,255,.70);
+  font-weight: 700;
+  font-size: .92rem;
+}
+
+/* Mobile tweaks */
+@media (max-width: 576px){
+  .mm-mid{ grid-template-columns: 1fr 76px 1fr; }
+  .mm-teamlogo{ width: 40px; height: 40px; border-radius: 14px; }
+  .mm-chip{ padding: 7px 10px; font-size: .85rem; }
+  .mm-wa{ font-size: .78rem; }
+}
+</style>
+{% endblock %}

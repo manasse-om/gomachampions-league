@@ -1,0 +1,30 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="admin-card">
+  <h4 class="mb-3">
+    <i class="fas fa-trash-can me-2"></i>Annuler le résultat
+  </h4>
+
+  <p class="text-light" style="opacity:.85;">
+    Match : <strong>{{ match.home_team.team_name }}</strong> ({{ match.home_team.abbreviation }})
+    vs <strong>{{ match.away_team.team_name }}</strong> ({{ match.away_team.abbreviation }})
+  </p>
+
+  <div class="alert alert-warning">
+    Cette action va remettre le match en “à venir” et supprimer tous les scores.
+    <br>
+    Le classement sera recalculé automatiquement (phase ligue).
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">
+      Confirmer l’annulation
+    </button>
+    <a href="{% url 'manage_matches' %}" class="btn btn-secondary ms-2">
+      Annuler
+    </a>
+  </form>
+</div>
+{% endblock %}

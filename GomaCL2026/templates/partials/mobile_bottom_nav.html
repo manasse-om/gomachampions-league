@@ -1,0 +1,105 @@
+{% load roles %}
+
+<nav class="ucl-bottomnav" aria-label="Navigation mobile">
+  <a class="nav-link ucl-bottomnav__item" href="{% url 'home' %}">
+    <i class="fas fa-house"></i>
+    <span>Accueil</span>
+  </a>
+
+  <a class="nav-link ucl-bottomnav__item" href="{% url 'fixtures' %}">
+    <i class="fas fa-calendar-days"></i>
+    <span>Calendrier</span>
+  </a>
+
+  <a class="nav-link ucl-bottomnav__item" href="{% url 'standings' %}">
+    <i class="fas fa-ranking-star"></i>
+    <span>Classement</span>
+  </a>
+
+  <a class="nav-link ucl-bottomnav__item" href="{% url 'results' %}">
+    <i class="fas fa-list-check"></i>
+    <span>Résultats</span>
+  </a>
+
+  {# ✅ Mes matchs (si admin sans team, on envoie vers dashboard pour éviter “pas d’équipe”) #}
+  {% if user.is_authenticated and user|has_role:"superadmin,organisateur,paiement,match" and not user.team %}
+    <a class="nav-link ucl-bottomnav__item" href="{% url 'dashboard' %}">
+      <i class="fas fa-shield-halved"></i>
+      <span>Admin</span>
+    </a>
+  {% else %}
+    <a class="nav-link ucl-bottomnav__item" href="{% url 'my_matches' %}">
+      <i class="fas fa-futbol"></i>
+      <span>Mes matchs</span>
+    </a>
+  {% endif %}
+
+  {# ✅ Connexion TOUJOURS visible #}
+  <a class="nav-link ucl-bottomnav__item" href="{% url 'login' %}">
+    <i class="fas fa-right-to-bracket"></i>
+    <span>Connexion</span>
+  </a>
+</nav>
+
+<style>
+/* ===== Mobile bottom nav (6 items) ===== */
+.ucl-bottomnav{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 1030;
+  display: flex;
+  justify-content: space-around;
+  gap: 4px;
+
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(0, 18, 51, 0.98);
+  border-top: 1px solid rgba(230, 194, 0, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ucl-bottomnav__item{
+  flex: 1;
+  text-align: center;
+  color: rgba(255,255,255,.82) !important;
+  text-decoration: none;
+  padding: 8px 4px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: .74rem;
+  line-height: 1.05;
+  transition: background .15s ease, color .15s ease;
+}
+
+.ucl-bottomnav__item i{
+  display:block;
+  font-size: 1.12rem;
+  margin-bottom: 5px;
+  color: rgba(255,255,255,.88);
+}
+
+.ucl-bottomnav__item:hover{
+  background: rgba(255,255,255,.06);
+  color: #fff !important;
+}
+
+/* Active (ucl-ui.js ajoute .active sur a.nav-link) */
+.ucl-bottomnav__item.active{
+  background: rgba(230,194,0,.14);
+  color: #fff !important;
+  border: 1px solid rgba(230,194,0,.22);
+}
+.ucl-bottomnav__item.active i{
+  color: #ffed4e;
+}
+
+/* Afficher uniquement sur mobile/tablette */
+@media (min-width: 992px){
+  .ucl-bottomnav{ display:none; }
+}
+
+/* Important: laisser de l'espace en bas pour le menu */
+@media (max-width: 991px){
+  body{ padding-bottom: 92px; }
+}
+</style>

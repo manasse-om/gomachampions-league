@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Admin - Goma Champions League{% endblock %}
+
+{% block content %}
+<section class="dashboard-section py-5">
+  <div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="row mb-4 align-items-center">
+      <div class="col">
+        <h1 class="dashboard-title mb-1">
+          <i class="fas fa-shield-alt me-2 text-warning"></i>
+          Panneau d’Administration
+        </h1>
+        <p class="dashboard-subtitle mb-0">
+          Connecté en tant que <strong>{{ user.username }}</strong>
+          {% if request.user.userprofile %}
+            <span class="role-pill ms-2">{{ request.user.userprofile.get_role_display }}</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="col-auto">
+        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+        </a>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="row g-4 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <i class="fas fa-users stat-icon"></i>
+          <div>
+            <h3 class="mb-0">{{ total_teams }}</h3>
+            <p class="mb-0">Équipes validées</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <div class="stat-card warning-card">
+          <i class="fas fa-hourglass-half stat-icon"></i>
+          <div>
+            <h3 class="mb-0">{{ pending_teams }}</h3>
+            <p class="mb-0">Paiements en attente</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <i class="fas fa-futbol stat-icon"></i>
+          <div>
+            <h3 class="mb-0">{{ total_matches }}</h3>
+            <p class="mb-0">Matchs programmés</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <i class="fas fa-check-circle stat-icon"></i>
+          <div>
+            <h3 class="mb-0">{{ played_matches }}</h3>
+            <p class="mb-0">Matchs joués</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS (top bar) -->
+    <div class="admin-card mb-4">
+      <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <div class="text-light" style="opacity:.85;">
+          <i class="fas fa-bolt me-2 text-warning"></i>
+          Actions rapides
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+          {% if pending_teams > 0 %}
+            <a href="{% url 'pending_payments' %}" class="btn btn-warning btn-sm rounded-pill px-3">
+              <i class="fas fa-receipt me-2"></i>Valider paiements ({{ pending_teams }})
+            </a>
+          {% endif %}
+
+          <a href="{% url 'league_draw_live' %}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+            <i class="fas fa-random me-2"></i>Tirage Ligue
+          </a>
+
+          <a href="{% url 'backup_database' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+            <i class="fas fa-download me-2"></i>Backup
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULES -->
+    <div class="row g-4">
+
+      <!-- COMPETITION -->
+      <div class="col-lg-4">
+        <div class="admin-card h-100">
+          <h5 class="admin-card-title">
+            <i class="fas fa-trophy me-2"></i>Compétition
+          </h5>
+
+          <div class="d-grid gap-2">
+            <a href="{% url 'competition_list' %}" class="btn btn-outline-warning">
+              Gérer compétitions
+            </a>
+            <a href="{% url 'competition_create' %}" class="btn btn-outline-success">
+              Créer compétition
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- EQUIPES -->
+      <div class="col-lg-4">
+        <div class="admin-card h-100">
+          <h5 class="admin-card-title">
+            <i class="fas fa-users me-2"></i>Équipes & Paiements
+          </h5>
+
+          <div class="d-grid gap-2">
+            <a href="{% url 'team_list' %}" class="btn btn-outline-primary">
+              Gestion des équipes
+            </a>
+
+            <a href="{% url 'pending_payments' %}"
+               class="btn {% if pending_teams > 0 %}btn-warning{% else %}btn-outline-warning{% endif %}">
+              {% if pending_teams > 0 %}
+                Valider paiements ({{ pending_teams }})
+              {% else %}
+                Paiements (aucun en attente)
+              {% endif %}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MATCHS -->
+      <div class="col-lg-4">
+        <div class="admin-card h-100">
+          <h5 class="admin-card-title">
+            <i class="fas fa-futbol me-2"></i>Matchs & Calendrier
+          </h5>
+
+          <div class="d-grid gap-2">
+            <a href="{% url 'manage_matches' %}" class="btn btn-outline-info">
+              Gestion des matchs
+            </a>
+            <a href="{% url 'generate_calendar' %}" class="btn btn-outline-success">
+              Générer calendrier
+            </a>
+            <a href="{% url 'reported_matches' %}" class="btn btn-outline-light">
+              Matchs signalés
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OUTILS -->
+    <div class="row g-4 mt-4">
+
+      <div class="col-lg-6">
+        <div class="admin-card h-100">
+          <h5 class="admin-card-title">
+            <i class="fas fa-cogs me-2"></i>Outils automatiques
+          </h5>
+
+          <div class="d-grid gap-2">
+            <a href="{% url 'generate_playoffs_view' %}" class="btn btn-outline-success">
+              Générer playoffs
+            </a>
+            <a href="{% url 'check_forfeits_view' %}" class="btn btn-outline-primary">
+              Vérifier forfaits (48h)
+            </a>
+            <a href="{% url 'download_calendar_pdf' %}" class="btn btn-outline-light">
+              Télécharger calendrier PDF
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="admin-card danger-card h-100">
+          <h5 class="admin-card-title">
+            <i class="fas fa-exclamation-triangle me-2"></i>Zone sensible
+          </h5>
+
+          <div class="d-grid gap-2">
+            <a href="{% url 'league_draw_live' %}" class="btn btn-outline-warning">
+              Tirage Ligue (8 adversaires)
+            </a>
+            <a href="{% url 'knockout_tools' %}" class="btn btn-outline-warning">
+              <i class="fas fa-sitemap me-2"></i>Phase finale (Bracket)
+            </a>
+            <a href="{% url 'reset_competition_view' %}" class="btn btn-danger">
+              Réinitialiser compétition
+            </a>
+            <a href="{% url 'recalc_league_table_view' %}" class="btn btn-outline-warning w-100 mb-2"><i class="fas fa-rotate me-2"></i>Recalculer classement (League)</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- USERS -->
+    <div class="row g-4 mt-4">
+      <div class="col-lg-6">
+        <div class="admin-card h-100">
+          <h5 class="admin-card-title">
+            <i class="fas fa-user-shield me-2"></i>Utilisateurs & Rôles
+          </h5>
+
+          {% if request.user.userprofile.role == 'superadmin' %}
+            <div class="d-grid gap-2">
+              <a href="{% url 'manage_users' %}" class="btn btn-outline-light">
+                <i class="fas fa-users-cog me-2"></i>Gérer les utilisateurs
+              </a>
+              <a href="{% url 'admin_logs' %}" class="btn btn-outline-light">
+                <i class="fas fa-clipboard-list me-2"></i>Logs admin
+              </a>
+            </div>
+          {% else %}
+            <div class="alert alert-warning text-center mb-0">
+              Accès réservé au Super Admin
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="admin-card h-100">
+          <h5 class="admin-card-title">
+            <i class="fas fa-id-badge me-2"></i>Accès (résumé)
+          </h5>
+
+          <table class="table table-dark table-bordered text-center mt-3 mb-0">
+            <tr>
+              <th>Module</th>
+              <th>Accès</th>
+            </tr>
+            <tr>
+              <td>Gestion Compétition</td>
+              <td>
+                {% if request.user.userprofile.role == 'superadmin' or request.user.userprofile.role == 'organisateur' %}
+                  ✅
+                {% else %}
+                  ❌
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td>Validation Paiements</td>
+              <td>
+                {% if request.user.userprofile.role == 'superadmin' or request.user.userprofile.role == 'paiement' or request.user.userprofile.role == 'organisateur' %}
+                  ✅
+                {% else %}
+                  ❌
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td>Gestion Matchs</td>
+              <td>
+                {% if request.user.userprofile.role == 'superadmin' or request.user.userprofile.role == 'match' or request.user.userprofile.role == 'organisateur' %}
+                  ✅
+                {% else %}
+                  ❌
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+/* BACKGROUND */
+.dashboard-section {
+  background: linear-gradient(135deg,#0b1423,#00142d);
+  color:#e6edf7;
+}
+
+/* HEADER */
+.dashboard-title { font-weight: 900; color:#ffd700; }
+.dashboard-subtitle { color:#d0d8e6; }
+
+.role-pill{
+  display:inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(255,255,255,.86);
+  font-weight: 700;
+  font-size: .85rem;
+}
+
+/* STAT CARDS */
+.stat-card {
+  background:#111c2f;
+  padding:18px;
+  border-radius:15px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  box-shadow:0 0 20px rgba(0,61,130,0.25);
+  transition: .25s ease;
+}
+.stat-card:hover { transform:translateY(-4px); }
+.stat-icon { font-size:2rem; color:#00a7e1; }
+.warning-card { border:2px solid #ffc107; }
+
+/* ADMIN CARDS */
+.admin-card {
+  background:#111c2f;
+  padding:22px;
+  border-radius:15px;
+  box-shadow:0 0 20px rgba(0,61,130,0.25);
+  transition: .25s ease;
+}
+.admin-card:hover { transform:translateY(-4px); }
+.admin-card-title{
+  margin-bottom: 14px;
+  color:#ffffff;
+  font-weight: 800;
+}
+.danger-card { border:2px solid rgba(220,53,69,.75); }
+
+/* Buttons */
+.btn-outline-warning,
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-info,
+.btn-outline-dark,
+.btn-outline-light {
+  border-radius: 999px;
+  font-weight: 650;
+}
+
+/* Responsive tweaks */
+@media (max-width: 576px){
+  .admin-card{ padding: 16px; }
+  .stat-card{ padding: 14px; }
+}
+</style>
+
+{% endblock %}

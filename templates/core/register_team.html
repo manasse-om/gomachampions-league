@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inscription - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5 register-bg">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-10 col-lg-8">
+
+        <div class="registration-card">
+
+          <div class="card-header text-center">
+            <h2>
+              <i class="fas fa-user-plus me-2"></i>
+              INSCRIPTION OFFICIELLE
+            </h2>
+            <p class="text-light mt-2">
+              Goma Champions League 2026
+            </p>
+          </div>
+
+          {% if competition and competition.registration_open and not competition.is_registration_full %}
+          <div class="card-body p-4">
+
+            <!-- INFORMATIONS -->
+            <div class="alert alert-info mb-4">
+              <strong>Informations importantes :</strong>
+              <ul class="mb-0 mt-2">
+                <li>Équipes inscrites : {{ competition.registered_teams_count }} / {{ competition.max_teams }}</li>
+                <li>Frais d'inscription : {{ competition.registration_fee }} CDF</li>
+                <li>Paiement : Airtel Money</li>
+              </ul>
+            </div>
+
+            <!-- PROCEDURE DE PAIEMENT -->
+            <div class="payment-box mb-4">
+              <h5><i class="fab fa-whatsapp me-2"></i>Procédure de paiement</h5>
+
+              <ol>
+                <li>Envoyer <strong>{{ competition.registration_fee }} CDF</strong> via Airtel Money au :</li>
+                <li><strong>+243992848365 (Manassé Ombeni)</strong></li>
+                <li>Rejoindre le groupe WhatsApp officiel</li>
+                <li>Envoyer la preuve de paiement dans le groupe</li>
+                <li>Attendre validation par l’administrateur</li>
+              </ol>
+
+              <div class="text-center mt-3">
+                <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto?mode=gi_t"
+                   target="_blank"
+                   class="btn btn-success btn-lg">
+                  <i class="fab fa-whatsapp me-2"></i>
+                  Rejoindre le groupe WhatsApp
+                </a>
+              </div>
+            </div>
+
+            <!-- FORMULAIRE -->
+            <form method="post" class="needs-validation" novalidate>
+              {% csrf_token %}
+
+              <!-- Erreurs générales -->
+              {% if form.non_field_errors %}
+              <div class="alert alert-danger mb-4">
+                {{ form.non_field_errors }}
+              </div>
+              {% endif %}
+
+              <h5 class="mb-3">Informations personnelles</h5>
+
+              <!-- Nom complet -->
+              <div class="mb-3">
+                <label class="form-label">Nom complet *</label>
+                {{ form.player_name }}
+                <div class="help-text">
+                  Exemple : <strong>Manassé Ombeni</strong>
+                </div>
+                {% if form.player_name.errors %}
+                <div class="field-error">
+                  {{ form.player_name.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- WhatsApp -->
+              <div class="mb-3">
+                <label class="form-label">Numéro WhatsApp *</label>
+                {{ form.whatsapp }}
+                <div class="help-text">
+                  Format conseillé : <strong>+243999999999</strong> (sans espaces).
+                </div>
+                {% if form.whatsapp.errors %}
+                <div class="field-error">
+                  {{ form.whatsapp.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <hr class="my-4">
+
+              <h5 class="mb-3">Informations de l'équipe</h5>
+
+              <!-- Nom équipe -->
+              <div class="mb-3">
+                <label class="form-label">Nom de l'équipe *</label>
+                {{ form.team_name }}
+                <div class="help-text">
+                  Exemple : <strong>Flick FC</strong>
+                </div>
+                {% if form.team_name.errors %}
+                <div class="field-error">
+                  {{ form.team_name.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- Abréviation -->
+              <div class="mb-3">
+                <label class="form-label">Abréviation (3 lettres) *</label>
+                {{ form.abbreviation }}
+                <div class="help-text">
+                  3 lettres uniquement. Exemple : <strong>FCK</strong>, <strong>GOM</strong>, <strong>ABC</strong>
+                </div>
+                {% if form.abbreviation.errors %}
+                <div class="field-error">
+                  {{ form.abbreviation.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <hr class="my-4">
+
+              <h5 class="mb-3">Sécurité du compte</h5>
+
+              <!-- Mot de passe -->
+              <div class="mb-4">
+                <label class="form-label">Mot de passe *</label>
+                {{ form.password }}
+                <div class="help-text">
+                  Minimum <strong>6 caractères</strong> (exemple : <strong>gomacl2026</strong>)
+                </div>
+                {% if form.password.errors %}
+                <div class="field-error">
+                  {{ form.password.errors }}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="alert alert-warning">
+                Après soumission, votre compte sera activé après vérification du paiement dans le groupe WhatsApp.
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-register">
+                  <i class="fas fa-paper-plane me-2"></i>
+                  Soumettre mon inscription
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+          {% else %}
+          <div class="card-body text-center p-5">
+            <i class="fas fa-lock fa-4x text-danger mb-3"></i>
+            <h3>Inscriptions fermées</h3>
+            <p>
+              {% if competition.is_registration_full %}
+              Le nombre maximum d'équipes a été atteint.
+              {% else %}
+              Les inscriptions ne sont pas ouvertes pour le moment.
+              {% endif %}
+            </p>
+          </div>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+/* BACKGROUND */
+.register-bg {
+  background: linear-gradient(135deg,#0b1423,#00142d);
+  color:white;
+}
+
+/* CARD */
+.registration-card {
+  background:#111c2f;
+  border-radius:20px;
+  box-shadow:0 0 30px rgba(0,61,130,0.3);
+  overflow:hidden;
+}
+
+.registration-card .card-header {
+  background:linear-gradient(135deg,#003d82,#00a7e1);
+  padding:2rem;
+  color:white;
+}
+
+/* PAYMENT BOX */
+.payment-box {
+  background:#1a2d44;
+  border-radius:15px;
+  padding:20px;
+  border:1px solid #2f4a73;
+}
+
+/* INPUTS */
+.form-control {
+  border-radius:12px;
+  border:1px solid #243552;
+  background:#0f1a2c;
+  color:white;
+}
+
+.form-control:focus {
+  border-color:#00a7e1;
+  box-shadow:0 0 10px rgba(0,167,225,0.4);
+}
+
+/* HELP + ERRORS */
+.help-text {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-top: 6px;
+  color: #cfd8e3;
+}
+
+.field-error {
+  margin-top: 6px;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+/* Django errors are often rendered as <ul><li>.. */
+.field-error ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.field-error li {
+  list-style: disc;
+}
+
+/* BUTTON */
+.btn-register {
+  background:linear-gradient(90deg,#003d82,#00a7e1);
+  border:none;
+  padding:12px;
+  border-radius:30px;
+  font-weight:600;
+  transition:0.3s;
+  color:white;
+}
+
+.btn-register:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(0,167,225,0.6);
+}
+</style>
+
+{% endblock %}

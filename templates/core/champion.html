@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}🏆 CHAMPION - GCL 2026 {% endblock %}
+
+{% block content %}
+<section class="champion-section">
+    <div class="container text-center">
+        
+        <!-- EFFET DE LUMIÈRE DERRIÈRE -->
+        <div class="glory-glow"></div>
+
+        <div class="champion-content ucl-reveal">
+            <div class="trophy-container">
+                <i class="fas fa-trophy trophy-icon"></i>
+            </div>
+
+            <h2 class="congrats-text">FÉLICITATIONS AU CHAMPION !</h2>
+            
+            <div class="champion-card">
+                <h1 class="champion-name">{{ champion.team_name }}</h1>
+                <div class="champion-sub">{{ champion.player_name }}</div>
+                <div class="champion-abbr">Saison GCL 2026</div>
+            </div>
+
+            <div class="final-score-recap">
+                Victoire en finale contre 
+                <strong>
+                    {% if final_match.home_team == champion %}
+                        {{ final_match.away_team.team_name }}
+                    {% else %}
+                        {{ final_match.home_team.team_name }}
+                    {% endif %}
+                </strong>
+                ({{ final_match.home_score }} - {{ final_match.away_score }})
+            </div>
+
+            <div class="mt-5">
+                <a href="{% url 'home' %}" class="btn btn-ucl-gold btn-lg px-5 rounded-pill">
+                    <i class="fas fa-house me-2"></i>Retour à l'accueil
+                </a>
+                <br>
+                <button onclick="shareWin()" class="btn btn-outline-success mt-3 rounded-pill">
+                    <i class="fab fa-whatsapp me-2"></i>Partager la victoire
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SCRIPTS : Confettis et Partage -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    window.onload = function() {
+        // Explosion de confettis dorés
+        var duration = 5 * 1000;
+        var end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#e6c200', '#ffffff', '#00a7e1']
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#e6c200', '#ffffff', '#00a7e1']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    };
+
+    function shareWin() {
+        const text = "🏆 INCROYABLE ! {{ champion.team_name }} vient de remporter la GOMA CHAMPIONS LEAGUE 2026 ! 🥇🔥\nDécouvrez le tableau final ici : " + window.location.origin + "/bracket/";
+        window.open("https://wa.me/?text=" + encodeURIComponent(text));
+    }
+</script>
+
+<style>
+.champion-section {
+    background: radial-gradient(circle at center, #0f1a2d 0%, #070b14 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 100px 0;
+}
+
+.glory-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+    background: #e6c200;
+    filter: blur(120px);
+    opacity: 0.3;
+    z-index: 0;
+}
+
+.champion-content {
+    position: relative;
+    z-index: 1;
+}
+
+.trophy-icon {
+    font-size: 8rem;
+    color: #e6c200;
+    filter: drop-shadow(0 0 20px rgba(230, 194, 0, 0.6));
+    margin-bottom: 20px;
+    animation: pulseTrophy 2s infinite;
+}
+
+@keyframes pulseTrophy {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.congrats-text {
+    color: #fff;
+    letter-spacing: 5px;
+    font-weight: 300;
+    margin-bottom: 30px;
+}
+
+.champion-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #e6c200;
+    padding: 40px;
+    border-radius: 30px;
+    display: inline-block;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.champion-name {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    margin: 0;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.champion-sub {
+    font-size: 1.5rem;
+    color: #e6c200;
+    font-weight: 600;
+}
+
+.champion-abbr {
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-top: 10px;
+}
+
+.final-score-recap {
+    margin-top: 30px;
+    color: #fff;
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .champion-name { font-size: 2.5rem; }
+    .trophy-icon { font-size: 5rem; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}À propos - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1 class="section-title text-center mb-5">
+            <i class="fas fa-info-circle me-2"></i>
+            À PROPOS
+        </h1>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>🏆 Goma Champions League 2026</h3>
+                <p>
+                    Compétition de eFootball 2026 (mobile) organisée à Goma, RDC.
+                    Format inspiré de la UEFA Champions League.
+                </p>
+            </div>
+        </div>
+        
+        <h3 class="text-center mb-4">👥 LES ORGANISATEURS</h3>
+        <div class="row g-4">
+            {% for organizer in organizers %}
+            <div class="col-md-6">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user-circle fa-3x text-primary mb-3"></i>
+                        <h5>{{ organizer.name }}</h5>
+                        <p class="text-muted">{{ organizer.role }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

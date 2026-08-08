@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Connexion - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5 login-pro">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-5">
+
+        <div class="login-card-pro">
+
+          <!-- HEADER -->
+          <div class="login-card-pro__header text-center">
+            <img src="{% static 'images/logo.png' %}" alt="GCL" class="login-card-pro__logo">
+            <h2 class="mb-1 fw-black" style="letter-spacing:.6px;">Connexion</h2>
+            <p class="mb-0 text-light" style="opacity:.82;">
+              Accès joueurs & administration
+            </p>
+          </div>
+
+          <!-- BODY -->
+          <div class="login-card-pro__body">
+
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-3">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="post" class="needs-validation" novalidate>
+              {% csrf_token %}
+
+              {# conserver next si tu le passes depuis la vue user_login #}
+              {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+              {% endif %}
+
+              <!-- USERNAME -->
+              <div class="mb-3">
+                <label for="username" class="form-label text-light fw-semibold">
+                  <i class="fas fa-user me-2"></i>Nom d'utilisateur
+                </label>
+
+                <div class="input-group">
+                  <span class="input-group-text input-dark">
+                    <i class="fas fa-at"></i>
+                  </span>
+                  <input type="text"
+                         name="username"
+                         id="username"
+                         class="form-control input-dark"
+                         placeholder="ex: fck"
+                         autocomplete="username"
+                         required
+                         autofocus>
+                </div>
+
+                <small class="text-light d-block mt-2" style="opacity:.72;">
+                  Astuce : c’est souvent l’abréviation de l’équipe (ex: <strong>fck</strong>).
+                </small>
+              </div>
+
+              <!-- PASSWORD -->
+              <div class="mb-2">
+                <label for="password" class="form-label text-light fw-semibold">
+                  <i class="fas fa-key me-2"></i>Mot de passe
+                </label>
+
+                <div class="input-group">
+                  <span class="input-group-text input-dark">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                  <input type="password"
+                         name="password"
+                         id="password"
+                         class="form-control input-dark"
+                         placeholder="••••••••"
+                         autocomplete="current-password"
+                         required>
+                  <button type="button" class="btn btn-outline-light btn-eye" id="togglePwd" aria-label="Afficher/Masquer">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- LINKS ROW -->
+              <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+                <a href="{% url 'forgot_password' %}" class="login-link">
+                  Mot de passe oublié ?
+                </a>
+                <a href="{% url 'register_team' %}" class="login-link">
+                  S’inscrire
+                </a>
+              </div>
+
+              <!-- INFO -->
+              <div class="login-tip">
+                <i class="fas fa-circle-info me-2"></i>
+                En cas de problème, vérifie ton <strong>username</strong> (abréviation) et ton mot de passe.
+              </div>
+
+              <!-- SUBMIT -->
+              <div class="d-grid mt-3">
+                <button type="submit" class="btn btn-ucl-gold btn-lg">
+                  <i class="fas fa-right-to-bracket me-2"></i>Se connecter
+                </button>
+              </div>
+            </form>
+
+          </div>
+
+          <!-- FOOTER -->
+          <div class="login-card-pro__footer text-center">
+            <a href="{% url 'home' %}" class="text-light" style="opacity:.85;">
+              <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+/* Page bg */
+.login-pro{
+  background: radial-gradient(900px 500px at 50% 0%, rgba(0,167,225,.16), transparent 55%),
+              linear-gradient(135deg,#0b1423,#00142d);
+  min-height: calc(100vh - 70px);
+}
+
+/* Card */
+.login-card-pro{
+  background: rgba(17,28,47,.78);
+  border-radius: 18px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.38);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+/* Header */
+.login-card-pro__header{
+  background: linear-gradient(135deg, rgba(0,61,130,.95), rgba(0,167,225,.55));
+  padding: 28px 22px;
+  color: #fff;
+}
+.login-card-pro__logo{
+  height: 64px;
+  width: auto;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 12px 22px rgba(0,0,0,.25));
+}
+.fw-black{ font-weight: 900; }
+
+/* Body */
+.login-card-pro__body{
+  padding: 22px;
+}
+
+/* Footer */
+.login-card-pro__footer{
+  padding: 14px 18px;
+  background: rgba(0,0,0,.10);
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+/* Inputs */
+.input-dark{
+  background: rgba(15,26,44,.92) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: #fff !important;
+}
+.input-dark:focus{
+  border-color: rgba(0,167,225,.8) !important;
+  box-shadow: 0 0 0 .2rem rgba(0,167,225,.18) !important;
+}
+
+.input-group-text.input-dark{
+  background: rgba(15,26,44,.92);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.78);
+}
+
+/* eye button */
+.btn-eye{
+  border-radius: 0 12px 12px 0;
+}
+.btn-eye:focus{
+  box-shadow: 0 0 0 .2rem rgba(0,167,225,.18);
+}
+
+/* links */
+.login-link{
+  color: rgba(255,255,255,.82);
+  font-weight: 800;
+  text-decoration: none;
+  font-size: .95rem;
+}
+.login-link:hover{
+  color: #e6c200;
+}
+
+/* tip */
+.login-tip{
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.86);
+  padding: 10px 12px;
+  font-size: .95rem;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const btn = document.getElementById("togglePwd");
+  const input = document.getElementById("password");
+  if(!btn || !input) return;
+
+  btn.addEventListener("click", function(){
+    const isPwd = input.getAttribute("type") === "password";
+    input.setAttribute("type", isPwd ? "text" : "password");
+    btn.innerHTML = isPwd ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% load i18n %}
+
+{% with m=t.match %}
+<div class="tie">
+
+  <!-- HEADER : Label (R16) + Statut -->
+  <div class="tie__head">
+    <span class="tie__label">{{ label }}</span>
+
+    {% if m.is_played %}
+      <span class="tie__status {% if t.is_forfeit %}is-danger{% else %}is-success{% endif %}">
+        {% if t.is_forfeit %}FORF.{% else %}FT{% endif %}
+      </span>
+    {% else %}
+      <span class="tie__date">
+        {{ m.scheduled_date|date:"d/m" }}
+      </span>
+    {% endif %}
+  </div>
+
+  <!-- EQUIPES (Abréviations) -->
+  <div class="tie__teams">
+    <!-- Equipe A -->
+    <div class="tie__row {% if t.winner_id == t.team_a.id %}is-win{% endif %}">
+      {% if t.team_a %}
+        <span class="tie__name" title="{{ t.team_a.team_name }}">
+          {{ t.team_a.abbreviation|default:t.team_a.team_name|upper }}
+        </span>
+      {% else %}
+        <span class="tie__name tie__name--tbd">TBD</span>
+      {% endif %}
+      
+      {% if t.agg_a is not None %}
+        <span class="tie__score">{{ t.agg_a }}</span>
+      {% endif %}
+    </div>
+
+    <!-- Equipe B -->
+    <div class="tie__row {% if t.winner_id == t.team_b.id %}is-win{% endif %}">
+      {% if t.team_b %}
+        <span class="tie__name" title="{{ t.team_b.team_name }}">
+          {{ t.team_b.abbreviation|default:t.team_b.team_name|upper }}
+        </span>
+      {% else %}
+        <span class="tie__name tie__name--tbd">TBD</span>
+      {% endif %}
+
+      {% if t.agg_b is not None %}
+        <span class="tie__score">{{ t.agg_b }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- DETAILS SCORES (Petit) -->
+  <div class="tie__meta">
+    {% if t.leg1_a is not None %}
+      <div class="tie__detail">
+        <span>Aller:</span> <span>{{ t.leg1_a }}-{{ t.leg1_b }}</span>
+      </div>
+    {% endif %}
+    
+    {% if t.leg2_a is not None %}
+      <div class="tie__detail">
+        <span>Retour:</span> <span>{{ t.leg2_a }}-{{ t.leg2_b }}</span>
+      </div>
+    {% endif %}
+
+    {% if t.pen_a is not None %}
+      <div class="tie__detail tie__detail--tab">
+        <span>TAB:</span> <span>{{ t.pen_a }}-{{ t.pen_b }}</span>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endwith %}
+
+<style>
+/* --- CARTE COMPACTE --- */
+.tie{
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  padding: 8px;
+  font-size: 0.9rem;
+}
+
+/* Header */
+.tie__head{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  padding-bottom: 4px;
+}
+.tie__label{
+  font-weight: 900;
+  color: #e6c200;
+  font-size: .7rem;
+  letter-spacing: 1px;
+}
+.tie__date{
+  font-size: .7rem;
+  color: rgba(255,255,255,.6);
+  font-weight: 700;
+}
+.tie__status{
+  font-size: .65rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+}
+.is-success{ background: rgba(40,167,69,.2); color: #4cd964; }
+.is-danger{ background: rgba(220,53,69,.2); color: #ff6b6b; }
+
+/* Teams */
+.tie__teams{
+  display:flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tie__row{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.tie__row.is-win{
+  background: rgba(230,194,0,.15);
+  box-shadow: inset 2px 0 0 #e6c200;
+}
+
+.tie__name{
+  font-weight: 800;
+  color: rgba(255,255,255,.9);
+  letter-spacing: .5px;
+}
+.tie__name--tbd{
+  color: rgba(255,255,255,.4);
+  font-style: italic;
+  font-weight: 500;
+}
+.tie__score{
+  font-weight: 900;
+  color: #fff;
+}
+
+/* Meta details */
+.tie__meta{
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,.05);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.tie__detail{
+  font-size: 0.68rem;
+  color: rgba(255,255,255,.6);
+  display: flex;
+  gap: 3px;
+}
+.tie__detail span:last-child{
+  color: rgba(255,255,255,.9);
+  font-weight: 700;
+}
+.tie__detail--tab{
+  color: #e6c200;
+}
+</style>

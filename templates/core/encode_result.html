@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Encoder le résultat - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="encode-card">
+
+          <div class="card-header text-center">
+            <h2 class="mb-0">
+              <i class="fas fa-edit me-2"></i>
+              {% if match.is_played %}MODIFIER LE RÉSULTAT{% else %}ENCODER LE RÉSULTAT{% endif %}
+            </h2>
+          </div>
+
+          <div class="card-body p-4">
+
+            <!-- Infos du match -->
+            <div class="match-info mb-4">
+              <div class="match-header">
+                <span class="badge bg-primary">{{ match.phase.get_name_display }}</span>
+                {% if match.phase.name == 'league' %}
+                  <span class="badge bg-warning text-dark ms-2">Journée {{ match.matchday }}</span>
+                {% endif %}
+                {% if match.match_leg != 'unique' %}
+                  <span class="badge bg-info ms-2">{{ match.get_match_leg_display }}</span>
+                {% endif %}
+                <span class="text-muted ms-2">{{ match.scheduled_date|date:"d/m/Y H:i" }}</span>
+              </div>
+
+              <div class="match-teams-display">
+                <div class="team-display">
+                  <div class="team-letter">{{ match.home_team.team_name|slice:":1"|upper }}</div>
+                  <div>
+                    <strong>{{ match.home_team.team_name }}</strong>
+                    <small>{{ match.home_team.abbreviation }}</small>
+                  </div>
+                </div>
+
+                <div class="vs-display">VS</div>
+
+                <div class="team-display justify-content-end text-end">
+                  <div>
+                    <strong>{{ match.away_team.team_name }}</strong>
+                    <small>{{ match.away_team.abbreviation }}</small>
+                  </div>
+                  <div class="team-letter team-letter-alt">{{ match.away_team.team_name|slice:":1"|upper }}</div>
+                </div>
+              </div>
+
+              {% if match.match_leg == 'retour' and match.first_leg and match.first_leg.is_played %}
+              <div class="alert alert-info mt-3">
+                <h6><i class="fas fa-info-circle me-2"></i>Score du match aller :</h6>
+                <p class="mb-0 fs-4">
+                  <strong>{{ match.first_leg.home_team.abbreviation }}</strong>
+                  {{ match.first_leg.home_score }} - {{ match.first_leg.away_score }}
+                  <strong>{{ match.first_leg.away_team.abbreviation }}</strong>
+                </p>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Formulaire (sans upload photo) -->
+            <form method="post" id="matchForm">
+              {% csrf_token %}
+
+              <h5 class="mb-3"><i class="fas fa-stopwatch me-2"></i>Score du temps réglementaire</h5>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.home_score.id_for_label }}" class="form-label">
+                    {{ form.home_score.label }} ({{ match.home_team.abbreviation }})
+                  </label>
+                  {{ form.home_score }}
+                  {% if form.home_score.errors %}<div class="text-danger small">{{ form.home_score.errors }}</div>{% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <label for="{{ form.away_score.id_for_label }}" class="form-label">
+                    {{ form.away_score.label }} ({{ match.away_team.abbreviation }})
+                  </label>
+                  {{ form.away_score }}
+                  {% if form.away_score.errors %}<div class="text-danger small">{{ form.away_score.errors }}</div>{% endif %}
+                </div>
+              </div>
+
+              {% if match.match_leg == 'retour' or match.phase.name == 'final' %}
+              <hr class="my-4">
+              <h5 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Prolongation (optionnel)</h5>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.home_extra_time.id_for_label }}" class="form-label">
+                    {{ form.home_extra_time.label }} ({{ match.home_team.abbreviation }})
+                  </label>
+                  {{ form.home_extra_time }}
+                  {% if form.home_extra_time.errors %}<div class="text-danger small">{{ form.home_extra_time.errors }}</div>{% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <label for="{{ form.away_extra_time.id_for_label }}" class="form-label">
+                    {{ form.away_extra_time.label }} ({{ match.away_team.abbreviation }})
+                  </label>
+                  {{ form.away_extra_time }}
+                  {% if form.away_extra_time.errors %}<div class="text-danger small">{{ form.away_extra_time.errors }}</div>{% endif %}
+                </div>
+              </div>
+
+              <hr class="my-4">
+              <h5 class="mb-3"><i class="fas fa-futbol me-2"></i>Tirs au but (optionnel)</h5>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="{{ form.home_penalties.id_for_label }}" class="form-label">
+                    {{ form.home_penalties.label }} ({{ match.home_team.abbreviation }})
+                  </label>
+                  {{ form.home_penalties }}
+                  {% if form.home_penalties.errors %}<div class="text-danger small">{{ form.home_penalties.errors }}</div>{% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <label for="{{ form.away_penalties.id_for_label }}" class="form-label">
+                    {{ form.away_penalties.label }} ({{ match.away_team.abbreviation }})
+                  </label>
+                  {{ form.away_penalties }}
+                  {% if form.away_penalties.errors %}<div class="text-danger small">{{ form.away_penalties.errors }}</div>{% endif %}
+                </div>
+              </div>
+              {% endif %}
+
+              <hr class="my-4">
+              <h5 class="mb-3"><i class="fas fa-flag me-2"></i>Forfait</h5>
+
+              <div class="mb-3">
+                <div class="form-check">
+                  {{ form.is_forfeit }}
+                  <label class="form-check-label" for="{{ form.is_forfeit.id_for_label }}">
+                    {{ form.is_forfeit.label }}
+                  </label>
+                </div>
+              </div>
+
+              <div class="mb-3" id="forfeit-team-field" style="display:none;">
+                <label for="{{ form.forfeit_team.id_for_label }}" class="form-label">
+                  {{ form.forfeit_team.label }}
+                </label>
+                {{ form.forfeit_team }}
+                {% if form.forfeit_team.errors %}<div class="text-danger small">{{ form.forfeit_team.errors }}</div>{% endif %}
+              </div>
+
+              <hr class="my-4">
+              <h5 class="mb-3"><i class="fas fa-note-sticky me-2"></i>Notes (optionnel)</h5>
+
+              <div class="mb-4">
+                {{ form.notes }}
+                {% if form.notes.errors %}<div class="text-danger small">{{ form.notes.errors }}</div>{% endif %}
+              </div>
+
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+              {% endif %}
+
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-success btn-lg">
+                  <i class="fas fa-save me-2"></i>ENREGISTRER
+                </button>
+
+                {% if match.is_played and user.is_staff %}
+                  <a href="{% url 'cancel_result' match.id %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash-can me-2"></i>Annuler le résultat
+                  </a>
+                {% endif %}
+
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                  <i class="fas fa-arrow-left me-2"></i>Retour au dashboard
+                </a>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.encode-card{
+  background: rgba(17,28,47,.78);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+.encode-card .card-header{
+  background: linear-gradient(135deg, rgba(0,61,130,.95), rgba(0,167,225,.55));
+  color: white;
+  padding: 2rem;
+}
+.match-info{
+  background: rgba(255,255,255,.05);
+  padding: 1.2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.match-header{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.match-teams-display{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap: 1rem;
+}
+.team-display{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+.team-letter{
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight: 1000;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  color:#0a0e17;
+}
+.team-letter-alt{
+  background: linear-gradient(135deg, rgba(0,167,225,.95), rgba(0,61,130,.85));
+  color:#fff;
+}
+.team-display strong{ display:block; font-size: 1.05rem; color: #fff; font-weight: 900; line-height: 1.1; }
+.team-display small{ display:block; color: rgba(255,255,255,.70); font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+
+.vs-display{
+  font-weight: 1000;
+  font-size: 1.2rem;
+  color: #e6c200;
+}
+
+@media (max-width: 768px){
+  .match-teams-display{ flex-direction: column; }
+  .team-display{ width: 100%; justify-content: center; }
+  .vs-display{ margin: 8px 0; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const forfeitCheckbox = document.querySelector('input[name="is_forfeit"]');
+  const forfeitTeamField = document.getElementById('forfeit-team-field');
+  const scoreFields = document.querySelectorAll('input[type="number"]');
+
+  function refreshForfeitUI(){
+    if (!forfeitCheckbox) return;
+    if (forfeitCheckbox.checked) {
+      forfeitTeamField.style.display = 'block';
+      scoreFields.forEach(field => { field.disabled = true; field.value = ''; });
+    } else {
+      forfeitTeamField.style.display = 'none';
+      scoreFields.forEach(field => { field.disabled = false; });
+    }
+  }
+
+  if (forfeitCheckbox) {
+    forfeitCheckbox.addEventListener('change', refreshForfeitUI);
+    refreshForfeitUI();
+  }
+});
+</script>
+{% endblock %}

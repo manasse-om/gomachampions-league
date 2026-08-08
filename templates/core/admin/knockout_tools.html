@@ -1,0 +1,59 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="admin-card">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h3 class="mb-1">Outils — Phase Finale (Bracket UCL)</h3>
+      <div class="text-light" style="opacity:.75;">
+        Génération du tableau complet + synchronisation des <strong>TBD</strong> après les matchs retour.
+      </div>
+    </div>
+
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-light">← Dashboard</a>
+  </div>
+
+  <hr class="border-secondary my-4">
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="p-3 rounded" style="background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);">
+        <h5 class="mb-2"><i class="fas fa-sitemap me-2 text-warning"></i>Générer le bracket complet</h5>
+        <div class="text-light" style="opacity:.75;">
+          Crée : <strong>Barrages</strong> (aller/retour) + <strong>8e</strong> + <strong>Quarts</strong> + <strong>Demi</strong> + <strong>Finale</strong>.
+        </div>
+
+        <a href="{% url 'generate_ucl_bracket_view' %}" class="btn btn-ucl-gold mt-3 w-100">
+          Générer bracket UCL
+        </a>
+        <a href="{% url 'set_playoff_dates_view' %}" class="btn btn-outline-light w-100 mt-2">
+          Fixer dates des barrages
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="p-3 rounded" style="background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);">
+        <h5 class="mb-2"><i class="fas fa-rotate me-2 text-info"></i>Synchroniser le bracket</h5>
+        <div class="text-light" style="opacity:.75;">
+          À utiliser après avoir encodé des matchs retour : remplace les <strong>TBD</strong> par les <strong>vainqueurs</strong>.
+        </div>
+
+        <form method="post" action="{% url 'sync_knockout_bracket_view' %}" class="mt-3">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-info w-100">
+            Synchroniser maintenant
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warning mt-4">
+    <strong>Conseil :</strong> encode toujours les matchs <strong>retour</strong> des barrages/8e/quarts/demis, puis clique sur
+    <strong>Synchroniser</strong>.
+  </div>
+
+</div>
+{% endblock %}

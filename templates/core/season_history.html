@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Historique des saisons - Goma Champions League{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #0a0e17, #0f1a2d); min-height: 100vh;">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <h1 style="color:#e6c200; font-weight:900; letter-spacing:1px;">
+        <i class="fas fa-history me-2"></i>Historique des Saisons
+      </h1>
+      <p style="color:rgba(255,255,255,.72);">Revivez toutes les éditions de la Goma Champions League</p>
+    </div>
+
+    {% if seasons_data %}
+      <div class="row g-4">
+        {% for item in seasons_data %}
+          <div class="col-md-6 col-lg-4">
+            <div class="season-card">
+
+              <!-- CHAMPION BADGE -->
+              {% if item.champion %}
+                <div class="champion-badge">
+                  <i class="fas fa-trophy me-2"></i>
+                  {{ item.champion.team_name }}
+                </div>
+              {% else %}
+                <div class="champion-badge no-champ">
+                  <i class="fas fa-hourglass me-2"></i>
+                  Pas encore de champion
+                </div>
+              {% endif %}
+
+              <!-- INFOS SAISON -->
+              <h4 class="season-name">{{ item.season.name }}</h4>
+              <p class="season-date">
+                <i class="far fa-calendar me-2"></i>
+                {{ item.season.start_date|date:"d/m/Y" }}
+                {% if item.season.end_date %}
+                  → {{ item.season.end_date|date:"d/m/Y" }}
+                {% endif %}
+              </p>
+
+              <!-- STATS RAPIDES -->
+              <div class="season-stats">
+                <div class="stat-item">
+                  <div class="stat-number">{{ item.total_teams }}</div>
+                  <div class="stat-label">Équipes</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">{{ item.total_matches }}</div>
+                  <div class="stat-label">Matchs joués</div>
+                </div>
+              </div>
+
+              <!-- BOUTON VOIR DÉTAILS -->
+              <a href="{% url 'season_detail' item.season.pk %}" class="btn-season-detail">
+                <i class="fas fa-eye me-2"></i>Voir les détails
+              </a>
+
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-archive fa-4x mb-3" style="color:rgba(255,255,255,.3);"></i>
+        <p style="color:rgba(255,255,255,.6); font-size:1.1rem;">
+          Aucune saison passée pour le moment.<br>
+          L'historique s'enrichira après la première édition !
+        </p>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+.season-card {
+  background: rgba(17,28,47,.72);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  transition: transform .25s ease, border-color .25s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.season-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(230,194,0,.35);
+}
+.champion-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  color: #0a0e17;
+  font-weight: 900;
+  font-size: .88rem;
+}
+.no-champ {
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.72);
+}
+.season-name {
+  color: #fff;
+  font-weight: 900;
+  margin: 0;
+}
+.season-date {
+  color: rgba(255,255,255,.65);
+  font-weight: 700;
+  margin: 0;
+  font-size: .9rem;
+}
+.season-stats {
+  display: flex;
+  gap: 20px;
+}
+.stat-item { text-align: center; }
+.stat-number {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #e6c200;
+  line-height: 1;
+}
+.stat-label {
+  font-size: .78rem;
+  color: rgba(255,255,255,.65);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.btn-season-detail {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  border-radius: 999px;
+  background: rgba(230,194,0,.12);
+  border: 1px solid rgba(230,194,0,.35);
+  color: #e6c200;
+  font-weight: 900;
+  text-decoration: none;
+  margin-top: auto;
+  transition: background .2s ease;
+}
+.btn-season-detail:hover {
+  background: rgba(230,194,0,.22);
+  color: #ffed4e;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Équipes - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5 calendar-pro">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="text-center mb-4">
+      <h1 class="display-6 fw-bold text-white mb-1" style="letter-spacing:.6px;">
+        Toutes les équipes
+      </h1>
+      <p class="text-gold mb-0">
+        {{ teams|length }} / 36 équipes validées
+      </p>
+    </div>
+
+    <!-- BARRE DE RECHERCHE -->
+    <div class="mb-3">
+      <div class="input-group">
+        <span class="input-group-text input-dark">
+          <i class="fas fa-search"></i>
+        </span>
+        <input
+          type="search"
+          id="searchTeams"
+          class="form-control input-dark"
+          placeholder="Rechercher équipe / joueur / abréviation..."
+          autocomplete="off">
+      </div>
+      <div class="text-end mt-1">
+        <small class="text-light" style="opacity:.7;">
+          <span id="teamsVisible">{{ teams|length }}</span> / {{ teams|length }} équipes affichées
+        </small>
+      </div>
+    </div>
+
+
+    <!-- TABLEAU -->
+    <div class="ucl-tablewrap">
+      <div class="table-responsive">
+        <table class="table ucl-table" id="teamsTable">
+          <thead>
+            <tr>
+              <th style="width:60px;">#</th>
+              <th>Équipe</th>
+              <th>Abréviation</th>
+              <th>Joueur</th>
+              <th class="text-center">Points</th>
+              <th class="text-center">Statut</th>
+              <th class="text-center">Contact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in teams %}
+            <tr class="team-row">
+              <td class="ucl-pos">{{ forloop.counter }}</td>
+
+              <td>
+                <div class="team-row">
+                  <div class="team-logo">
+                    {{ team.team_name|slice:":1"|upper }}
+                  </div>
+                  <div class="team-meta">
+                    <div class="team-name">{{ team.team_name }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="ucl-pill">{{ team.abbreviation }}</span>
+              </td>
+
+              <td>{{ team.player_name }}</td>
+
+              <td class="text-center ucl-pts">{{ team.points }}</td>
+
+              <td class="text-center">
+                {% if team.payment_validated %}
+                  <span class="badge bg-success">✅ Validé</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">En attente</span>
+                {% endif %}
+              </td>
+
+              <td class="text-center">
+                <a class="wa-dot" href="https://wa.me/{{ team.whatsapp|cut:'+' }}" target="_blank" title="Contacter sur WhatsApp">
+                  <i class="fab fa-whatsapp"></i>
+                </a>
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+.calendar-pro{
+  background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 100%);
+  min-height: 100vh;
+  color:#eee;
+}
+.text-gold{ color:#e6c200 !important; }
+
+#searchTeams{
+  font-size: 1rem;
+}
+
+.team-row:hover{
+  background: rgba(230,194,0,.06);
+}
+
+.wa-dot{
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border: 1px solid rgba(37,211,102,.35);
+  background: rgba(37,211,102,.10);
+  color: rgba(255,255,255,.92);
+  font-weight: 900;
+}
+.wa-dot:hover{
+  background: rgba(37,211,102,.18);
+  color:#fff;
+}
+
+.team-logo{
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 1000;
+  font-size: .95rem;
+  color: #0a0e17;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  flex: 0 0 auto;
+}
+
+@media (max-width: 768px){
+  .team-logo{ width:28px; height:28px; }
+}
+
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  const searchInput = document.getElementById("searchTeams");
+  const rows = document.querySelectorAll(".team-row");
+  const counter = document.getElementById("teamsVisible");
+
+  searchInput.addEventListener("input", function(){
+    const query = this.value.toLowerCase().trim();
+    let visible = 0;
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+
+      if(text.includes(query)){
+        row.style.display = "";
+        visible +=1;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    counter.textContent = visible;
+  });
+
+});
+</script>
+
+{% endblock %}

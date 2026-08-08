@@ -1,0 +1,99 @@
+{% load i18n %}
+
+{% if final_match %}
+  <div class="bk-final">
+    <div class="bk-final__teams">
+      <div class="bk-final__team">
+        {% if final_match.home_team.abbreviation == 'TBD' %}
+          <span style="opacity:.5;">À déterminer</span>
+        {% else %}
+          {{ final_match.home_team.team_name }}
+        {% endif %}
+      </div>
+      <div class="bk-final__score">
+        {% if final_match.is_played %}
+          {{ final_match.home_score }} - {{ final_match.away_score }}
+          {% if final_match.winner %}
+            <div style="margin-top:8px; font-size:.78rem; color:#47d18c;">
+              🏆 {{ final_match.winner.team_name }}
+            </div>
+          {% endif %}
+        {% else %}
+          VS
+        {% endif %}
+      </div>
+      <div class="bk-final__team text-end">
+        {% if final_match.away_team.abbreviation == 'TBD' %}
+          <span style="opacity:.5;">À déterminer</span>
+        {% else %}
+          {{ final_match.away_team.team_name }}
+        {% endif %}
+      </div>
+    </div>
+    <div class="bk-final__meta">
+      {% language 'fr' %}
+        <i class="far fa-calendar me-1"></i>{{ final_match.scheduled_date|date:"d/m/Y" }}
+      {% endlanguage %}
+      {% if final_match.is_played %}
+        <span class="bk-badge bk-badge--success">Terminé</span>
+      {% else %}
+        <span class="bk-badge">Match unique</span>
+      {% endif %}
+    </div>
+  </div>
+{% else %}
+  <div class="bk-muted">Finale non encore générée.</div>
+{% endif %}
+
+<style>
+.bk-final {
+  border-radius: 16px;
+  border: 1px solid rgba(230,194,0,.28);
+  background: rgba(255,255,255,.04);
+  padding: 12px;
+}
+.bk-final__teams {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  gap: 10px;
+  align-items: center;
+}
+.bk-final__team {
+  font-weight: 950;
+  word-break: break-word;
+  line-height: 1.15;
+  color: rgba(255,255,255,.90);
+}
+.bk-final__score {
+  font-weight: 1000;
+  color: #e6c200;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 1.1rem;
+}
+.bk-final__meta {
+  margin-top: 10px;
+  text-align: center;
+  color: rgba(255,255,255,.72);
+  font-weight: 800;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.bk-badge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: .68rem;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.80);
+}
+.bk-badge--success {
+  background: rgba(40,167,69,.15);
+  border-color: rgba(40,167,69,.30);
+  color: #47d18c;
+}
+</style>

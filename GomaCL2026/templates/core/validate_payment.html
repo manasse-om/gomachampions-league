@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Valider le paiement - Dashboard Admin{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h3 class="mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            VALIDATION DU PAIEMENT
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Informations du joueur -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-user me-2"></i>Informations du joueur</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>Nom complet</th>
+                                        <td>{{ team.player_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>WhatsApp</th>
+                                        <td>
+                                            <a href="https://wa.me/{{ team.whatsapp }}" target="_blank" class="btn btn-sm btn-success">
+                                                <i class="fab fa-whatsapp me-1"></i>{{ team.whatsapp }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date d'inscription</th>
+                                        <td>{{ team.created_at|date:"d/m/Y à H:i" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-shield-alt me-2"></i>Informations de l'équipe</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>Nom de l'équipe</th>
+                                        <td>{{ team.team_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Abréviation</th>
+                                        <td><strong>{{ team.abbreviation }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Username</th>
+                                        <td><code>{{ team.abbreviation|lower }}</code></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Logo de l'équipe -->
+                        {% if team.logo %}
+                        <div class="mb-4">
+                            <h5><i class="fas fa-image me-2"></i>Logo de l'équipe</h5>
+                            <img src="{{ team.logo.url }}" alt="Logo" class="img-fluid rounded border" style="max-height: 150px;">
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Preuve de paiement -->
+                        <div class="mb-4">
+                            <h5><i class="fas fa-receipt me-2"></i>Preuve de paiement</h5>
+                            {% if team.payment_proof %}
+                            <div class="text-center">
+                                <a href="{{ team.payment_proof.url }}" target="_blank">
+                                    <img src="{{ team.payment_proof.url }}" alt="Preuve de paiement" class="img-fluid rounded border" style="max-height: 500px; cursor: zoom-in;">
+                                </a>
+                                <p class="text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Cliquez sur l'image pour l'agrandir
+                                </p>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Aucune preuve de paiement uploadée !
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Décision -->
+                        <hr class="my-4">
+                        
+                        <h4 class="mb-3">
+                            <i class="fas fa-gavel me-2"></i>
+                            DÉCISION
+                        </h4>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-lg w-100"
+                                            onclick="return confirm('✅ Confirmer la validation du paiement pour {{ team.player_name }} ?\n\nCette action :\n• Activera le compte\n• Permettra au joueur de se connecter\n• L\'ajoutera à la compétition')">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        ✅ APPROUVER LE PAIEMENT
+                                    </button>
+                                    <small class="text-muted d-block mt-2">
+                                        Le joueur pourra se connecter avec :<br>
+                                        Username : <code>{{ team.abbreviation|lower }}</code>
+                                    </small>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-lg w-100"
+                                            onclick="return confirm('❌ ATTENTION : Refuser le paiement ?\n\nCette action :\n• Supprimera l\'inscription\n• Supprimera le compte utilisateur\n• Est IRRÉVERSIBLE\n\nÊtes-vous sûr ?')">
+                                        <i class="fas fa-times-circle me-2"></i>
+                                        ❌ REFUSER LE PAIEMENT
+                                    </button>
+                                    <small class="text-muted d-block mt-2">
+                                        L'inscription et le compte seront supprimés définitivement.
+                                    </small>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="alert alert-info mt-4">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Conseils :</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Vérifiez que le montant est bien <strong>1 000 CDF</strong></li>
+                                <li>Vérifiez que le destinataire est <strong>+243992848365</strong></li>
+                                <li>Vérifiez la date et l'heure du paiement</li>
+                                <li>En cas de doute, contactez le joueur sur WhatsApp</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <a href="{% url 'pending_payments' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Retour à la liste
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

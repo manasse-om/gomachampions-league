@@ -1,0 +1,340 @@
+{% load static %}
+{% load roles %}
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm ucl-nav">
+  <div class="container-fluid px-3 px-lg-4">
+
+    <!-- BRAND -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}">
+      <img src="{% static 'images/logo.png' %}" alt="Goma CL" class="ucl-logo">
+      <div class="d-none d-md-flex align-items-baseline gap-2">
+        <span class="ucl-brand-title">GOMA CHAMPIONS LEAGUE</span>
+        <span class="ucl-brand-year">2026</span>
+      </div>
+      <span class="d-md-none ucl-brand-short">GCL 2026</span>
+    </a>
+
+    <!-- TOGGLER -->
+    <button class="navbar-toggler border-0 ucl-toggler"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#mobileMenu"
+            aria-controls="mobileMenu"
+            aria-label="Ouvrir le menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- DESKTOP MENU -->
+    <div class="collapse navbar-collapse" id="desktopMenu">
+      <ul class="navbar-nav ms-auto align-items-center ucl-nav-links">
+
+        <li class="nav-item"><a class="nav-link ucl-link" href="{% url 'home' %}">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link ucl-link" href="{% url 'teams_list' %}">Équipes</a></li>
+        <li class="nav-item"><a class="nav-link ucl-link" href="{% url 'standings' %}">Classement</a></li>
+        <li class="nav-item"><a class="nav-link ucl-link" href="{% url 'fixtures' %}">Calendrier</a></li>
+        <li class="nav-item"><a class="nav-link ucl-link" href="{% url 'results' %}">Résultats</a></li>
+        <li class="nav-item"><a class="nav-link ucl-link" href="{% url 'bracket' %}">Phase finale</a></li>
+        <li class="nav-item"><a class="nav-link ucl-link" href="{% url 'rules' %}">Règlement</a></li>
+
+        <li class="nav-item ms-lg-2 ucl-sep d-none d-lg-block"></li>
+
+        <!-- AUTH ACTIONS (DESKTOP) -->
+        {% if user.is_authenticated %}
+
+          {% if user|has_role:"superadmin,organisateur,paiement,match" %}
+            <li class="nav-item dropdown ms-lg-2">
+              <a class="btn ucl-btn ucl-btn-gold dropdown-toggle"
+                 data-bs-toggle="dropdown"
+                 role="button"
+                 aria-expanded="false">
+                ADMIN
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow ucl-dropdown">
+                <li>
+                  <span class="dropdown-item-text text-light" style="opacity:.85;">
+                    {{ user.username }} —
+                    {% if user.userprofile %}{{ user.userprofile.get_role_display }}{% endif %}
+                  </span>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+
+                <li><a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a></li>
+
+                {% if user.team %}
+                  <li><a class="dropdown-item" href="{% url 'my_matches' %}">Mes matchs</a></li>
+                  <li><a class="dropdown-item" href="{% url 'edit_my_team' %}">Mon équipe</a></li>
+                {% endif %}
+
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Déconnexion</a></li>
+              </ul>
+            </li>
+
+          {% elif user.team %}
+            <li class="nav-item dropdown ms-lg-2">
+              <a class="btn ucl-btn ucl-btn-gold dropdown-toggle"
+                 data-bs-toggle="dropdown"
+                 role="button"
+                 aria-expanded="false">
+                {{ user.team.abbreviation|upper }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow ucl-dropdown">
+                <li><a class="dropdown-item" href="{% url 'my_matches' %}">Mes matchs</a></li>
+                <li><a class="dropdown-item" href="{% url 'edit_my_team' %}">Mon équipe</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Déconnexion</a></li>
+              </ul>
+            </li>
+
+          {% else %}
+            <li class="nav-item dropdown ms-lg-2">
+              <a class="btn ucl-btn ucl-btn-outline dropdown-toggle"
+                 data-bs-toggle="dropdown"
+                 role="button"
+                 aria-expanded="false">
+                {{ user.username }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow ucl-dropdown">
+                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Déconnexion</a></li>
+              </ul>
+            </li>
+          {% endif %}
+
+        {% else %}
+          <li class="nav-item ms-lg-2">
+            <a href="{% url 'register_team' %}" class="btn ucl-btn ucl-btn-outline">Inscription</a>
+          </li>
+          <li class="nav-item ms-2">
+            <a href="{% url 'login' %}" class="btn ucl-btn ucl-btn-gold">Connexion</a>
+          </li>
+        {% endif %}
+
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
+<!-- MOBILE OFFCANVAS -->
+<div class="offcanvas offcanvas-end text-bg-dark ucl-offcanvas" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+  <div class="offcanvas-header ucl-offcanvas-header">
+    <div class="d-flex align-items-center gap-2">
+      <img src="{% static 'images/logo.png' %}" alt="Goma CL" class="ucl-logo-sm">
+      <div>
+        <div class="ucl-offcanvas-title" id="mobileMenuLabel">Menu</div>
+        <div class="ucl-offcanvas-subtitle">Goma Champions League 2026</div>
+      </div>
+    </div>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+  </div>
+
+  <div class="offcanvas-body pt-3">
+    <ul class="navbar-nav ucl-mobile-links">
+      <li class="nav-item"><a class="nav-link ucl-mobile-link" href="{% url 'home' %}">Accueil</a></li>
+      <li class="nav-item"><a class="nav-link ucl-mobile-link" href="{% url 'teams_list' %}">Équipes</a></li>
+      <li class="nav-item"><a class="nav-link ucl-mobile-link" href="{% url 'standings' %}">Classement</a></li>
+      <li class="nav-item"><a class="nav-link ucl-mobile-link" href="{% url 'fixtures' %}">Calendrier</a></li>
+      <li class="nav-item"><a class="nav-link ucl-mobile-link" href="{% url 'results' %}">Résultats</a></li>
+      <li class="nav-item"><a class="nav-link ucl-mobile-link" href="{% url 'bracket' %}">Phase finale</a></li>
+      <li class="nav-item"><a class="nav-link ucl-mobile-link" href="{% url 'rules' %}">Règlement</a></li>
+
+      <hr class="border-secondary my-3">
+
+      {% if user.is_authenticated %}
+
+        {% if user|has_role:"superadmin,organisateur,paiement,match" %}
+          <div class="ucl-mobile-card">
+            <div class="ucl-mobile-chip">ADMIN</div>
+            <div class="text-light mt-2" style="opacity:.8;">
+              {{ user.username }} — {% if user.userprofile %}{{ user.userprofile.get_role_display }}{% endif %}
+            </div>
+
+            <div class="d-grid gap-2 mt-3">
+              <a href="{% url 'dashboard' %}" class="btn ucl-btn ucl-btn-gold">Dashboard</a>
+
+              {% if user.team %}
+                <a href="{% url 'my_matches' %}" class="btn ucl-btn ucl-btn-outline">Mes matchs</a>
+                <a href="{% url 'edit_my_team' %}" class="btn ucl-btn ucl-btn-outline">Mon équipe</a>
+              {% endif %}
+
+              <a href="{% url 'logout' %}" class="btn ucl-btn ucl-btn-danger">Déconnexion</a>
+            </div>
+          </div>
+
+        {% elif user.team %}
+          <div class="ucl-mobile-card">
+            <div class="ucl-mobile-chip">{{ user.team.abbreviation|upper }}</div>
+            <div class="d-grid gap-2 mt-3">
+              <a href="{% url 'my_matches' %}" class="btn ucl-btn ucl-btn-outline">Mes matchs</a>
+              <a href="{% url 'edit_my_team' %}" class="btn ucl-btn ucl-btn-outline">Mon équipe</a>
+              <a href="{% url 'logout' %}" class="btn ucl-btn ucl-btn-danger">Déconnexion</a>
+            </div>
+          </div>
+
+        {% else %}
+          <div class="d-grid gap-2">
+            <a href="{% url 'logout' %}" class="btn ucl-btn ucl-btn-danger">Déconnexion</a>
+          </div>
+        {% endif %}
+
+      {% else %}
+        <div class="d-grid gap-2">
+          <a href="{% url 'register_team' %}" class="btn ucl-btn ucl-btn-gold">Inscription</a>
+          <a href="{% url 'login' %}" class="btn ucl-btn ucl-btn-outline">Connexion</a>
+        </div>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<style>
+/* === UCL NAV THEME === */
+.ucl-nav{
+  background: rgba(0, 18, 51, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(230, 194, 0, 0.25);
+  min-height: 56px;
+}
+.ucl-logo{ height: 34px; width:auto; }
+.ucl-logo-sm{ height: 30px; width:auto; }
+
+.ucl-brand-title{
+  color:#e6c200;
+  font-weight:900;
+  letter-spacing:1px;
+  font-size: 0.95rem;
+  line-height:1;
+}
+.ucl-brand-year{
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 3px;
+  font-size: 0.70rem;
+}
+.ucl-brand-short{
+  color:#e6c200;
+  font-weight:900;
+  letter-spacing:1px;
+  font-size: 0.92rem;
+}
+
+/* Desktop links */
+.ucl-nav-links{ gap: 2px; }
+.ucl-link{
+  color: rgba(255,255,255,0.88) !important;
+  font-weight: 650;
+  font-size: 0.90rem;
+  padding: 7px 8px !important;
+  position: relative;
+  transition: color .18s ease, transform .18s ease;
+}
+.ucl-link:hover{
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+.ucl-link::after{
+  content:"";
+  position:absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 4px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e6c200, transparent);
+  transform: scaleX(0);
+  transition: transform .18s ease;
+  opacity: .9;
+}
+.ucl-link:hover::after{ transform: scaleX(1); }
+
+/* Separator */
+.ucl-sep{
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.18);
+  margin: 0 6px;
+}
+
+/* Buttons */
+.ucl-btn{
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  font-size: 0.84rem;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.ucl-btn-gold{
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  border: none;
+  color:#0a0e17;
+  box-shadow: 0 10px 22px rgba(230,194,0,0.18);
+}
+.ucl-btn-gold:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(230,194,0,0.26);
+  color:#0a0e17;
+}
+.ucl-btn-outline{
+  background: transparent;
+  border: 1.8px solid rgba(230,194,0,0.9);
+  color: #e6c200;
+}
+.ucl-btn-outline:hover{
+  background: rgba(230,194,0,0.10);
+  transform: translateY(-1px);
+}
+.ucl-btn-danger{
+  background: rgba(220,53,69,0.12);
+  border: 1px solid rgba(220,53,69,0.55);
+  color: #ffb3bb;
+}
+
+/* Dropdown */
+.ucl-dropdown{
+  background: #0b1423;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.ucl-dropdown .dropdown-item{ color: rgba(255,255,255,0.88); font-size: 0.92rem; }
+.ucl-dropdown .dropdown-item:hover{ background: rgba(230,194,0,0.10); color: #fff; }
+.ucl-dropdown .dropdown-divider{ border-color: rgba(255,255,255,0.12); }
+
+/* Offcanvas */
+.ucl-offcanvas{
+  width: 310px;
+  background: #0a0e17 !important;
+  border-left: 1px solid rgba(230,194,0,0.25);
+}
+.ucl-offcanvas-header{ border-bottom: 1px solid rgba(230,194,0,0.18); }
+.ucl-offcanvas-title{ font-weight: 900; color:#e6c200; letter-spacing: 1px; }
+.ucl-offcanvas-subtitle{ color: rgba(255,255,255,0.70); font-size: 0.82rem; }
+
+.ucl-mobile-link{
+  color: rgba(255,255,255,0.90) !important;
+  padding: 10px 8px;
+  font-weight: 800;
+  font-size: 0.98rem;
+  border-radius: 12px;
+}
+.ucl-mobile-link:hover{ background: rgba(255,255,255,0.06); }
+
+.ucl-mobile-card{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 14px;
+}
+.ucl-mobile-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color:#0a0e17;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+}
+
+/* Keep your behavior */
+@media (max-width: 991px) { #desktopMenu { display: none !important; } }
+@media (min-width: 992px) { #mobileMenu { display: none !important; } }
+</style>

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #0a0e17, #0f1a2d); min-height: 100vh;">
+  <div class="container" style="max-width: 600px;">
+
+    <h2 style="color:#e6c200; font-weight:900; margin-bottom:24px;">
+      <i class="fas fa-upload me-2"></i>Restaurer la base de données
+    </h2>
+
+    <div style="background:rgba(220,53,69,.10); border:1px solid rgba(220,53,69,.35); border-radius:14px; padding:16px; margin-bottom:24px;">
+      <i class="fas fa-triangle-exclamation me-2" style="color:#ff6b6b;"></i>
+      <strong style="color:#ff6b6b;">Attention !</strong>
+      <span style="color:rgba(255,255,255,.85);">
+        Cette action va écraser les données existantes avec celles du fichier backup.
+      </span>
+    </div>
+
+    <div style="background:rgba(17,28,47,.65); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:24px;">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-4">
+          <label class="form-label" style="color:#fff; font-weight:900;">
+            <i class="fas fa-file-code me-2" style="color:#e6c200;"></i>
+            Fichier backup (.json)
+          </label>
+          <input type="file"
+                 name="backup_file"
+                 accept=".json"
+                 class="form-control"
+                 style="background:rgba(15,26,44,.92); border:1px solid rgba(255,255,255,.14); color:#fff; border-radius:12px;"
+                 required>
+          <small style="color:rgba(255,255,255,.55);">
+            Sélectionne le fichier JSON téléchargé depuis le dashboard.
+          </small>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit"
+                  class="btn btn-danger btn-lg rounded-pill"
+                  onclick="return confirm('⚠️ Êtes-vous sûr ? Cette action va écraser toutes les données actuelles !')">
+            <i class="fas fa-upload me-2"></i>Restaurer maintenant
+          </button>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-light rounded-pill">
+            Annuler
+          </a>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

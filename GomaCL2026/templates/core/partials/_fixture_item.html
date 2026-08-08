@@ -1,0 +1,102 @@
+{% load roles %}
+
+<div class="fx-item {% if match.is_late and not match.is_played and not match.is_forfeit %}is-late{% endif %}">
+
+  <!-- HOME -->
+  <div class="fx-team fx-team--left">
+    <div class="fx-team__stack">
+      <div class="fx-team__name" title="{{ match.home_team.team_name }}">
+        {{ match.home_team.team_name }}
+      </div>
+
+      {% if match.home_team.whatsapp %}
+        <a class="fx-wa"
+           href="https://wa.me/{{ match.home_team.whatsapp|cut:'+' }}"
+           target="_blank" rel="noopener"
+           title="WhatsApp : {{ match.home_team.whatsapp }}">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- MID -->
+  <div class="fx-mid">
+    {% if show_matchday %}
+      <div class="fx-tag fx-tag--info" style="margin-bottom:5px;">J{{ match.matchday }}</div>
+    {% endif %}
+
+    {% if match.is_played %}
+      <div class="fx-mid__main fx-mid__score">{{ match.home_score }} - {{ match.away_score }}</div>
+      <div class="fx-mid__sub">
+        {% if match.is_forfeit %}
+          <span class="fx-tag fx-tag--danger">Forfait</span>
+        {% else %}
+          <span class="fx-tag fx-tag--success">FT</span>
+        {% endif %}
+      </div>
+    {% else %}
+      {% with t=match.scheduled_date|time:"H:i" %}
+        <div class="fx-mid__main fx-mid__time">
+          {% if t == "00:00" or t == "00:01" %}Toute la journée{% else %}{{ t }}{% endif %}
+        </div>
+      {% endwith %}
+      <div class="fx-mid__sub">
+        {% if match.is_late %}
+          <span class="fx-tag fx-tag--warn">Retard</span>
+        {% else %}
+          <span class="fx-tag fx-tag--info">À jouer</span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if match.rescheduled_from %}
+      <div class="fx-rescheduled">
+        <span class="fx-tag fx-tag--rescheduled">Reporté</span>
+        {% if match.rescheduled_reason %}
+          <div class="fx-rescheduled__reason" title="{{ match.rescheduled_reason }}">
+            {{ match.rescheduled_reason }}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- AWAY -->
+  <div class="fx-team fx-team--right">
+    <div class="fx-team__stack text-end">
+      <div class="fx-team__name" title="{{ match.away_team.team_name }}">
+        {{ match.away_team.team_name }}
+      </div>
+
+      {% if match.away_team.whatsapp %}
+        <a class="fx-wa fx-wa--right"
+           href="https://wa.me/{{ match.away_team.whatsapp|cut:'+' }}"
+           target="_blank" rel="noopener"
+           title="WhatsApp : {{ match.away_team.whatsapp }}">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ADMIN ACTIONS -->
+  {% if user|has_role:"superadmin,organisateur,match" %}
+    <div class="fx-admin">
+      <a href="{% url 'encode_result' match.id %}" class="fx-admin__btn fx-admin__btn--gold">
+        {% if match.is_played %}Modifier{% else %}Encoder{% endif %}
+      </a>
+
+      {% if match.is_played %}
+        <a href="{% url 'cancel_result' match.id %}" class="fx-admin__btn fx-admin__btn--danger">
+          Annuler
+        </a>
+      {% else %}
+        <a href="{% url 'reschedule_match' match.id %}" class="fx-admin__btn fx-admin__btn--light">
+          Reporter
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>

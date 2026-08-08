@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-4">
+
+    <h2 class="text-center mb-4">
+        {{ competition.name }}<br>
+        <small>Calendrier Officiel</small>
+    </h2>
+
+    {% for phase in phases %}
+        <h4 class="mt-4">{{ phase.get_name_display }}</h4>
+        <hr>
+
+        {% for match in phase.matches.all %}
+            <div class="mb-2">
+                {{ match.scheduled_date|date:"d/m/Y H:i" }} —
+                {{ match.home_team.team_name }}
+                vs
+                {{ match.away_team.team_name }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+</div>
+
+{% endblock %}

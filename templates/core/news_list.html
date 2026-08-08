@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Actualités - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1 class="section-title text-center mb-5">
+            <i class="fas fa-newspaper me-2"></i>
+            ACTUALITÉS
+        </h1>
+        
+        {% if news %}
+        <div class="row g-4">
+            {% for article in news %}
+            <div class="col-md-6 col-lg-4">
+                <div class="news-card-full">
+                    {% if article.image %}
+                    <div class="news-image">
+                        <img src="{{ article.image.url }}" alt="{{ article.title }}">
+                        <div class="news-date">
+                            <i class="far fa-calendar me-2"></i>
+                            {{ article.created_at|date:"d/m/Y" }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="news-image no-image">
+                        <i class="fas fa-newspaper fa-4x"></i>
+                        <div class="news-date">
+                            <i class="far fa-calendar me-2"></i>
+                            {{ article.created_at|date:"d/m/Y" }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="news-body">
+                        <h4>{{ article.title }}</h4>
+                        <p>{{ article.content|truncatewords:30 }}</p>
+                        <a href="{% url 'news_detail' article.pk %}" class="btn btn-outline-primary btn-sm">
+                            Lire la suite <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-info-circle fa-4x text-muted mb-3"></i>
+            <p class="text-muted">Aucune actualité pour le moment.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.news-card-full {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-card-full:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.news-image {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.news-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.news-card-full:hover .news-image img {
+    transform: scale(1.1);
+}
+
+.news-image.no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.news-date {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.news-body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-body h4 {
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.news-body p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    flex: 1;
+}
+</style>
+{% endblock %}

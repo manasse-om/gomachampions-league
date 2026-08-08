@@ -1,0 +1,58 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+
+<div class="admin-card">
+
+  <h4>Modifier rôle : {{ user_obj.username }}</h4>
+  <p class="text-light" style="opacity:.8;">
+    Rôle actuel : <strong>{{ profile.get_role_display }}</strong>
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Rôle :</label>
+      <select name="role" class="form-select">
+
+        <option value="player" {% if profile.role == "player" %}selected{% endif %}>
+          Joueur
+        </option>
+
+        <option value="superadmin" {% if profile.role == "superadmin" %}selected{% endif %}>
+          Super Admin
+        </option>
+
+        <option value="organisateur" {% if profile.role == "organisateur" %}selected{% endif %}>
+          Organisateur
+        </option>
+
+        <option value="paiement" {% if profile.role == "paiement" %}selected{% endif %}>
+          Modérateur Paiements
+        </option>
+
+        <option value="match" {% if profile.role == "match" %}selected{% endif %}>
+          Gestionnaire Matchs
+        </option>
+
+      </select>
+
+      <small class="text-light d-block mt-2" style="opacity:.7;">
+        Astuce : laisse <strong>Joueur</strong> pour les participants. Donne <strong>Organisateur/Match/Paiement</strong> seulement aux admins.
+      </small>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      Enregistrer
+    </button>
+
+    <a href="{% url 'team_list' %}" class="btn btn-secondary ms-2">
+      Retour
+    </a>
+
+  </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="admin-card ucl-gen-card">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+      <h3 class="mb-1 ucl-gen-title">
+        <i class="fas fa-calendar-alt me-2 text-warning"></i>
+        Générer la Phase Ligue — 8 Journées
+      </h3>
+      <p class="mb-0 text-light" style="opacity:.82;">
+        Format : <strong>8 journées</strong> • <strong>18 matchs</strong>/journée • <strong>2 journées</strong>/jour (repère <strong>00:00</strong> & <strong>00:01</strong>)<br>
+        Objectif : chaque équipe joue <strong>2 matchs par jour</strong> sur une fenêtre de 24h (<strong>00:00 → 23:59</strong>).
+      </p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{% url 'league_draw_live' %}" class="btn btn-outline-light rounded-pill px-3">
+        ← Retour tirage
+      </a>
+    </div>
+  </div>
+
+  <hr class="border-secondary my-4">
+
+  <div class="alert alert-danger ucl-gen-alert">
+    <strong><i class="fas fa-triangle-exclamation me-2"></i>Attention :</strong>
+    cette action <strong>supprime d’abord tous les matchs existants</strong> de la phase <strong>League</strong> avant de recréer un nouveau calendrier.
+  </div>
+
+  <form method="post" class="row g-3 align-items-end">
+    {% csrf_token %}
+
+    <div class="col-12 col-md-6">
+      <label class="form-label text-light fw-semibold">Date de début (Jour 1)</label>
+      <input type="date" name="start_date" class="form-control" required>
+      <small class="text-light d-block mt-2" style="opacity:.75;">
+        Jour 1 : <strong>J1 = 00:00</strong> et <strong>J2 = 00:01</strong><br>
+        Jour 2 : <strong>J3 = 00:00</strong> et <strong>J4 = 00:01</strong> • … jusqu’à J8
+      </small>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <div class="d-flex flex-column flex-sm-row gap-2 justify-content-md-end">
+        <button type="submit" class="btn btn-ucl-gold btn-lg rounded-pill px-4">
+          <i class="fas fa-bolt me-2"></i>Générer maintenant
+        </button>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+          Dashboard
+        </a>
+      </div>
+    </div>
+  </form>
+
+  <div class="alert alert-info mt-4 ucl-gen-info">
+    <i class="fas fa-circle-info me-2"></i>
+    Les heures affichées servent de <strong>repère de journée</strong>. Les joueurs peuvent jouer à n’importe quelle heure dans la journée.
+  </div>
+
+</div>
+
+<style>
+.ucl-gen-card{
+  background: rgba(17,28,47,.78);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 18px 50px rgba(0,0,0,.28);
+  backdrop-filter: blur(10px);
+}
+.ucl-gen-title{
+  font-weight: 900;
+  letter-spacing: .3px;
+}
+.ucl-gen-alert{
+  border-radius: 16px;
+  border: 1px solid rgba(220,53,69,.35);
+  background: rgba(220,53,69,.10);
+  color: rgba(255,255,255,.92);
+}
+.ucl-gen-info{
+  border-radius: 16px;
+  border: 1px solid rgba(0,167,225,.30);
+  background: rgba(0,167,225,.10);
+  color: rgba(255,255,255,.92);
+}
+</style>
+{% endblock %}

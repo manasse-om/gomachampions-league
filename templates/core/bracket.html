@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Bracket - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="bk-page py-4">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="bk-hero">
+      <div class="bk-hero__texture"></div>
+      <div class="bk-hero__content text-center">
+        <div class="bk-kicker">ROAD TO</div>
+        <h1 class="bk-title">GOMA CL 2026</h1>
+        <div class="bk-subtitle">BRACKET OFFICIEL</div>
+
+        {% if fmt %}
+          <div class="bk-debug mt-2">
+            {{ fmt.label }} •
+            playoff={{ playoff_ties|length }}
+            {% if bracket_type == 'round_16' %}• r16={{ r16_ties|length }}{% endif %}
+            • qf={{ qf_ties|length }} • sf={{ sf_ties|length }}
+          </div>
+
+          <!-- Légende du format -->
+          <div class="bk-format-legend mt-3">
+            <span class="bk-legend-item bk-legend-item--green">
+              Top {{ fmt.direct_qualified }} → Qualifiés directs
+            </span>
+            <span class="bk-legend-item bk-legend-item--yellow">
+              {{ fmt.playoff_ties }} barrages
+            </span>
+            <span class="bk-legend-item bk-legend-item--red">
+              Reste → Éliminés
+            </span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if not competition %}
+      <div class="bk-empty text-center mt-4">Aucune compétition active.</div>
+
+    {% else %}
+
+      <div class="bk-scrollhint d-md-none">
+        Astuce : fais glisser horizontalement pour voir tout le tableau.
+      </div>
+
+      <div class="bk-grid-wrap">
+
+        {% if bracket_type == 'round_16' %}
+        <!-- ============================
+             FORMAT R16 (24-36 équipes)
+             5 colonnes
+             ============================ -->
+        <div class="bk-grid bk-grid--r16">
+
+          <!-- COL 1 : BARRAGES -->
+          <div class="bk-col">
+            <div class="bk-col__title">BARRAGES</div>
+            <div class="bk-col__sides">
+              <div class="bk-side">
+                {% for t in playoff_ties|slice:":4" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}
+                  <div class="bk-muted">—</div>
+                {% endfor %}
+              </div>
+              <div class="bk-side">
+                {% for t in playoff_ties|slice:"4:" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}
+                  <div class="bk-muted">—</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 2 : 8es -->
+          <div class="bk-col">
+            <div class="bk-col__title">8<sup>e</sup> DE FINALE</div>
+            <div class="bk-col__sides">
+              <div class="bk-side">
+                {% for t in r16_ties|slice:":4" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+              <div class="bk-side">
+                {% for t in r16_ties|slice:"4:" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 3 : QF -->
+          <div class="bk-col">
+            <div class="bk-col__title">QUARTS</div>
+            <div class="bk-col__sides">
+              <div class="bk-side">
+                {% for t in qf_ties|slice:":2" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+              <div class="bk-side">
+                {% for t in qf_ties|slice:"2:" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 4 : SF -->
+          <div class="bk-col">
+            <div class="bk-col__title">DEMI-FINALES</div>
+            <div class="bk-col__sides">
+              <div class="bk-side">
+                {% for t in sf_ties|slice:":1" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+              <div class="bk-side">
+                {% for t in sf_ties|slice:"1:" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 5 : FINALE -->
+          <div class="bk-col bk-col--final">
+            <div class="bk-col__title">FINALE</div>
+            {% include "core/partials/_bracket_final.html" %}
+          </div>
+
+        </div>
+
+        {% else %}
+        <!-- ============================
+             FORMAT QF (12-23 équipes)
+             4 colonnes (pas de R16)
+             ============================ -->
+        <div class="bk-grid bk-grid--qf">
+
+          <!-- COL 1 : BARRAGES -->
+          <div class="bk-col">
+            <div class="bk-col__title">BARRAGES</div>
+            <div class="bk-col__sides">
+              <div class="bk-side">
+                {% for t in playoff_ties|slice:":2" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}
+                  <div class="bk-muted">—</div>
+                {% endfor %}
+              </div>
+              <div class="bk-side">
+                {% for t in playoff_ties|slice:"2:" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}
+                  <div class="bk-muted">—</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 2 : QF -->
+          <div class="bk-col">
+            <div class="bk-col__title">QUARTS DE FINALE</div>
+            <div class="bk-col__sides">
+              <div class="bk-side">
+                {% for t in qf_ties|slice:":2" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+              <div class="bk-side">
+                {% for t in qf_ties|slice:"2:" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 3 : SF -->
+          <div class="bk-col">
+            <div class="bk-col__title">DEMI-FINALES</div>
+            <div class="bk-col__sides">
+              <div class="bk-side">
+                {% for t in sf_ties|slice:":1" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+              <div class="bk-side">
+                {% for t in sf_ties|slice:"1:" %}
+                  {% include "core/partials/_bracket_tie.html" with t=t %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 4 : FINALE -->
+          <div class="bk-col bk-col--final">
+            <div class="bk-col__title">FINALE</div>
+            {% include "core/partials/_bracket_final.html" %}
+          </div>
+
+        </div>
+        {% endif %}
+
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+.bk-page {
+  background: radial-gradient(1200px 600px at 50% 10%, rgba(0,167,225,.16), transparent 55%),
+              linear-gradient(135deg, #070b14, #0b1423 40%, #0f1a2d);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+}
+
+/* HERO */
+.bk-hero {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(17,28,47,.45);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.bk-hero__texture {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(230,194,0,.10), transparent 35%),
+    radial-gradient(circle at 80% 10%, rgba(0,167,225,.12), transparent 35%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 1px, transparent 1px 10px);
+  opacity: .85;
+  pointer-events: none;
+}
+.bk-hero__content { position: relative; z-index: 2; }
+.bk-kicker {
+  color: rgba(255,255,255,.72);
+  letter-spacing: 4px;
+  font-weight: 800;
+  font-size: .85rem;
+}
+.bk-title {
+  margin: 6px 0 0;
+  font-weight: 1000;
+  letter-spacing: 2px;
+  color: #fff;
+}
+.bk-subtitle {
+  margin-top: 6px;
+  color: #e6c200;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: .95rem;
+}
+.bk-debug {
+  color: rgba(255,255,255,.68);
+  font-weight: 800;
+  font-size: .85rem;
+}
+
+/* LÉGENDE FORMAT */
+.bk-format-legend {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.bk-legend-item {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: .78rem;
+  border: 1px solid transparent;
+}
+.bk-legend-item--green {
+  background: rgba(40,167,69,.12);
+  border-color: rgba(40,167,69,.35);
+  color: #47d18c;
+}
+.bk-legend-item--yellow {
+  background: rgba(230,194,0,.12);
+  border-color: rgba(230,194,0,.35);
+  color: #e6c200;
+}
+.bk-legend-item--red {
+  background: rgba(220,53,69,.10);
+  border-color: rgba(220,53,69,.30);
+  color: #ff6b6b;
+}
+
+/* HINT SCROLL */
+.bk-scrollhint {
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.80);
+  font-weight: 750;
+}
+
+/* GRID */
+.bk-grid-wrap {
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+/* R16 = 5 colonnes */
+.bk-grid--r16 {
+  display: grid;
+  grid-template-columns: repeat(5, 300px);
+  gap: 14px;
+  min-width: 1100px;
+}
+
+/* QF = 4 colonnes */
+.bk-grid--qf {
+  display: grid;
+  grid-template-columns: repeat(4, 300px);
+  gap: 14px;
+  min-width: 900px;
+}
+
+/* Responsive desktop */
+@media (min-width: 992px) {
+  .bk-grid--r16 {
+    grid-template-columns: repeat(5, 1fr);
+    min-width: 0;
+  }
+  .bk-grid--qf {
+    grid-template-columns: repeat(4, 1fr);
+    min-width: 0;
+  }
+}
+
+/* COLONNES */
+.bk-col {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 12px;
+  backdrop-filter: blur(10px);
+}
+.bk-col--final {
+  border-color: rgba(230,194,0,.28);
+  box-shadow: inset 0 0 0 1px rgba(230,194,0,.18);
+}
+.bk-col__title {
+  text-align: center;
+  font-weight: 1000;
+  letter-spacing: 1px;
+  color: #e6c200;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(0,61,130,.35);
+  border: 1px solid rgba(255,255,255,.10);
+  margin-bottom: 10px;
+  font-size: .88rem;
+}
+
+/* SIDES */
+.bk-col__sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 576px) {
+  .bk-col__sides { grid-template-columns: 1fr; }
+}
+
+.bk-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bk-muted {
+  text-align: center;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.70);
+}
+</style>
+{% endblock %}

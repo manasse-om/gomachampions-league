@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirmer la réinitialisation - Goma Champions League 2026{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white text-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ATTENTION !
+                        </h3>
+                    </div>
+                    <div class="card-body text-center p-5">
+                        <i class="fas fa-trash-alt fa-5x text-danger mb-4"></i>
+                        <h4 class="text-danger mb-3">Réinitialiser la compétition ?</h4>
+                        <p class="text-muted mb-4">
+                            Cette action va :
+                        </p>
+                        <ul class="text-start text-muted mb-4">
+                            <li>❌ Supprimer TOUS les matchs</li>
+                            <li>❌ Réinitialiser TOUTES les statistiques des équipes</li>
+                            <li>❌ Supprimer TOUTES les phases (sauf la phase de ligue)</li>
+                        </ul>
+                        <div class="alert alert-danger">
+                            <strong>⚠️ Cette action est IRRÉVERSIBLE !</strong>
+                        </div>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <i class="fas fa-check me-2"></i>
+                                    OUI, RÉINITIALISER TOUT
+                                </button>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-times me-2"></i>
+                                    Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

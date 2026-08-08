@@ -1,0 +1,157 @@
+{% load static %}
+
+<footer class="footer-pro">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+
+            <!-- COLONNE 1 : À PROPOS + BOUTON WHATSAPP -->
+            <div class="col-lg-5">
+                <div class="d-flex align-items-center mb-4">
+                    <img src="{% static 'images/logo.png' %}" alt="Goma CL" class="footer-logo me-3">
+                    <div>
+                        <h4 class="text-white fw-bold mb-0">GOMA CHAMPIONS LEAGUE</h4>
+                        <p class="text-gold small mb-0" style="letter-spacing: 2px;">PREMIÈRE ÉDITION • 2026</p>
+                    </div>
+                </div>
+                <p class="text-light mb-4" style="opacity: 0.9; line-height: 1.7;">
+                    La plus grande compétition eFootball mobile de l'Est de la RDC.<br>
+                    Format officiel UEFA Champions League – 36 équipes.
+                </p>
+
+                <!-- BOUTON WHATSAPP ULTRA CLASSE -->
+                <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto" 
+                   target="_blank" 
+                   class="btn-whatsapp-pro">
+                    <i class="fab fa-whatsapp fa-lg me-2"></i>
+                    Rejoindre le groupe officiel WhatsApp
+                </a>
+            </div>
+
+            <!-- COLONNE 2 : LIENS RAPIDES -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="text-gold fw-semibold mb-4 text-uppercase" style="letter-spacing: 2px;">
+                    Navigation
+                </h5>
+                <ul class="list-unstyled footer-links">
+                    <li><a href="{% url 'home' %}"><i class="fas fa-angle-right me-2"></i>Accueil</a></li>
+                    <li><a href="{% url 'standings' %}"><i class="fas fa-angle-right me-2"></i>Classement</a></li>
+                    <li><a href="{% url 'fixtures' %}"><i class="fas fa-angle-right me-2"></i>Calendrier</a></li>
+                    <li><a href="{% url 'results' %}"><i class="fas fa-angle-right me-2"></i>Résultats</a></li>
+                    <li><a href="{% url 'bracket' %}"><i class="fas fa-angle-right me-2"></i>Bracket</a></li>
+                    <li><a href="{% url 'rules' %}"><i class="fas fa-angle-right me-2"></i>Règlement</a></li>
+                </ul>
+            </div>
+
+            <!-- COLONNE 3 : ORGANISATEURS -->
+            <div class="col-lg-4 col-md-6">
+                <h5 class="text-gold fw-semibold mb-4 text-uppercase" style="letter-spacing: 2px;">
+                    Organisateurs
+                </h5>
+                <ul class="list-unstyled text-light organizers-list">
+                    <li><i class="fas fa-crown text-gold me-2"></i>Manassé Ombeni</li>
+                    <li><i class="fas fa-star text-gold me-2"></i>The Luckiest</li>
+                    <li><i class="fas fa-medal text-gold me-2"></i>Job Badesire</li>
+                    <li><i class="fas fa-trophy text-gold me-2"></i>Héritier DJO</li>
+                    <li><i class="fas fa-shield-alt text-gold me-2"></i>Joachim</li>
+                    <li><i class="fas fa-gem text-gold me-2"></i>Ildephonse</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- LIGNE SÉPARATRICE + COPYRIGHT -->
+        <hr class="footer-divider my-5">
+
+        <div class="row align-items-center text-center text-md-start">
+            <div class="col-md-6">
+                <p class="mb-0 text-light" style="opacity: 0.8;">
+                    © 2026 Goma Champions League • Tous droits réservés
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="mb-0 text-light" style="opacity: 0.8;">
+                    <i class="fas fa-gamepad me-2 text-gold"></i>
+                    Powered by eFootball 2026
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+.footer-pro {
+    background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 50%, #0b1425 100%);
+    padding: 80px 0 40px;
+    color: #ddd;
+    border-top: 4px solid #e6c200;
+}
+
+.footer-logo {
+    height: 65px;
+    filter: drop-shadow(0 0 10px #e6c200);
+}
+
+.text-gold {
+    color: #e6c200 !important;
+}
+
+/* BOUTON WHATSAPP PRO */
+.btn-whatsapp-pro {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.02rem;
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+    transition: all 0.4s ease;
+    border: none;
+}
+
+.btn-whatsapp-pro:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(37, 211, 102, 0.5);
+    background: linear-gradient(135deg, #128c7e, #25d366);
+    color: white;
+}
+
+/* LIENS FOOTER */
+.footer-links a {
+    color: #bbb;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #e6c200;
+    padding-left: 10px;
+}
+
+/* ORGANISATEURS */
+.organizers-list li {
+    margin-bottom: 12px;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* SÉPARATEUR */
+.footer-divider {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e6c20044, transparent);
+    margin: 50px 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .footer-pro {
+        padding: 60px 0 30px;
+    }
+    .btn-whatsapp-pro {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>

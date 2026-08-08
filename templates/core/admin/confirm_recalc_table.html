@@ -1,0 +1,24 @@
+{% extends 'core/admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="admin-card">
+  <h4 class="mb-3">
+    <i class="fas fa-rotate me-2"></i>Recalculer le classement
+  </h4>
+
+  <div class="alert alert-warning">
+    Cette action remet à zéro les stats (points, victoires, buts, etc.) puis les recalcule à partir des matchs joués (phase league).
+    <br><strong>À utiliser après correction d’un résultat.</strong>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-warning">
+      Confirmer le recalcul
+    </button>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary ms-2">
+      Annuler
+    </a>
+  </form>
+</div>
+{% endblock %}
