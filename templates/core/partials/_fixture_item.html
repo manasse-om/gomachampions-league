@@ -8,101 +8,115 @@
      data-match-date="{{ scheduled|date:'Y-m-d' }}"
      data-is-played="{{ match.is_played|yesno:'true,false' }}">
 
-  <!-- COUNTDOWN BADGE -->
+  <!-- ============================================ -->
+  <!-- COUNTDOWN -->
+  <!-- ============================================ -->
   {% if not match.is_played %}
-    <div class="fx-countdown-wrap" style="grid-column: 1 / -1;">
+    <div class="fx-countdown-wrap">
       <div class="fx-countdown" id="cd-{{ match.id }}">
-        <span class="cd-spinner"><i class="fas fa-circle-notch fa-spin"></i></span>
+        <span class="cd-spinner">
+          <i class="fas fa-circle-notch fa-spin"></i>
+        </span>
       </div>
     </div>
   {% endif %}
 
-  <!-- ÉQUIPE DOMICILE -->
-  <div class="fx-team">
-    <div class="fx-team__stack">
+  <!-- ============================================ -->
+  <!-- LIGNE : DOMICILE | SCORE/TEMPS | EXTÉRIEUR -->
+  <!-- ============================================ -->
+  <div class="fx-main">
+
+    <!-- DOMICILE -->
+    <div class="fx-team fx-team--home">
       <div class="fx-team__name">{{ match.home_team.team_name }}</div>
       {% if match.home_team.whatsapp %}
         <a class="fx-wa"
            href="https://wa.me/{{ match.home_team.whatsapp|cut:'+' }}"
            target="_blank" rel="noopener"
-           title="{{ match.home_team.whatsapp }}">
+           title="WhatsApp {{ match.home_team.whatsapp }}">
           <i class="fab fa-whatsapp"></i>
         </a>
       {% endif %}
     </div>
-  </div>
 
-  <!-- CENTRE : score ou heure -->
-  <div class="fx-mid">
-    {% if match.is_played %}
-      <div class="fx-mid__main fx-mid__score">
+    <!-- CENTRE : SCORE OU HEURE -->
+    <div class="fx-mid">
+      {% if match.is_played %}
         {% if match.is_forfeit %}
-          <span class="fx-tag fx-tag--danger">Forfait</span>
+          <div class="fx-mid__score-wrap">
+            <span class="fx-tag fx-tag--danger">Forfait</span>
+          </div>
         {% else %}
-          {{ match.home_score }} - {{ match.away_score }}
+          <div class="fx-mid__score">
+            <span class="fx-mid__score-num">{{ match.home_score }}</span>
+            <span class="fx-mid__score-sep">–</span>
+            <span class="fx-mid__score-num">{{ match.away_score }}</span>
+          </div>
           {% if match.home_extra_time is not None %}
-            <div style="font-size:.75rem; opacity:.7;">(ap)</div>
+            <div class="fx-mid__extra">(ap)</div>
           {% endif %}
           {% if match.home_penalties is not None %}
-            <div style="font-size:.75rem; opacity:.7;">tab {{ match.home_penalties }}-{{ match.away_penalties }}</div>
+            <div class="fx-mid__extra">tab {{ match.home_penalties }}-{{ match.away_penalties }}</div>
           {% endif %}
         {% endif %}
-      </div>
-      <div class="fx-mid__sub">
-        <span class="fx-tag fx-tag--success">Terminé</span>
-      </div>
-    {% else %}
-      <div class="fx-mid__main fx-mid__time">
-        {% language 'fr' %}
-          {{ scheduled|date:"d/m" }}
-        {% endlanguage %}
-      </div>
-      <div class="fx-mid__sub">
-        {% if match.is_late %}
-          <span class="fx-tag fx-tag--danger">Retard</span>
-        {% elif match.reported %}
-          <span class="fx-tag fx-tag--warn">Signalé</span>
-        {% else %}
-          <span class="fx-tag fx-tag--info">À jouer</span>
-        {% endif %}
-      </div>
-      {% if match.rescheduled_from %}
-        <div class="fx-rescheduled">
-          <span class="fx-tag fx-tag--rescheduled">Reporté</span>
-          {% if match.rescheduled_reason %}
-            <div class="fx-rescheduled__reason">{{ match.rescheduled_reason }}</div>
+        <div class="fx-mid__status">
+          <span class="fx-tag fx-tag--success">
+            <i class="fas fa-check"></i> Terminé
+          </span>
+        </div>
+      {% else %}
+        <div class="fx-mid__date">
+          {% language 'fr' %}{{ scheduled|date:"d/m" }}{% endlanguage %}
+        </div>
+        <div class="fx-mid__status">
+          {% if match.is_late %}
+            <span class="fx-tag fx-tag--danger">Retard</span>
+          {% elif match.reported %}
+            <span class="fx-tag fx-tag--warn">Signalé</span>
+          {% else %}
+            <span class="fx-tag fx-tag--info">À jouer</span>
           {% endif %}
         </div>
+        {% if match.rescheduled_from %}
+          <div class="fx-rescheduled">
+            <span class="fx-tag fx-tag--rescheduled">Reporté</span>
+          </div>
+        {% endif %}
       {% endif %}
-    {% endif %}
-  </div>
+    </div>
 
-  <!-- ÉQUIPE EXTÉRIEUR -->
-  <div class="fx-team fx-team--right">
-    <div class="fx-team__stack" style="align-items:flex-end;">
-      <div class="fx-team__name" style="text-align:right;">{{ match.away_team.team_name }}</div>
+    <!-- EXTÉRIEUR -->
+    <div class="fx-team fx-team--away">
+      <div class="fx-team__name">{{ match.away_team.team_name }}</div>
       {% if match.away_team.whatsapp %}
-        <a class="fx-wa fx-wa--right"
+        <a class="fx-wa"
            href="https://wa.me/{{ match.away_team.whatsapp|cut:'+' }}"
            target="_blank" rel="noopener"
-           title="{{ match.away_team.whatsapp }}">
+           title="WhatsApp {{ match.away_team.whatsapp }}">
           <i class="fab fa-whatsapp"></i>
         </a>
       {% endif %}
     </div>
+
   </div>
 
-  <!-- ADMIN BUTTONS -->
+  <!-- ============================================ -->
+  <!-- BOUTONS ADMIN -->
+  <!-- ============================================ -->
   {% if user|has_role:"superadmin,organisateur,match" %}
     <div class="fx-admin">
       <a href="{% url 'encode_result' match.id %}" class="fx-admin__btn fx-admin__btn--gold">
+        <i class="fas {% if match.is_played %}fa-pen{% else %}fa-keyboard{% endif %}"></i>
         {% if match.is_played %}Modifier{% else %}Encoder{% endif %}
       </a>
       {% if match.is_played %}
-        <a href="{% url 'cancel_result' match.id %}" class="fx-admin__btn fx-admin__btn--danger">Annuler</a>
-      {% endif %}
-      {% if not match.is_played %}
-        <a href="{% url 'reschedule_match' match.id %}" class="fx-admin__btn fx-admin__btn--light">Reporter</a>
+        <a href="{% url 'cancel_result' match.id %}" class="fx-admin__btn fx-admin__btn--danger">
+          <i class="fas fa-rotate-left"></i> Annuler
+        </a>
+      {% else %}
+        <a href="{% url 'reschedule_match' match.id %}" class="fx-admin__btn fx-admin__btn--light">
+          <i class="fas fa-calendar-plus"></i> Reporter
+        </a>
       {% endif %}
     </div>
   {% endif %}
@@ -110,112 +124,347 @@
 </div>
 {% endwith %}
 
+<!-- ============================================ -->
+<!-- STYLES — AUTO-CONTAINED -->
+<!-- ============================================ -->
 <style>
-/* COUNTDOWN */
-.fx-countdown-wrap{
-  padding: 0 0 6px 0;
+/* ============================================ */
+/* ITEM CONTAINER */
+/* ============================================ */
+.fx-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  transition: border-color .15s ease, background .15s ease;
 }
-.fx-countdown{
+.fx-item:hover {
+  border-color: rgba(230,194,0,.22);
+  background: rgba(255,255,255,.05);
+}
+.fx-item.is-late {
+  box-shadow: inset 3px 0 0 rgba(220,53,69,.9);
+  background: rgba(220,53,69,.04);
+}
+
+/* ============================================ */
+/* COUNTDOWN */
+/* ============================================ */
+.fx-countdown-wrap {
+  display: flex;
+  justify-content: center;
+}
+.fx-countdown {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
+  gap: 8px;
+  padding: 5px 12px;
   border-radius: 999px;
   font-weight: 900;
   font-size: .78rem;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.04);
   color: rgba(255,255,255,.85);
+  letter-spacing: .3px;
 }
-.fx-countdown.is-live{
-  border-color: rgba(40,167,69,.45);
-  background: rgba(40,167,69,.12);
-  color: #47d18c;
-  animation: pulse-green 2s ease-in-out infinite;
-}
-.fx-countdown.is-soon{
-  border-color: rgba(255,193,7,.45);
-  background: rgba(255,193,7,.10);
-  color: #ffd700;
-}
-.fx-countdown.is-far{
-  border-color: rgba(0,167,225,.30);
-  background: rgba(0,167,225,.08);
-  color: rgba(255,255,255,.80);
-}
-@keyframes pulse-green{
-  0%,100%{ box-shadow: 0 0 0 0 rgba(40,167,69,.4); }
-  50%{ box-shadow: 0 0 0 6px rgba(40,167,69,0); }
-}
-.cd-block{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 28px;
-}
-.cd-num{ font-size: .95rem; font-weight: 1000; line-height: 1; }
-.cd-label{ font-size: .62rem; opacity: .75; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
-.cd-sep{ font-weight: 1000; opacity: .6; margin-top: -6px; }
-
-/* COUNTDOWN CORRIGÉ */
-.fx-countdown {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: .82rem;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.85);
-}
-
-/* Pas encore ouverte → bleu */
 .fx-countdown.is-waiting {
   border-color: rgba(0,167,225,.35);
   background: rgba(0,167,225,.08);
   color: rgba(255,255,255,.85);
 }
-
-/* Ouverte, encore du temps → vert */
 .fx-countdown.is-open.is-normal {
   border-color: rgba(40,167,69,.45);
   background: rgba(40,167,69,.10);
   color: #47d18c;
 }
-
-/* Ouverte, moins de 12h → orange */
 .fx-countdown.is-open.is-warning {
   border-color: rgba(255,165,0,.55);
   background: rgba(255,165,0,.12);
   color: #ffaa00;
-  animation: pulse-warn 2s ease-in-out infinite;
+  animation: fxPulseWarn 2s ease-in-out infinite;
 }
-
-/* Ouverte, moins de 3h → rouge urgent */
 .fx-countdown.is-open.is-urgent {
   border-color: rgba(220,53,69,.65);
   background: rgba(220,53,69,.15);
   color: #ff6b6b;
-  animation: pulse-red 1s ease-in-out infinite;
+  animation: fxPulseRed 1s ease-in-out infinite;
 }
-
-/* Fermée → gris */
 .fx-countdown.is-expired {
   border-color: rgba(255,255,255,.15);
   background: rgba(255,255,255,.04);
   color: rgba(255,255,255,.45);
 }
-
 .cd-time { letter-spacing: .5px; }
 
-@keyframes pulse-warn {
-  0%,100%{ box-shadow: 0 0 0 0 rgba(255,165,0,.4); }
-  50%{ box-shadow: 0 0 0 6px rgba(255,165,0,0); }
+@keyframes fxPulseWarn {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,165,0,.4); }
+  50%     { box-shadow: 0 0 0 6px rgba(255,165,0,0); }
 }
-@keyframes pulse-red {
-  0%,100%{ box-shadow: 0 0 0 0 rgba(220,53,69,.5); }
-  50%{ box-shadow: 0 0 0 8px rgba(220,53,69,0); }
+@keyframes fxPulseRed {
+  0%,100% { box-shadow: 0 0 0 0 rgba(220,53,69,.5); }
+  50%     { box-shadow: 0 0 0 8px rgba(220,53,69,0); }
+}
+
+/* ============================================ */
+/* LIGNE PRINCIPALE : DOMICILE | MID | EXTÉRIEUR */
+/* ============================================ */
+.fx-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+/* ============================================ */
+/* ÉQUIPES */
+/* ============================================ */
+.fx-team {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.fx-team--home { align-items: flex-start; }
+.fx-team--away { align-items: flex-end; }
+
+.fx-team__name {
+  font-weight: 950;
+  color: rgba(255,255,255,.94);
+  line-height: 1.15;
+  font-size: .94rem;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.fx-team--away .fx-team__name { text-align: right; }
+
+/* WhatsApp icon */
+.fx-wa {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(37,211,102,.35);
+  background: rgba(37,211,102,.10);
+  color: rgba(255,255,255,.92);
+  text-decoration: none;
+  font-size: .82rem;
+  transition: all .15s ease;
+  flex-shrink: 0;
+}
+.fx-wa:hover {
+  background: rgba(37,211,102,.22);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+/* ============================================ */
+/* CENTRE */
+/* ============================================ */
+.fx-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  padding: 0 6px;
+  min-width: 80px;
+}
+
+.fx-mid__score {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 1000;
+  font-size: 1.05rem;
+  color: #e6c200;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.fx-mid__score-num { min-width: 14px; }
+.fx-mid__score-sep { opacity: .55; font-size: .85rem; }
+
+.fx-mid__extra {
+  font-size: .70rem;
+  opacity: .72;
+  color: rgba(255,255,255,.75);
+  font-weight: 700;
+}
+
+.fx-mid__date {
+  font-weight: 1000;
+  color: #e6c200;
+  font-size: .95rem;
+  letter-spacing: .3px;
+}
+
+.fx-mid__status {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.fx-mid__score-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================ */
+/* TAGS */
+/* ============================================ */
+.fx-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: .70rem;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.88);
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.fx-tag i { font-size: .62rem; }
+.fx-tag--success {
+  border-color: rgba(40,167,69,.40);
+  background: rgba(40,167,69,.14);
+  color: #47d18c;
+}
+.fx-tag--danger {
+  border-color: rgba(220,53,69,.40);
+  background: rgba(220,53,69,.14);
+  color: #ff6b6b;
+}
+.fx-tag--warn {
+  border-color: rgba(255,193,7,.45);
+  background: rgba(255,193,7,.14);
+  color: #ffd700;
+}
+.fx-tag--info {
+  border-color: rgba(0,167,225,.35);
+  background: rgba(0,167,225,.12);
+  color: #00d4ff;
+}
+.fx-tag--rescheduled {
+  border-color: rgba(0,167,225,.35);
+  background: rgba(0,167,225,.12);
+  color: #00d4ff;
+}
+
+/* ============================================ */
+/* RESCHEDULED */
+/* ============================================ */
+.fx-rescheduled {
+  margin-top: 2px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================ */
+/* ADMIN BUTTONS */
+/* ============================================ */
+.fx-admin {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  flex-wrap: wrap;
+}
+.fx-admin__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: .78rem;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+.fx-admin__btn i { font-size: .72rem; }
+.fx-admin__btn:hover {
+  transform: translateY(-1px);
+  color: #fff;
+}
+.fx-admin__btn--gold {
+  border: none;
+  background: linear-gradient(45deg, #e6c200, #ffed4e);
+  color: #0a0e17 !important;
+  box-shadow: 0 4px 12px rgba(230,194,0,.20);
+}
+.fx-admin__btn--gold:hover {
+  box-shadow: 0 6px 16px rgba(230,194,0,.35);
+  color: #0a0e17 !important;
+}
+.fx-admin__btn--danger {
+  border-color: rgba(220,53,69,.40);
+  background: rgba(220,53,69,.12);
+  color: #ff6b6b;
+}
+.fx-admin__btn--danger:hover { background: rgba(220,53,69,.22); }
+.fx-admin__btn--light {
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.05);
+}
+.fx-admin__btn--light:hover { background: rgba(255,255,255,.10); }
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 576px) {
+  .fx-item { padding: 10px; gap: 8px; border-radius: 12px; }
+
+  .fx-countdown {
+    padding: 4px 10px;
+    font-size: .72rem;
+    gap: 6px;
+  }
+
+  .fx-main {
+    grid-template-columns: minmax(0, 1fr) 68px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .fx-team__name { font-size: .88rem; }
+  .fx-wa { width: 24px; height: 24px; font-size: .76rem; }
+
+  .fx-mid { min-width: 68px; padding: 0 2px; }
+  .fx-mid__score { font-size: .96rem; }
+  .fx-mid__date { font-size: .88rem; }
+  .fx-tag { padding: 2px 7px; font-size: .66rem; }
+
+  .fx-admin {
+    justify-content: stretch;
+    padding-top: 6px;
+    gap: 5px;
+  }
+  .fx-admin__btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: .74rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .fx-main { grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr); }
+  .fx-team__name { font-size: .82rem; }
+  .fx-mid__score { font-size: .88rem; letter-spacing: 0; }
+  .fx-tag { font-size: .62rem; padding: 2px 6px; }
+  .fx-admin__btn { font-size: .70rem; padding: 7px 8px; }
 }
 </style>

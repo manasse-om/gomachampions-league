@@ -26,7 +26,7 @@ class Competition(models.Model):
     max_teams = models.IntegerField(default=36, verbose_name=_("Nombre max d'équipes"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
     registration_open = models.BooleanField(default=True, verbose_name=_("Inscriptions ouvertes"))
-    registration_fee = models.IntegerField(default=1000, verbose_name=_("Frais d'inscription (CDF)"))
+    registration_fee = models.IntegerField(default=2500, verbose_name=_("Frais d'inscription (CDF)"))
 
     # Dates
     start_date = models.DateField(verbose_name=_("Date de début"))

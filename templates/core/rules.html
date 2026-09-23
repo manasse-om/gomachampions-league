@@ -1,557 +1,864 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Règlement - Goma Champions League 2026{% endblock %}
+{% block title %}Règlement — Goma Champions League 2026{% endblock %}
 
 {% block content %}
-<section class="rules-page py-5">
-  <div class="container" style="max-width: 860px;">
+<section class="rules-page">
 
-    <!-- HEADER -->
-    <div class="rules-hero text-center mb-5">
-      <img src="{% static 'images/logo.png' %}" alt="GCL" style="height:80px; margin-bottom:16px; filter: drop-shadow(0 0 14px rgba(230,194,0,.4));">
-      <h1 class="rules-main-title">GOMA CHAMPIONS LEAGUE</h1>
-      <div class="rules-subtitle">SAISON 2026 — RÈGLEMENT OFFICIEL</div>
-      <p class="rules-lead">
-        Compétition officielle eFootball Mobile organisée à Goma, RDC.<br>
-        Format de l'UEFA Champions League.
+  <!-- ============================================ -->
+  <!-- HERO -->
+  <!-- ============================================ -->
+  <div class="rules-hero">
+    <div class="rules-hero__glow"></div>
+    <div class="container rules-hero__inner">
+      <img src="{% static 'images/logo.png' %}"
+           alt="GCL" class="rules-hero__logo">
+      <div class="rules-hero__kicker">SAISON 2026</div>
+      <h1 class="rules-hero__title">GOMA CHAMPIONS LEAGUE</h1>
+      <div class="rules-hero__subtitle">RÈGLEMENT OFFICIEL</div>
+      <p class="rules-hero__lead">
+        Compétition officielle <strong>eFootball Mobile</strong> — Goma, RDC.<br>
+        Format UEFA Champions League adaptatif de <strong>12 à 36 équipes</strong>.
       </p>
     </div>
+  </div>
 
-    <!-- ARTICLE 1 -->
-    <div class="rules-card mb-4">
+  <div class="container rules-container">
+
+    <!-- ============================================ -->
+    <!-- SUMMARY : L'ESSENTIEL EN 30 SECONDES -->
+    <!-- ============================================ -->
+    <div class="rules-summary">
+      <div class="rules-summary__title">
+        <i class="fas fa-bolt"></i> L'essentiel en 30 secondes
+      </div>
+      <div class="rules-summary__grid">
+        <div class="rules-summary__item">
+          <div class="rules-summary__label">Inscription</div>
+          <div class="rules-summary__value">{{ cagnotte.fee|default:2500 }} FC</div>
+        </div>
+        <div class="rules-summary__item">
+          <div class="rules-summary__label">Format</div>
+          <div class="rules-summary__value">UCL adaptatif</div>
+        </div>
+        <div class="rules-summary__item">
+          <div class="rules-summary__label">Fenêtre match</div>
+          <div class="rules-summary__value">25 heures</div>
+        </div>
+        <div class="rules-summary__item">
+          <div class="rules-summary__label">Durée match</div>
+          <div class="rules-summary__value">10 min</div>
+        </div>
+        <div class="rules-summary__item">
+          <div class="rules-summary__label">Forfait</div>
+          <div class="rules-summary__value">0 – 3</div>
+        </div>
+        <div class="rules-summary__item">
+          <div class="rules-summary__label">Preuves</div>
+          <div class="rules-summary__value">Capture / Vidéo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ARTICLE 1 — GÉNÉRALITÉS -->
+    <!-- ============================================ -->
+    <article class="rules-card">
       <div class="rules-card__num">1</div>
       <div class="rules-card__body">
         <h3 class="rules-card__title">Dispositions générales</h3>
         <p>
-          La <strong>Goma Champions League 2026</strong> est une compétition officielle de eFootball Mobile
-          organisée à Goma, République Démocratique du Congo. Tous les participants s'engagent à respecter
-          l'intégralité du présent règlement dès leur inscription.
+          La <strong>Goma Champions League 2026</strong> est une compétition officielle
+          de <strong>eFootball Mobile</strong> organisée à Goma (RDC). Toute inscription
+          vaut acceptation pleine et entière du présent règlement.
         </p>
         <div class="rules-alert rules-alert--warn">
-          <i class="fas fa-triangle-exclamation me-2"></i>
-          Le non-respect du règlement peut entraîner la disqualification définitive sans remboursement.
+          <i class="fas fa-triangle-exclamation"></i>
+          Le non-respect du règlement peut entraîner une <strong>disqualification définitive sans remboursement</strong>.
         </div>
       </div>
-    </div>
+    </article>
 
-    <!-- ARTICLE 2 -->
-    <div class="rules-card mb-4">
+    <!-- ============================================ -->
+    <!-- ARTICLE 2 — FORMAT -->
+    <!-- ============================================ -->
+    <article class="rules-card">
       <div class="rules-card__num">2</div>
       <div class="rules-card__body">
         <h3 class="rules-card__title">Format de la compétition</h3>
-        <p>La compétition se déroule en deux grandes phases :</p>
-        <ul class="rules-list">
-          <li><strong>Phase de Ligue :</strong> 36 équipes s'affrontent selon un système de points. Chaque équipe joue 8 matchs contre 8 adversaires différents tirés au sort.</li>
-          <li><strong>Phase Finale (Bracket UCL) :</strong> Les meilleures équipes s'affrontent en matchs aller-retour (Barrages → 8es → Quarts → Demis → Finale).</li>
-        </ul>
+        <p>
+          Le format s'adapte automatiquement au nombre d'équipes inscrites
+          (<strong>12 à 36 équipes</strong>), en conservant l'esprit et la cohérence
+          de l'UEFA Champions League.
+        </p>
+
+        <div class="rules-steps">
+          <div class="rules-step">
+            <div class="rules-step__num">1</div>
+            <div class="rules-step__body">
+              <div class="rules-step__title">Phase de Ligue</div>
+              <p>Chaque équipe joue <strong>4 à 8 matchs</strong> (selon le nombre d'équipes) contre des adversaires tirés au sort. Classement par points avec départage aux différences de buts.</p>
+            </div>
+          </div>
+
+          <div class="rules-step">
+            <div class="rules-step__num">2</div>
+            <div class="rules-step__body">
+              <div class="rules-step__title">Phase Finale (Bracket UCL)</div>
+              <p>Les meilleures équipes se qualifient pour les <strong>barrages</strong>, puis <strong>8<sup>es</sup>, Quarts, Demi-finales</strong> et <strong>Finale</strong>. Matchs <strong>aller-retour sur une même journée</strong>.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="rules-alert rules-alert--info">
-          <i class="fas fa-gamepad me-2"></i>
-          <strong>Création de salle :</strong> L'équipe désignée à domicile crée la salle de match sur eFootball et envoie l'invitation à son adversaire via WhatsApp.
+          <i class="fas fa-gamepad"></i>
+          <strong>Création de salle :</strong> l'équipe désignée « domicile » crée la salle sur eFootball et envoie l'invitation à son adversaire via WhatsApp.
         </div>
       </div>
-    </div>
+    </article>
 
-    <!-- ARTICLE 3 : PARAMÈTRES -->
-    <div class="rules-card mb-4">
+    <!-- ============================================ -->
+    <!-- ARTICLE 3 — PARAMÈTRES -->
+    <!-- ============================================ -->
+    <article class="rules-card">
       <div class="rules-card__num">3</div>
       <div class="rules-card__body">
         <h3 class="rules-card__title">Paramètres officiels des matchs</h3>
 
-        <div class="row g-3 mt-1">
-          <!-- Phase de ligue -->
-          <div class="col-md-6">
-            <div class="params-box">
-              <div class="params-box__title">
-                <i class="fas fa-layer-group me-2"></i>Phase de Ligue
-              </div>
-              <table class="params-table">
-                <tr><td><i class="fas fa-clock me-2"></i>Durée</td><td><strong>10 minutes</strong></td></tr>
-                <tr><td><i class="fas fa-dumbbell me-2"></i>Forme domicile</td><td><strong>Excellente</strong></td></tr>
-                <tr><td><i class="fas fa-dumbbell me-2"></i>Forme extérieur</td><td><strong>Excellente</strong></td></tr>
-                <tr><td><i class="fas fa-arrows-rotate me-2"></i>Remplacements</td><td><strong>5 max</strong></td></tr>
-                <tr><td><i class="fas fa-cloud-sun me-2"></i>Météo</td><td><strong>Par défaut</strong></td></tr>
-                <tr><td><i class="fas fa-stopwatch me-2"></i>Prolongations</td><td><strong class="text-danger">Désactivées</strong></td></tr>
-              </table>
+        <div class="rules-params">
+          <div class="rules-params__box">
+            <div class="rules-params__title">
+              <i class="fas fa-layer-group"></i> Phase de Ligue
             </div>
+            <table class="rules-params__table">
+              <tr><td><i class="fas fa-clock"></i> Durée</td><td><strong>10 min</strong></td></tr>
+              <tr><td><i class="fas fa-dumbbell"></i> Forme domicile</td><td><strong>Excellente</strong></td></tr>
+              <tr><td><i class="fas fa-dumbbell"></i> Forme extérieur</td><td><strong>Excellente</strong></td></tr>
+              <tr><td><i class="fas fa-arrows-rotate"></i> Remplacements</td><td><strong>5 max</strong></td></tr>
+              <tr><td><i class="fas fa-cloud-sun"></i> Météo</td><td><strong>Par défaut</strong></td></tr>
+              <tr><td><i class="fas fa-stopwatch"></i> Prolongations</td><td><strong class="t-danger">Désactivées</strong></td></tr>
+            </table>
           </div>
 
-          <!-- Phase finale -->
-          <div class="col-md-6">
-            <div class="params-box params-box--gold">
-              <div class="params-box__title">
-                <i class="fas fa-trophy me-2"></i>Phase Finale
-              </div>
-              <table class="params-table">
-                <tr><td><i class="fas fa-clock me-2"></i>Durée</td><td><strong>10 min (Finale : 15 min)</strong></td></tr>
-                <tr><td><i class="fas fa-dumbbell me-2"></i>Forme domicile</td><td><strong>Excellente</strong></td></tr>
-                <tr><td><i class="fas fa-dumbbell me-2"></i>Forme extérieur</td><td><strong>Excellente</strong></td></tr>
-                <tr><td><i class="fas fa-arrows-rotate me-2"></i>Remplacements</td><td><strong>5 max</strong></td></tr>
-                <tr><td><i class="fas fa-stopwatch me-2"></i>Prolongations</td><td><strong class="text-success">Activées</strong></td></tr>
-                <tr><td><i class="fas fa-futbol me-2"></i>Tirs au but</td><td><strong class="text-success">Activés</strong></td></tr>
-                <tr><td><i class="fas fa-ban me-2"></i>Match nul</td><td><strong class="text-danger">Impossible</strong></td></tr>
-              </table>
+          <div class="rules-params__box rules-params__box--gold">
+            <div class="rules-params__title">
+              <i class="fas fa-trophy"></i> Phase Finale
             </div>
+            <table class="rules-params__table">
+              <tr><td><i class="fas fa-clock"></i> Durée</td><td><strong>10 min <small>(Finale 15 min)</small></strong></td></tr>
+              <tr><td><i class="fas fa-dumbbell"></i> Forme domicile</td><td><strong>Excellente</strong></td></tr>
+              <tr><td><i class="fas fa-dumbbell"></i> Forme extérieur</td><td><strong>Excellente</strong></td></tr>
+              <tr><td><i class="fas fa-arrows-rotate"></i> Remplacements</td><td><strong>5 max</strong></td></tr>
+              <tr><td><i class="fas fa-stopwatch"></i> Prolongations</td><td><strong class="t-success">Activées</strong></td></tr>
+              <tr><td><i class="fas fa-futbol"></i> Tirs au but</td><td><strong class="t-success">Activés</strong></td></tr>
+              <tr><td><i class="fas fa-ban"></i> Match nul</td><td><strong class="t-danger">Impossible</strong></td></tr>
+            </table>
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-    <!-- ARTICLE 4 : CAGNOTTE -->
-    <div class="prize-total">
-      <i class="fas fa-coins me-2"></i>
-      Cagnotte totale : <strong>60 000 FC</strong>
-      <small style="opacity:.7; margin-left:8px;">(24 équipes × 2 500 FC)</small>
-    </div>
+    <!-- ============================================ -->
+    <!-- ARTICLE 4 — CAGNOTTE -->
+    <!-- ============================================ -->
+    <article class="rules-card">
+      <div class="rules-card__num">4</div>
+      <div class="rules-card__body">
+        <h3 class="rules-card__title">Cagnotte & Répartition des prix</h3>
 
-    <div class="row g-3 mt-2">
-      <div class="col-6 col-md-3">
-        <div class="prize-card prize-card--gold">
-          <i class="fas fa-trophy prize-icon"></i>
-          <div class="prize-pos">🥇 Champion</div>
-          <div class="prize-amount">25 000 FC</div>
+        <p>
+          La cagnotte provient des frais d'inscription
+          (<strong>{{ cagnotte.fee|default:2500 }} FC</strong> par équipe).
+          Elle évolue selon le nombre d'équipes validées, avec une répartition
+          <strong>en pourcentages fixes</strong> garantissant l'équité saison après saison.
+        </p>
+
+        <div class="rules-prize-total">
+          <i class="fas fa-coins"></i>
+          <span>Cagnotte totale :</span>
+          {% if cagnotte.n_teams > 0 %}
+            <strong>{{ cagnotte.total }} FC</strong>
+            <small>({{ cagnotte.n_teams }} équipes × {{ cagnotte.fee }} FC)</small>
+          {% else %}
+            <strong>À déterminer</strong>
+            <small>(dès la clôture des inscriptions)</small>
+          {% endif %}
+        </div>
+
+        <div class="rules-prize-grid">
+          <div class="rules-prize rules-prize--gold">
+            <i class="fas fa-trophy rules-prize__icon"></i>
+            <div class="rules-prize__pos">🥇 Champion</div>
+            <div class="rules-prize__pct">40%</div>
+            <div class="rules-prize__amount">
+              {% if cagnotte.n_teams > 0 %}{{ cagnotte.champion }} FC{% else %}—{% endif %}
+            </div>
+          </div>
+
+          <div class="rules-prize rules-prize--silver">
+            <i class="fas fa-medal rules-prize__icon"></i>
+            <div class="rules-prize__pos">🥈 Finaliste</div>
+            <div class="rules-prize__pct">20%</div>
+            <div class="rules-prize__amount">
+              {% if cagnotte.n_teams > 0 %}{{ cagnotte.finaliste }} FC{% else %}—{% endif %}
+            </div>
+          </div>
+
+          <div class="rules-prize rules-prize--bronze">
+            <i class="fas fa-award rules-prize__icon"></i>
+            <div class="rules-prize__pos">🥉 Demi-finalistes</div>
+            <div class="rules-prize__pct">10% chacun</div>
+            <div class="rules-prize__amount">
+              {% if cagnotte.n_teams > 0 %}{{ cagnotte.demi }} FC <small>× 2</small>{% else %}—{% endif %}
+            </div>
+          </div>
+
+          <div class="rules-prize rules-prize--org">
+            <i class="fas fa-shield-alt rules-prize__icon"></i>
+            <div class="rules-prize__pos">🏛️ Organisation</div>
+            <div class="rules-prize__pct">20%</div>
+            <div class="rules-prize__amount">
+              {% if cagnotte.n_teams > 0 %}{{ cagnotte.org }} FC{% else %}—{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="rules-alert rules-alert--info mt-3">
+          <i class="fas fa-info-circle"></i>
+          Prix versés aux <strong>4 derniers survivants</strong> (champion, finaliste, 2 demi-finalistes).
+          Paiement <strong>le jour de la finale</strong>. Les 20% de l'organisation couvrent la logistique
+          (communication, données, matériel, imprévus).
         </div>
       </div>
-      <div class="col-6 col-md-3">
-        <div class="prize-card prize-card--silver">
-          <i class="fas fa-medal prize-icon"></i>
-          <div class="prize-pos">🥈 Finaliste</div>
-          <div class="prize-amount">15 000 FC</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="prize-card prize-card--bronze">
-          <i class="fas fa-award prize-icon"></i>
-          <div class="prize-pos">🥉 Demi-finalistes</div>
-          <div class="prize-amount">5 000 FC <small>× 2</small></div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="prize-card">
-          <i class="fas fa-shield-alt prize-icon"></i>
-          <div class="prize-pos">🏛️ Organisation</div>
-          <div class="prize-amount">10 000 FC</div>
-        </div>
-      </div>
-    </div>
+    </article>
 
-    <div class="prize-org mt-3">
-      <i class="fas fa-info-circle me-2"></i>
-      Prix distribués à partir des <strong>demi-finales</strong>.
-      Paiement le jour de la finale.
-    </div>
-
-    <!-- ARTICLE 5 : DÉLAIS -->
-    <div class="rules-card mb-4">
+    <!-- ============================================ -->
+    <!-- ARTICLE 5 — DÉLAIS & FENÊTRE DE JEU -->
+    <!-- ============================================ -->
+    <article class="rules-card">
       <div class="rules-card__num">5</div>
       <div class="rules-card__body">
-        <h3 class="rules-card__title">Délais & Calendrier</h3>
+        <h3 class="rules-card__title">Délais & Fenêtre de jeu</h3>
+
         <p>
-          Chaque match doit être joué dans les <strong>24 heures</strong> suivant sa publication dans le calendrier.
-          Limite absolue : <strong>12h59</strong>.
+          Chaque journée ouvre une <strong>fenêtre de 25 heures</strong> pour jouer :
         </p>
+
+        <div class="rules-window">
+          <div class="rules-window__item">
+            <div class="rules-window__label">Ouverture</div>
+            <div class="rules-window__value">J à 12h00</div>
+          </div>
+          <div class="rules-window__arrow"><i class="fas fa-arrow-right"></i></div>
+          <div class="rules-window__item">
+            <div class="rules-window__label">Fermeture</div>
+            <div class="rules-window__value">J+1 à 12h59</div>
+          </div>
+        </div>
+
         <p>
-          Chaque joueur doit vérifier le calendrier régulièrement et contacter son adversaire via WhatsApp
-          pour fixer l'heure du match. Tout manquement sans justification valable entraîne un <strong>forfait 3-0</strong>.
+          Les joueurs sont <strong>libres de fixer l'heure</strong> de leur match dans cette fenêtre,
+          via WhatsApp. Les matchs <strong>aller ET retour</strong> doivent être joués
+          <strong>le même jour</strong>.
         </p>
+
         <div class="rules-alert rules-alert--warn">
-          <i class="fas fa-hourglass-half me-2"></i>
-          Après <strong>24 heures</strong> sans résultat, l'organisateur peut décider d'office d'un forfait contre le joueur absent.
+          <i class="fas fa-hourglass-half"></i>
+          Passé le délai sans résultat, l'organisation applique d'office un <strong>forfait 0 – 3</strong>.
         </div>
       </div>
-    </div>
+    </article>
 
-    <!-- ARTICLE 6 : DÉCONNEXIONS -->
-    <div class="rules-card mb-4">
+    <!-- ============================================ -->
+    <!-- ARTICLE 6 — DÉCONNEXIONS -->
+    <!-- ============================================ -->
+    <article class="rules-card">
       <div class="rules-card__num">6</div>
       <div class="rules-card__body">
-        <h3 class="rules-card__title">Déconnexions & Problèmes réseau</h3>
+        <h3 class="rules-card__title">Déconnexions & problèmes réseau</h3>
 
-        <div class="rules-alert rules-alert--warn mb-3">
-          <i class="fas fa-wifi me-2"></i>
-          <strong>Important :</strong> Chaque joueur est personnellement responsable de tester sa connexion 4G/WiFi avant son match. La connexion instable en RDC est une réalité connue — ce règlement existe pour protéger le fair-play et éviter les abus.
+        <div class="rules-alert rules-alert--info mb-3">
+          <i class="fas fa-wifi"></i>
+          Chaque joueur est responsable de tester sa connexion avant match.
+          La connexion instable en RDC est une réalité connue — ce règlement protège le fair-play.
         </div>
 
-        <!-- CAS 1 -->
-        <div class="deco-case mb-3">
-          <div class="deco-case__num">Cas 1</div>
-          <div class="deco-case__title">Score nul 0-0 au moment de la déconnexion</div>
-          <p class="mb-0">
-            Si la déconnexion survient alors que le score est de <strong>0-0</strong>, le match est intégralement
-            rejoué à 0-0, quel que soit le joueur déconnecté. Aucun but n'est conservé.
-          </p>
+        <div class="rules-case">
+          <div class="rules-case__num">Cas 1</div>
+          <div class="rules-case__title">Score 0 – 0 au moment de la coupure</div>
+          <p class="mb-0">Match intégralement rejoué à 0 – 0, quel que soit le joueur déconnecté.</p>
         </div>
 
-        <!-- CAS 2 -->
-        <div class="deco-case mb-3">
-          <div class="deco-case__num">Cas 2</div>
-          <div class="deco-case__title">Un joueur mène au score</div>
+        <div class="rules-case">
+          <div class="rules-case__num">Cas 2</div>
+          <div class="rules-case__title">Un joueur mène au score</div>
 
-          <div class="sub-case sub-case--danger mb-2">
-            <strong>CAS A — Le joueur qui PERD se déconnecte</strong><br>
-            Victoire par forfait <strong>3-0</strong> accordée automatiquement au joueur qui menait au score.<br>
-            <small class="text-light" style="opacity:.75;">Ex : Score 2-1 pour A, B lag → Résultat final : A gagne 3-0</small>
+          <div class="rules-subcase rules-subcase--danger">
+            <strong>CAS A — Le perdant se déconnecte</strong><br>
+            Victoire <strong>3 – 0</strong> accordée automatiquement au joueur qui menait.<br>
+            <small>Ex : 2-1 pour A, B lag → A gagne 3-0</small>
           </div>
 
-          <div class="sub-case sub-case--info mb-2">
-            <strong>CAS B — Le joueur qui MÈNE se déconnecte</strong>
-            <table class="deco-table mt-2">
+          <div class="rules-subcase rules-subcase--info">
+            <strong>CAS B — Le meneur se déconnecte</strong>
+            <table class="rules-table">
               <tr>
-                <td><span class="time-badge">Avant 70'</span></td>
-                <td>Match à rejouer intégralement à 0-0. Le meneur perd son avantage.</td>
+                <td><span class="badge-time">Avant 70'</span></td>
+                <td>Match rejoué à 0 – 0. Le meneur perd son avantage.</td>
               </tr>
               <tr>
-                <td><span class="time-badge time-badge--green">≥ 70' — écart ≥ 3 buts</span></td>
-                <td>Le score au moment de la coupure est validé définitivement.<br>
-                <small style="opacity:.75;">Ex : 5-0 à la 85', le meneur lag → 5-0 validé</small></td>
+                <td><span class="badge-time badge-time--green">≥ 70' &amp; écart ≥ 3 buts</span></td>
+                <td>Score validé au moment de la coupure.<br><small>Ex : 5-0 à la 85' → 5-0 validé</small></td>
               </tr>
               <tr>
-                <td><span class="time-badge time-badge--warn">≥ 70' — écart &lt; 3 buts</span></td>
-                <td>Match à rejouer à 0-0.<br>
-                <small style="opacity:.75;">Ex : 2-0 à la 88', le meneur lag → on rejoue à 0-0</small></td>
+                <td><span class="badge-time badge-time--warn">≥ 70' &amp; écart &lt; 3 buts</span></td>
+                <td>Match rejoué à 0 – 0.<br><small>Ex : 2-0 à la 88' → rejoué</small></td>
               </tr>
             </table>
           </div>
         </div>
 
-        <!-- CAS 3 : PREUVE -->
-        <div class="deco-case mb-3">
-          <div class="deco-case__num">Cas 3</div>
-          <div class="deco-case__title">Preuve & Procédure de réclamation</div>
-          <p>Toute réclamation doit être accompagnée d'une <strong>capture d'écran ou vidéo</strong> montrant clairement :</p>
+        <div class="rules-case">
+          <div class="rules-case__num">Cas 3</div>
+          <div class="rules-case__title">Preuves & réclamation</div>
+          <p>Toute réclamation exige une <strong>capture d'écran ou vidéo</strong> montrant :</p>
           <ul class="rules-list">
             <li>Le score exact au moment de la déconnexion</li>
             <li>Le message de déconnexion affiché par le jeu</li>
           </ul>
-          <p>
-            La preuve doit être envoyée sur le <strong>groupe WhatsApp officiel</strong> dans les
-            <strong>5 minutes</strong> suivant l'incident.
-          </p>
+          <p>La preuve doit être envoyée au <strong>groupe WhatsApp officiel</strong> dans les <strong>5 minutes</strong> suivant l'incident.</p>
+
           <div class="rules-alert rules-alert--danger">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            Sans preuve valide, l'organisateur accordera automatiquement la victoire au joueur resté connecté.
+            <i class="fas fa-exclamation-triangle"></i>
+            Sans preuve valide, la victoire est accordée automatiquement au joueur resté connecté.
           </div>
         </div>
 
-        <!-- LIMITE ANTI-ABUS -->
-        <div class="deco-case mb-3">
-          <div class="deco-case__num">Limite</div>
-          <div class="deco-case__title">Anti-abus — Maximum 2 déconnexions par match</div>
+        <div class="rules-case">
+          <div class="rules-case__num">Anti-abus</div>
+          <div class="rules-case__title">Maximum 2 déconnexions par match</div>
           <p class="mb-0">
-            À la <strong>3ème déconnexion</strong>, c'est un forfait automatique <strong>3-0</strong> contre
-            le joueur déconnecté — même s'il menait au score.
+            À la <strong>3ᵉ déconnexion</strong>, forfait automatique <strong>0 – 3</strong>
+            contre le joueur déconnecté, même s'il menait au score.
           </p>
         </div>
 
-        <!-- FORCE MAJEURE -->
-        <div class="deco-case">
-          <div class="deco-case__num">Force majeure</div>
-          <div class="deco-case__title">Situations exceptionnelles</div>
-          <p>Les situations suivantes sont considérées comme cas de force majeure :</p>
+        <div class="rules-case">
+          <div class="rules-case__num">Force majeure</div>
+          <div class="rules-case__title">Situations exceptionnelles</div>
+          <p>Cas reconnus comme force majeure :</p>
           <ul class="rules-list">
-            <li><i class="fas fa-bolt me-2" style="color:#e6c200;"></i>Coupure générale d'électricité affectant les deux joueurs</li>
-            <li><i class="fas fa-server me-2" style="color:#e6c200;"></i>Maintenance ou panne des serveurs Konami (eFootball)</li>
-            <li><i class="fas fa-mobile-screen me-2" style="color:#e6c200;"></i>Bug serveur généralisé confirmé par Konami</li>
+            <li><i class="fas fa-bolt"></i> Coupure générale d'électricité affectant les deux joueurs</li>
+            <li><i class="fas fa-server"></i> Maintenance ou panne serveurs Konami</li>
+            <li><i class="fas fa-mobile-screen"></i> Bug serveur généralisé confirmé par Konami</li>
           </ul>
-          <p class="mb-0">Dans ces cas, le match est reporté par décision de l'organisation. La décision est souveraine et sans appel.</p>
+          <p class="mb-0">Dans ces cas, le match est reporté par décision souveraine de l'organisation.</p>
         </div>
       </div>
-    </div>
+    </article>
 
-    <!-- ARTICLE 7 : FAIR-PLAY -->
-    <div class="rules-card mb-4">
+    <!-- ============================================ -->
+    <!-- ARTICLE 7 — TRICHERIE & FAIR-PLAY -->
+    <!-- ============================================ -->
+    <article class="rules-card">
       <div class="rules-card__num">7</div>
       <div class="rules-card__body">
-        <h3 class="rules-card__title">Tricherie et Fraude</h3>
-        <ul class="rules-list">
-          <li>Toute falsification de résultat, utilisation de faux comptes ou tentative de manipulation=</li>
+        <h3 class="rules-card__title">Tricherie, fraude & fair-play</h3>
 
-          <li>occasionne <strong>l'exclusion immédiate et définitive de la competition</strong>.</li>
-        </ul>
-        <div class="rules-alert rules-alert--info">
-          <i class="fas fa-scale-balanced me-2"></i>
-          <strong>Cas non prévus :</strong> L'organisation se réserve le droit de trancher tout litige non prévu dans ce règlement, dans un esprit d'équité et de fair-play.
-        </div>
-      </div>
-    </div>
-
-        <!-- ARTICLE 8 : FAIR-PLAY -->
-    <div class="rules-card mb-4">
-      <div class="rules-card__num">8</div>
-      <div class="rules-card__body">
-        <h3 class="rules-card__title">Fair-play & Conduite</h3>
         <ul class="rules-list">
+          <li>Toute falsification de résultat, faux compte ou tentative de manipulation entraîne une <strong>exclusion immédiate et définitive</strong>.</li>
           <li>Tout comportement irrespectueux envers un adversaire ou un organisateur est sanctionné.</li>
-          <li>La manipulation de scores ou la triche entraîne une disqualification immédiate et définitive.</li>
-          <li>Les litiges doivent être signalés via la plateforme ou le groupe WhatsApp officiel dans un délai de <strong>15 minutes</strong> après le match.</li>
+          <li>Les litiges doivent être signalés via la plateforme ou le groupe WhatsApp officiel dans les <strong>15 minutes</strong> après le match.</li>
           <li>Toute décision de l'organisation est <strong>finale et souveraine</strong>.</li>
         </ul>
+
         <div class="rules-alert rules-alert--info">
-          <i class="fas fa-scale-balanced me-2"></i>
-          <strong>Cas non prévus :</strong> L'organisation se réserve le droit de trancher tout litige non prévu dans ce règlement, dans un esprit d'équité et de fair-play.
+          <i class="fas fa-scale-balanced"></i>
+          <strong>Cas non prévus :</strong> l'organisation se réserve le droit de trancher tout litige
+          dans un esprit d'équité et de fair-play.
         </div>
       </div>
-    </div>
+    </article>
 
+    <!-- ============================================ -->
     <!-- BOUTON PDF -->
-    <div class="text-center mt-4">
-      <a href="{% url 'download_rules_pdf' %}" class="btn-rules-pdf">
-        <i class="fas fa-file-pdf me-2"></i>Télécharger le règlement en PDF
+    <!-- ============================================ -->
+    <div class="rules-cta">
+      <a href="{% url 'download_rules_pdf' %}" class="rules-cta__btn">
+        <i class="fas fa-file-pdf"></i>
+        Télécharger le règlement en PDF
       </a>
     </div>
 
   </div>
 </section>
 
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
 <style>
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
 .rules-page {
-  background: linear-gradient(135deg, #070b14 0%, #0b1423 50%, #0f1a2d 100%);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(0,167,225,.14), transparent 60%),
+    linear-gradient(135deg, #070b14 0%, #0b1423 45%, #0f1a2d 100%);
   min-height: 100vh;
   color: rgba(255,255,255,.92);
+  padding-bottom: 60px;
 }
+.rules-container { max-width: 920px; }
 
+/* ============================================ */
 /* HERO */
-.rules-hero { padding: 20px 0 10px; }
-.rules-main-title {
-  font-weight: 1000;
-  letter-spacing: 2px;
-  color: #fff;
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
-  margin: 0;
+/* ============================================ */
+.rules-hero {
+  position: relative;
+  padding: 60px 0 40px;
+  overflow: hidden;
 }
-.rules-subtitle {
+.rules-hero__glow {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(230,194,0,.10), transparent 45%),
+    radial-gradient(circle at 80% 30%, rgba(0,167,225,.12), transparent 45%);
+  pointer-events: none;
+}
+.rules-hero__inner { position: relative; text-align: center; z-index: 2; }
+.rules-hero__logo {
+  height: 88px; margin-bottom: 18px;
+  filter: drop-shadow(0 0 20px rgba(230,194,0,.45));
+}
+.rules-hero__kicker {
+  color: rgba(255,255,255,.55);
+  font-weight: 800; letter-spacing: 5px;
+  font-size: .82rem; margin-bottom: 8px;
+}
+.rules-hero__title {
+  font-weight: 1000; letter-spacing: 2px;
+  color: #fff; font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+  margin: 0; line-height: 1.1;
+}
+.rules-hero__subtitle {
+  color: #e6c200; font-weight: 900;
+  letter-spacing: 4px; font-size: 1rem;
+  margin: 12px 0 20px;
+}
+.rules-hero__lead {
+  color: rgba(255,255,255,.72);
+  max-width: 620px; margin: 0 auto;
+  line-height: 1.7; font-size: .95rem;
+}
+.rules-hero__lead strong { color: #e6c200; }
+
+/* ============================================ */
+/* SUMMARY */
+/* ============================================ */
+.rules-summary {
+  background: linear-gradient(135deg, rgba(0,167,225,.10), rgba(230,194,0,.06));
+  border: 1px solid rgba(0,167,225,.25);
+  border-radius: 18px;
+  padding: 20px 22px;
+  margin-bottom: 28px;
+  backdrop-filter: blur(10px);
+}
+.rules-summary__title {
   color: #e6c200;
   font-weight: 900;
-  letter-spacing: 3px;
-  font-size: .9rem;
-  margin: 8px 0;
+  font-size: 1rem;
+  letter-spacing: .5px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
 }
-.rules-lead {
-  color: rgba(255,255,255,.72);
-  margin: 10px auto 0;
-  max-width: 600px;
-  line-height: 1.6;
+.rules-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.rules-summary__item {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.rules-summary__label {
+  font-size: .72rem;
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 4px;
+}
+.rules-summary__value {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
 }
 
+/* ============================================ */
 /* CARD */
+/* ============================================ */
 .rules-card {
-  background: rgba(17,28,47,.65);
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 18px;
-  padding: 0;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
   display: flex;
-  gap: 0;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  backdrop-filter: blur(12px);
+  transition: border-color .2s ease;
 }
+.rules-card:hover { border-color: rgba(230,194,0,.20); }
 .rules-card__num {
   background: linear-gradient(135deg, #003d82, #00a7e1);
   color: #fff;
   font-weight: 1000;
-  font-size: 1.4rem;
-  min-width: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 1.5rem;
+  min-width: 68px;
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.rules-card__body {
-  padding: 22px;
-  flex: 1;
-}
+.rules-card__body { padding: 24px 26px; flex: 1; }
 .rules-card__title {
   color: #e6c200;
   font-weight: 900;
-  margin-bottom: 14px;
-  font-size: 1.1rem;
-  letter-spacing: .4px;
+  font-size: 1.12rem;
+  margin-bottom: 16px;
+  letter-spacing: .3px;
 }
+.rules-card p {
+  color: rgba(255,255,255,.85);
+  line-height: 1.75;
+  margin-bottom: 12px;
+  font-size: .94rem;
+}
+.rules-card strong { color: #fff; }
 
+/* ============================================ */
 /* ALERTS */
+/* ============================================ */
 .rules-alert {
   border-radius: 12px;
-  padding: 12px 14px;
+  padding: 13px 15px;
   font-weight: 700;
-  margin-top: 10px;
+  margin-top: 12px;
+  font-size: .90rem;
+  display: flex; gap: 10px; align-items: flex-start;
+  line-height: 1.55;
 }
+.rules-alert i { margin-top: 3px; flex-shrink: 0; }
 .rules-alert--warn {
   background: rgba(255,193,7,.10);
-  border: 1px solid rgba(255,193,7,.35);
-  color: rgba(255,255,255,.90);
+  border: 1px solid rgba(255,193,7,.30);
+  color: rgba(255,255,255,.92);
 }
+.rules-alert--warn i { color: #ffc107; }
 .rules-alert--info {
-  background: rgba(0,167,225,.10);
-  border: 1px solid rgba(0,167,225,.30);
-  color: rgba(255,255,255,.90);
+  background: rgba(0,167,225,.08);
+  border: 1px solid rgba(0,167,225,.28);
+  color: rgba(255,255,255,.92);
 }
+.rules-alert--info i { color: #00a7e1; }
 .rules-alert--danger {
   background: rgba(220,53,69,.10);
-  border: 1px solid rgba(220,53,69,.35);
-  color: rgba(255,255,255,.90);
+  border: 1px solid rgba(220,53,69,.30);
+  color: rgba(255,255,255,.92);
 }
+.rules-alert--danger i { color: #ff6b6b; }
 
-/* LISTE */
+/* ============================================ */
+/* LIST */
+/* ============================================ */
 .rules-list {
-  padding-left: 20px;
-  line-height: 2;
+  padding-left: 22px;
   color: rgba(255,255,255,.88);
+  line-height: 1.9;
+  font-size: .94rem;
+  margin-bottom: 10px;
 }
+.rules-list li { margin-bottom: 4px; }
+.rules-list i { color: #e6c200; margin-right: 6px; }
 
+/* ============================================ */
+/* STEPS (format) */
+/* ============================================ */
+.rules-steps { margin: 16px 0 4px; }
+.rules-step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+}
+.rules-step__num {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e6c200, #b59a00);
+  color: #0f1a2d;
+  font-weight: 1000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.rules-step__title {
+  color: #fff; font-weight: 900;
+  font-size: 1rem; margin-bottom: 6px;
+}
+.rules-step__body p { margin: 0; font-size: .92rem; }
+
+/* ============================================ */
 /* PARAMS */
-.params-box {
-  background: rgba(255,255,255,.04);
+/* ============================================ */
+.rules-params {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 6px;
+}
+@media (max-width: 640px) { .rules-params { grid-template-columns: 1fr; } }
+.rules-params__box {
+  background: rgba(255,255,255,.035);
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 14px;
   padding: 16px;
-  height: 100%;
 }
-.params-box--gold {
-  border-color: rgba(230,194,0,.30);
+.rules-params__box--gold {
+  border-color: rgba(230,194,0,.28);
   background: rgba(230,194,0,.04);
 }
-.params-box__title {
+.rules-params__title {
   color: #e6c200;
   font-weight: 900;
-  margin-bottom: 12px;
-  font-size: .95rem;
+  font-size: .85rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.3px;
+  margin-bottom: 12px;
 }
-.params-table { width: 100%; border-collapse: collapse; }
-.params-table td {
-  padding: 5px 0;
-  font-size: .90rem;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+.rules-params__table { width: 100%; border-collapse: collapse; }
+.rules-params__table td {
+  padding: 6px 0;
+  font-size: .88rem;
+  border-bottom: 1px solid rgba(255,255,255,.05);
   color: rgba(255,255,255,.85);
 }
-.params-table td:last-child { text-align: right; }
+.rules-params__table td:first-child i { color: rgba(255,255,255,.55); margin-right: 6px; }
+.rules-params__table td:last-child { text-align: right; }
+.rules-params__table tr:last-child td { border-bottom: none; }
+.t-danger { color: #ff6b6b; }
+.t-success { color: #47d18c; }
+.rules-params__table small { opacity: .7; font-weight: 600; }
 
-/* PRIZE */
-.prize-total {
-  background: linear-gradient(45deg, rgba(230,194,0,.15), rgba(230,194,0,.05));
+/* ============================================ */
+/* PRIZES */
+/* ============================================ */
+.rules-prize-total {
+  background: linear-gradient(45deg, rgba(230,194,0,.14), rgba(230,194,0,.04));
   border: 1px solid rgba(230,194,0,.35);
   border-radius: 14px;
-  padding: 14px 18px;
-  font-size: 1.1rem;
+  padding: 16px 20px;
+  font-size: 1.05rem;
   color: #fff;
   font-weight: 700;
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin: 14px 0;
 }
-.prize-card {
+.rules-prize-total i { color: #e6c200; font-size: 1.1rem; }
+.rules-prize-total strong {
+  color: #e6c200; font-size: 1.2rem;
+  margin-left: auto;
+}
+.rules-prize-total small { opacity: .65; font-weight: 600; font-size: .82rem; }
+
+.rules-prize-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+@media (max-width: 768px) { .rules-prize-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.rules-prize {
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 14px;
   padding: 16px 12px;
   text-align: center;
-  height: 100%;
+  transition: transform .2s ease;
 }
-.prize-card--gold { border-color: rgba(230,194,0,.45); background: rgba(230,194,0,.08); }
-.prize-card--silver { border-color: rgba(192,192,192,.45); background: rgba(192,192,192,.06); }
-.prize-card--bronze { border-color: rgba(205,127,50,.45); background: rgba(205,127,50,.06); }
-.prize-icon { font-size: 1.6rem; color: #e6c200; display: block; margin-bottom: 8px; }
-.prize-pos { font-size: .82rem; color: rgba(255,255,255,.72); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-.prize-amount { font-size: 1.15rem; font-weight: 900; color: #fff; margin-top: 6px; }
-.prize-org {
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: rgba(255,255,255,.88);
-}
+.rules-prize:hover { transform: translateY(-3px); }
+.rules-prize--gold { border-color: rgba(230,194,0,.45); background: rgba(230,194,0,.07); }
+.rules-prize--silver { border-color: rgba(192,192,192,.40); background: rgba(192,192,192,.05); }
+.rules-prize--bronze { border-color: rgba(205,127,50,.40); background: rgba(205,127,50,.05); }
+.rules-prize--org { border-color: rgba(0,167,225,.35); background: rgba(0,167,225,.05); }
 
-/* DÉCO CASES */
-.deco-case {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
-  padding: 14px;
+.rules-prize__icon {
+  font-size: 1.5rem; color: #e6c200;
+  display: block; margin-bottom: 8px;
 }
-.deco-case__num {
+.rules-prize--org .rules-prize__icon { color: #00a7e1; }
+.rules-prize__pos {
+  font-size: .78rem;
+  color: rgba(255,255,255,.72);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+.rules-prize__pct {
+  color: #e6c200;
+  font-weight: 1000;
+  font-size: .82rem;
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+.rules-prize--org .rules-prize__pct { color: #00a7e1; }
+.rules-prize__amount {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #fff;
+  margin-top: 6px;
+}
+.rules-prize__amount small { opacity: .65; font-weight: 700; font-size: .75rem; }
+
+/* ============================================ */
+/* WINDOW */
+/* ============================================ */
+.rules-window {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 16px 0;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(0,167,225,.06);
+  border: 1px solid rgba(0,167,225,.20);
+  flex-wrap: wrap;
+}
+.rules-window__item { text-align: center; }
+.rules-window__label {
+  font-size: .72rem; color: rgba(255,255,255,.55);
+  text-transform: uppercase; letter-spacing: 1.2px;
+  font-weight: 800; margin-bottom: 4px;
+}
+.rules-window__value {
+  font-size: 1.15rem; font-weight: 1000;
+  color: #e6c200;
+}
+.rules-window__arrow { color: rgba(255,255,255,.30); font-size: 1.2rem; }
+
+/* ============================================ */
+/* CASE (déconnexions) */
+/* ============================================ */
+.rules-case {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.rules-case__num {
   display: inline-block;
-  padding: 4px 10px;
+  padding: 4px 11px;
   border-radius: 999px;
   background: rgba(0,61,130,.55);
   border: 1px solid rgba(0,167,225,.30);
   color: #fff;
   font-weight: 900;
-  font-size: .78rem;
+  font-size: .72rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
-.deco-case__title {
+.rules-case__title {
   font-weight: 900;
   color: #e6c200;
   margin-bottom: 10px;
   font-size: 1rem;
 }
-.sub-case {
+.rules-subcase {
   border-radius: 12px;
-  padding: 12px;
-  font-size: .92rem;
+  padding: 12px 14px;
+  font-size: .90rem;
+  margin-top: 10px;
+  line-height: 1.65;
 }
-.sub-case--danger {
-  background: rgba(220,53,69,.10);
-  border: 1px solid rgba(220,53,69,.25);
+.rules-subcase--danger {
+  background: rgba(220,53,69,.08);
+  border: 1px solid rgba(220,53,69,.22);
 }
-.sub-case--info {
-  background: rgba(0,167,225,.08);
-  border: 1px solid rgba(0,167,225,.20);
+.rules-subcase--info {
+  background: rgba(0,167,225,.06);
+  border: 1px solid rgba(0,167,225,.18);
 }
+.rules-subcase small { opacity: .75; }
 
-.deco-table { width: 100%; border-collapse: collapse; }
-.deco-table td {
-  padding: 8px 6px;
+.rules-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.rules-table td {
+  padding: 10px 8px;
   border-bottom: 1px solid rgba(255,255,255,.06);
   font-size: .88rem;
   color: rgba(255,255,255,.88);
   vertical-align: top;
 }
-.time-badge {
+.rules-table tr:last-child td { border-bottom: none; }
+.badge-time {
   display: inline-block;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
   font-weight: 900;
-  font-size: .78rem;
-  background: rgba(220,53,69,.20);
+  font-size: .76rem;
+  background: rgba(220,53,69,.18);
   border: 1px solid rgba(220,53,69,.35);
   color: #fff;
   white-space: nowrap;
 }
-.time-badge--green {
-  background: rgba(40,167,69,.20);
-  border-color: rgba(40,167,69,.35);
-}
-.time-badge--warn {
-  background: rgba(255,193,7,.14);
-  border-color: rgba(255,193,7,.35);
-}
+.badge-time--green { background: rgba(40,167,69,.18); border-color: rgba(40,167,69,.35); }
+.badge-time--warn { background: rgba(255,193,7,.14); border-color: rgba(255,193,7,.35); }
 
-/* PDF BUTTON */
-.btn-rules-pdf {
-  display: inline-flex;
-  align-items: center;
-  padding: 14px 28px;
+/* ============================================ */
+/* CTA */
+/* ============================================ */
+.rules-cta { text-align: center; margin-top: 30px; }
+.rules-cta__btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 15px 30px;
   border-radius: 999px;
   background: linear-gradient(135deg, #dc3545, #c82333);
-  color: #fff;
+  color: #fff !important;
   font-weight: 900;
   text-decoration: none;
   font-size: 1rem;
-  transition: opacity .2s ease;
+  box-shadow: 0 8px 24px rgba(220,53,69,.25);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
-.btn-rules-pdf:hover { opacity: .88; color: #fff; }
+.rules-cta__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(220,53,69,.40);
+}
 
+/* ============================================ */
 /* MOBILE */
+/* ============================================ */
 @media (max-width: 576px) {
   .rules-card { flex-direction: column; }
   .rules-card__num {
     min-width: unset;
-    padding: 12px;
-    font-size: 1.1rem;
-    flex-direction: row;
-    gap: 8px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    justify-content: flex-start;
   }
-  .rules-card__num::before { content: "Article "; font-size: .75rem; opacity: .8; }
+  .rules-card__num::before {
+    content: "Article ";
+    font-size: .75rem; opacity: .7; margin-right: 4px;
+  }
+  .rules-card__body { padding: 18px; }
+  .rules-summary { padding: 16px; }
+  .rules-prize__amount { font-size: .95rem; }
+  .rules-window { padding: 14px; gap: 10px; }
 }
 </style>
 {% endblock %}

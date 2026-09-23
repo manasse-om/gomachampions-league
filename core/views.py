@@ -268,6 +268,12 @@ def fixtures(request):
     today = timezone.localdate()
     fmt = None
 
+    # ============ FILTRES ============
+    phase_filter = (request.GET.get('phase') or '').strip()
+    status_filter = (request.GET.get('status') or '').strip()
+    team_filter = (request.GET.get('team') or '').strip()
+    matchday_filter = (request.GET.get('matchday') or '').strip()
+
     if competition:
         n_teams = Team.objects.filter(
             payment_validated=True,
@@ -275,29 +281,89 @@ def fixtures(request):
         ).exclude(abbreviation="TBD").count()
         fmt = get_competition_format(n_teams) if n_teams >= 12 else None
 
-        phases = Phase.objects.filter(
-            competition=competition
-        ).prefetch_related(
-            Prefetch(
-                'matches',
-                queryset=Match.objects.select_related(
-                    'home_team', 'away_team', 'phase'
-                ).order_by('scheduled_date')
+        # --- Base queryset ---
+        matches_qs = Match.objects.filter(
+            phase__competition=competition
+        ).select_related(
+            'home_team', 'away_team', 'phase'
+        ).order_by('scheduled_date')
+
+        # --- Filtres ---
+        if phase_filter:
+            matches_qs = matches_qs.filter(phase__name=phase_filter)
+
+        deadline = timezone.now() - timedelta(hours=48)
+        if status_filter == 'played':
+            matches_qs = matches_qs.filter(is_played=True)
+        elif status_filter == 'pending':
+            matches_qs = matches_qs.filter(is_played=False)
+        elif status_filter == 'late':
+            matches_qs = matches_qs.filter(
+                is_played=False, scheduled_date__lt=deadline
             )
-        )
+        elif status_filter == 'reported':
+            matches_qs = matches_qs.filter(reported=True, is_played=False)
+
+        if team_filter:
+            try:
+                tid = int(team_filter)
+                matches_qs = matches_qs.filter(
+                    Q(home_team_id=tid) | Q(away_team_id=tid)
+                )
+            except (ValueError, TypeError):
+                pass
+
+        if matchday_filter:
+            try:
+                matches_qs = matches_qs.filter(matchday=int(matchday_filter))
+            except (ValueError, TypeError):
+                pass
+
+        # --- Phases avec matchs filtrés ---
+        phases = Phase.objects.filter(competition=competition).prefetch_related(
+            Prefetch('matches', queryset=matches_qs)
+        ).order_by('order')
+
         for ph in phases:
             ph.today_matches = [
                 m for m in ph.matches.all()
                 if timezone.localtime(m.scheduled_date).date() == today
             ]
+
+        # --- Options de filtres ---
+        all_phases = Phase.objects.filter(competition=competition).order_by('order')
+        all_teams = Team.objects.filter(
+            payment_validated=True,
+            competition=competition
+        ).exclude(abbreviation="TBD").order_by('team_name')
+        all_matchdays = Match.objects.filter(
+            phase__competition=competition
+        ).exclude(matchday=0).values_list('matchday', flat=True).distinct().order_by('matchday')
+
+        filters_active = any([phase_filter, status_filter, team_filter, matchday_filter])
+        filtered_count = matches_qs.count()
     else:
         phases = []
+        all_phases = []
+        all_teams = []
+        all_matchdays = []
+        filters_active = False
+        filtered_count = 0
 
     return render(request, 'core/fixtures.html', {
         'competition': competition,
         'phases': phases,
         'today': today,
         'fmt': fmt,
+        'all_phases': all_phases,
+        'all_teams': all_teams,
+        'all_matchdays': all_matchdays,
+        'phase_filter': phase_filter,
+        'status_filter': status_filter,
+        'team_filter': team_filter,
+        'matchday_filter': matchday_filter,
+        'filters_active': filters_active,
+        'filtered_count': filtered_count,
     })
 
 
@@ -433,15 +499,40 @@ def bracket(request):
 # ==========================================
 def rules(request):
     """
-    Règlement de la compétition
+    Règlement de la compétition avec cagnotte adaptative.
     """
     competition = Competition.objects.filter(is_active=True).first()
-    
+
+    cagnotte = {
+        'total': 0, 'org': 0, 'champion': 0,
+        'finaliste': 0, 'demi': 0,
+        'n_teams': 0, 'fee': 0,
+    }
+
+    if competition:
+        n_teams = Team.objects.filter(
+            payment_validated=True,
+            competition=competition
+        ).exclude(abbreviation="TBD").count()
+
+        fee = competition.registration_fee or 2500
+        total = n_teams * fee
+
+        cagnotte = {
+            'total': total,
+            'org': int(total * 0.20),        # 20% organisation
+            'champion': int(total * 0.40),   # 40% champion
+            'finaliste': int(total * 0.20),  # 20% finaliste
+            'demi': int(total * 0.10),       # 10% × 2 demis
+            'n_teams': n_teams,
+            'fee': fee,
+        }
+
     context = {
         'competition': competition,
+        'cagnotte': cagnotte,
     }
     return render(request, 'core/rules.html', context)
-
 
 # ==========================================
 # À PROPOS
@@ -677,16 +768,23 @@ def update_team_stats(match):
 # MES MATCHS (POUR LES JOUEURS)
 # ==========================================
 @login_required
+@login_required
 def my_matches(request):
     """
-    Afficher les matchs de l'utilisateur connecté
+    Afficher les matchs de l'utilisateur connecté (saison active)
     """
-    # Récupérer l'équipe de l'utilisateur
+    # ✅ Patch #2: filtrer par compétition active
+    competition = Competition.objects.filter(is_active=True).first()
     try:
-        team = Team.objects.get(user=request.user)
+        team = Team.objects.get(user=request.user, competition=competition)
     except Team.DoesNotExist:
         messages.error(request, _("Vous n'avez pas d'équipe associée."))
         return redirect('home')
+    except Team.MultipleObjectsReturned:
+        # Sécurité: prend la plus récente
+        team = Team.objects.filter(
+            user=request.user, competition=competition
+        ).order_by('-created_at').first()
     
     # Vérifier si le paiement est validé
     if not team.payment_validated:
@@ -716,17 +814,19 @@ def my_matches(request):
 # ==========================================
 @login_required
 def report_match(request, match_id):
-    """
-    Signaler un problème sur un match
-    """
     match = get_object_or_404(Match, pk=match_id)
     
-    # Vérifier que l'utilisateur est bien impliqué dans ce match
+    # ✅ Patch #2
+    competition = Competition.objects.filter(is_active=True).first()
     try:
-        team = Team.objects.get(user=request.user)
+        team = Team.objects.get(user=request.user, competition=competition)
     except Team.DoesNotExist:
         messages.error(request, _("Vous n'avez pas d'équipe associée."))
         return redirect('home')
+    except Team.MultipleObjectsReturned:
+        team = Team.objects.filter(
+            user=request.user, competition=competition
+        ).order_by('-created_at').first()
     
     if match.home_team != team and match.away_team != team:
         messages.error(request, _("Vous n'êtes pas impliqué dans ce match."))
@@ -916,45 +1016,289 @@ def validate_payment(request, team_id):
 
 @role_required(['superadmin', 'organisateur', 'match'])
 def download_calendar_pdf(request):
+    """
+    PDF du calendrier. Respecte les filtres GET (phase, status, team, matchday).
+    """
+    from io import BytesIO
+    from django.contrib.staticfiles import finders
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+        Image, HRFlowable, PageBreak,
+    )
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.enums import TA_CENTER
+
+    # ============ COULEURS ============
+    NAVY = colors.HexColor("#0b1423")
+    GOLD = colors.HexColor("#e6c200")
+    CYAN = colors.HexColor("#00a7e1")
+    CYAN_BG = colors.HexColor("#e6f6fd")
+    GREEN = colors.HexColor("#28a745")
+    RED = colors.HexColor("#dc3545")
+    AMBER = colors.HexColor("#ffc107")
+    GREY = colors.HexColor("#666666")
+    GREY_BG = colors.HexColor("#f4f6fa")
+    GREY_LINE = colors.HexColor("#d8dde7")
+    WHITE = colors.white
+    DARK = colors.HexColor("#333333")
+
+    # ============ COMPÉTITION ============
     competition = Competition.objects.filter(is_active=True).first()
     if not competition:
         messages.error(request, "Aucune compétition active.")
         return redirect('dashboard')
 
-    phases = Phase.objects.filter(competition=competition).prefetch_related('matches')
+    # ============ FILTRES ============
+    phase_filter = (request.GET.get('phase') or '').strip()
+    status_filter = (request.GET.get('status') or '').strip()
+    team_filter = (request.GET.get('team') or '').strip()
+    matchday_filter = (request.GET.get('matchday') or '').strip()
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="calendrier_goma_cl.pdf"'
+    matches_qs = Match.objects.filter(
+        phase__competition=competition
+    ).select_related('home_team', 'away_team', 'phase').order_by(
+        'phase__order', 'matchday', 'scheduled_date'
+    )
 
-    p = canvas.Canvas(response, pagesize=A4)
-    width, height = A4
+    if phase_filter:
+        matches_qs = matches_qs.filter(phase__name=phase_filter)
 
-    y = height - 40
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, y, competition.name)
-    y -= 30
+    now = timezone.now()
+    deadline = now - timedelta(hours=48)
 
-    p.setFont("Helvetica", 10)
+    if status_filter == 'played':
+        matches_qs = matches_qs.filter(is_played=True)
+    elif status_filter == 'pending':
+        matches_qs = matches_qs.filter(is_played=False)
+    elif status_filter == 'late':
+        matches_qs = matches_qs.filter(
+            is_played=False, scheduled_date__lt=deadline
+        )
+    elif status_filter == 'reported':
+        matches_qs = matches_qs.filter(reported=True, is_played=False)
 
-    for phase in phases:
-        p.drawString(50, y, phase.get_name_display())
-        y -= 20
+    if team_filter:
+        try:
+            tid = int(team_filter)
+            matches_qs = matches_qs.filter(
+                Q(home_team_id=tid) | Q(away_team_id=tid)
+            )
+        except (ValueError, TypeError):
+            pass
 
-        for match in phase.matches.all():
-            line = f"{match.scheduled_date.strftime('%d/%m/%Y %H:%M')} - {match.home_team.team_name} vs {match.away_team.team_name}"
-            p.drawString(60, y, line)
-            y -= 15
+    if matchday_filter:
+        try:
+            md = int(matchday_filter)
+            matches_qs = matches_qs.filter(matchday=md)
+        except (ValueError, TypeError):
+            pass
 
-            if y < 50:
-                p.showPage()
-                p.setFont("Helvetica", 10)
-                y = height - 40
+    total = matches_qs.count()
 
-        y -= 10
+    # ============ STYLES ============
+    s_title = ParagraphStyle('title', fontName='Helvetica-Bold', fontSize=20,
+                             leading=24, textColor=NAVY, alignment=TA_CENTER)
+    s_sub = ParagraphStyle('sub', fontName='Helvetica-Bold', fontSize=11,
+                           leading=14, textColor=GOLD, alignment=TA_CENTER)
+    s_lead = ParagraphStyle('lead', fontName='Helvetica', fontSize=9.5,
+                            leading=13, textColor=GREY, alignment=TA_CENTER)
+    s_phase = ParagraphStyle('phase', fontName='Helvetica-Bold', fontSize=12,
+                             leading=16, textColor=WHITE)
+    s_cell = ParagraphStyle('cell', fontName='Helvetica', fontSize=9,
+                            leading=12, textColor=DARK)
+    s_cell_bold = ParagraphStyle('cellb', parent=s_cell, fontName='Helvetica-Bold')
+    s_cell_center = ParagraphStyle('cellc', parent=s_cell, alignment=TA_CENTER)
+    s_cell_center_b = ParagraphStyle('cellcb', parent=s_cell_bold, alignment=TA_CENTER)
+    s_status_played = ParagraphStyle('stp', parent=s_cell_center_b, textColor=GREEN)
+    s_status_late = ParagraphStyle('stl', parent=s_cell_center_b, textColor=RED)
+    s_status_pending = ParagraphStyle('stpd', parent=s_cell_center_b, textColor=GREY)
+    s_status_reported = ParagraphStyle('str', parent=s_cell_center_b, textColor=AMBER)
+    s_footer = ParagraphStyle('footer', fontName='Helvetica', fontSize=8,
+                              leading=10, textColor=GREY, alignment=TA_CENTER)
+    s_empty = ParagraphStyle('empty', fontName='Helvetica-Oblique', fontSize=10,
+                             leading=14, textColor=GREY, alignment=TA_CENTER)
 
-    p.save()
+    # ============ CONSTRUCTION ============
+    story = []
+
+    # Logo
+    logo_path = finders.find('images/logo.png')
+    if logo_path:
+        try:
+            logo = Image(logo_path, width=18*mm, height=18*mm)
+            logo.hAlign = 'CENTER'
+            story.append(logo)
+            story.append(Spacer(1, 4))
+        except Exception:
+            pass
+
+    story.append(Paragraph("GOMA CHAMPIONS LEAGUE", s_title))
+    story.append(Paragraph("CALENDRIER OFFICIEL DES MATCHS", s_sub))
+    story.append(Spacer(1, 4))
+
+    # Résumé filtres
+    summary_parts = [f"{total} match{'s' if total != 1 else ''}"]
+    if phase_filter:
+        ph = Phase.objects.filter(competition=competition, name=phase_filter).first()
+        if ph:
+            summary_parts.append(f"Phase : {ph.get_name_display()}")
+    if status_filter:
+        labels = {'played': 'Joués', 'pending': 'À jouer',
+                  'late': 'En retard', 'reported': 'Signalés'}
+        summary_parts.append(f"Statut : {labels.get(status_filter, status_filter)}")
+    if team_filter:
+        try:
+            t = Team.objects.get(pk=int(team_filter))
+            summary_parts.append(f"Équipe : {t.team_name}")
+        except (Team.DoesNotExist, ValueError, TypeError):
+            pass
+    if matchday_filter:
+        summary_parts.append(f"Journée : J{matchday_filter}")
+
+    story.append(Paragraph(" • ".join(summary_parts), s_lead))
+    story.append(Spacer(1, 10))
+    story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=12))
+
+    if total == 0:
+        story.append(Spacer(1, 30))
+        story.append(Paragraph("Aucun match ne correspond aux filtres actifs.", s_empty))
+    else:
+        # Grouper par phase
+        phases_order = ['league', 'playoff', 'round_16', 'quarter', 'semi', 'final']
+        grouped = {}
+        for m in matches_qs:
+            grouped.setdefault(m.phase_id, {'phase': m.phase, 'matches': []})
+            grouped[m.phase_id]['matches'].append(m)
+
+        ordered_phases = sorted(
+            grouped.values(),
+            key=lambda g: phases_order.index(g['phase'].name)
+            if g['phase'].name in phases_order else 99,
+        )
+
+        col_widths = [22*mm, 55*mm, 18*mm, 55*mm, 28*mm]
+
+        for block in ordered_phases:
+            phase = block['phase']
+            matches = block['matches']
+
+            # Titre de phase (bandeau cyan)
+            ph_title = Paragraph(
+                f"{phase.get_name_display()} &nbsp;<font size='9' color='#bde6f7'>"
+                f"({len(matches)} match{'s' if len(matches) != 1 else ''})</font>",
+                s_phase,
+            )
+            ph_tbl = Table([[ph_title]], colWidths=[sum(col_widths)])
+            ph_tbl.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), CYAN),
+                ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ]))
+            story.append(ph_tbl)
+            story.append(Spacer(1, 2))
+
+            # Tableau des matchs
+            header = [
+                Paragraph('<b>Date</b>', s_cell_center_b),
+                Paragraph('<b>Domicile</b>', s_cell_bold),
+                Paragraph('<b>Score</b>', s_cell_center_b),
+                Paragraph('<b>Extérieur</b>', s_cell_bold),
+                Paragraph('<b>Statut</b>', s_cell_center_b),
+            ]
+            rows = [header]
+            styles = [
+                ('BACKGROUND', (0, 0), (-1, 0), NAVY),
+                ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
+                ('GRID', (0, 0), (-1, -1), 0.35, GREY_LINE),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING', (0, 0), (-1, -1), 5),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ]
+
+            for i, m in enumerate(matches, start=1):
+                # Date
+                d = timezone.localtime(m.scheduled_date)
+                date_txt = d.strftime('%d/%m')
+
+                # Score
+                if m.is_played and not m.is_forfeit:
+                    score_txt = f"{m.home_score or 0} - {m.away_score or 0}"
+                elif m.is_forfeit:
+                    score_txt = "FF"
+                else:
+                    score_txt = "—"
+
+                # Statut
+                if m.is_forfeit:
+                    status = Paragraph("Forfait", s_status_reported)
+                elif m.is_played:
+                    status = Paragraph("Joué", s_status_played)
+                elif m.reported:
+                    status = Paragraph("Signalé", s_status_reported)
+                elif m.scheduled_date < deadline:
+                    status = Paragraph("En retard", s_status_late)
+                else:
+                    status = Paragraph("À jouer", s_status_pending)
+
+                home_name = (m.home_team.team_name or m.home_team.abbreviation)[:32]
+                away_name = (m.away_team.team_name or m.away_team.abbreviation)[:32]
+
+                rows.append([
+                    Paragraph(date_txt, s_cell_center),
+                    Paragraph(home_name, s_cell_bold),
+                    Paragraph(score_txt, s_cell_center_b),
+                    Paragraph(away_name, s_cell_bold),
+                    status,
+                ])
+
+                if i % 2 == 0:
+                    styles.append(('BACKGROUND', (0, i), (-1, i), GREY_BG))
+
+            tbl = Table(rows, colWidths=col_widths, repeatRows=1)
+            tbl.setStyle(TableStyle(styles))
+            story.append(tbl)
+            story.append(Spacer(1, 12))
+
+    # Footer
+    story.append(Spacer(1, 6))
+    story.append(HRFlowable(width="100%", thickness=0.8, color=GOLD, spaceAfter=6))
+    gen = timezone.localtime(timezone.now()).strftime('%d/%m/%Y à %Hh%M')
+    story.append(Paragraph(
+        f"Document généré le {gen} — Goma Champions League 2026<br/>"
+        f"<b>gomacl.onrender.com</b>",
+        s_footer,
+    ))
+
+    # Build
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4,
+        leftMargin=15*mm, rightMargin=15*mm,
+        topMargin=15*mm, bottomMargin=15*mm,
+        title=f"Calendrier — {competition.name}",
+        author="Goma Champions League",
+    )
+    doc.build(story)
+    buffer.seek(0)
+
+    # Nom de fichier adapté aux filtres
+    parts = ["calendrier"]
+    if phase_filter:
+        parts.append(phase_filter)
+    if status_filter:
+        parts.append(status_filter)
+    filename = "_".join(parts) + f"_{datetime.now().strftime('%Y%m%d')}.pdf"
+
+    response = HttpResponse(buffer, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
-
 
 @role_required(['superadmin', 'organisateur'])
 def backup_database(request):
@@ -970,34 +1314,322 @@ def backup_database(request):
 
 
 def download_rules_pdf(request):
+    """
+    Génère le PDF officiel du règlement — design pro avec logo + sections colorées.
+    Lit le montant d'inscription depuis la compétition active.
+    """
+    from io import BytesIO
+    from django.contrib.staticfiles import finders
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+        Image, HRFlowable, KeepTogether,
+    )
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.enums import TA_CENTER
+
+    # ==================================================
+    # COULEURS
+    # ==================================================
+    NAVY      = colors.HexColor("#0b1423")
+    GOLD      = colors.HexColor("#e6c200")
+    GOLD_BG   = colors.HexColor("#fffbe6")
+    CYAN      = colors.HexColor("#00a7e1")
+    CYAN_BG   = colors.HexColor("#e6f6fd")
+    RED       = colors.HexColor("#dc3545")
+    RED_BG    = colors.HexColor("#fdecee")
+    GREEN     = colors.HexColor("#28a745")
+    GREEN_BG  = colors.HexColor("#e9f7ec")
+    GREY_DARK = colors.HexColor("#333333")
+    GREY      = colors.HexColor("#666666")
+    GREY_BG   = colors.HexColor("#f4f6fa")
+    WHITE     = colors.white
+
+    # ==================================================
+    # DONNÉES DYNAMIQUES
+    # ==================================================
+    competition = Competition.objects.filter(is_active=True).first()
+    fee = (competition.registration_fee if competition else None) or 1000
+
+    # ==================================================
+    # STYLES
+    # ==================================================
+    s_kicker = ParagraphStyle('kicker', fontName='Helvetica-Bold', fontSize=9,
+                              leading=12, textColor=GREY, alignment=TA_CENTER,
+                              spaceAfter=2)
+    s_title = ParagraphStyle('title', fontName='Helvetica-Bold', fontSize=22,
+                             leading=26, textColor=NAVY, alignment=TA_CENTER,
+                             spaceAfter=2)
+    s_subtitle = ParagraphStyle('subtitle', fontName='Helvetica-Bold', fontSize=11,
+                                leading=14, textColor=GOLD, alignment=TA_CENTER,
+                                spaceAfter=8)
+    s_lead = ParagraphStyle('lead', fontName='Helvetica', fontSize=10,
+                            leading=14, textColor=GREY, alignment=TA_CENTER,
+                            spaceAfter=4)
+    s_body = ParagraphStyle('body', fontName='Helvetica', fontSize=10,
+                            leading=15, textColor=GREY_DARK, spaceAfter=4)
+    s_bullet = ParagraphStyle('bullet', parent=s_body, leftIndent=12,
+                              bulletIndent=2, spaceAfter=3)
+    s_footer = ParagraphStyle('footer', fontName='Helvetica', fontSize=8,
+                              leading=10, textColor=GREY, alignment=TA_CENTER)
+    s_small = ParagraphStyle('small', fontName='Helvetica-Oblique', fontSize=8.5,
+                             leading=11, textColor=GREY, spaceAfter=6)
+
+    # ==================================================
+    # HEADER : LOGO
+    # ==================================================
+    story = []
+
+    logo_path = finders.find('images/logo.png')
+    if logo_path:
+        try:
+            logo = Image(logo_path, width=20*mm, height=20*mm)
+            logo.hAlign = 'CENTER'
+            story.append(logo)
+            story.append(Spacer(1, 4))
+        except Exception:
+            pass
+
+    story.append(Paragraph("SAISON 2026", s_kicker))
+    story.append(Paragraph("GOMA CHAMPIONS LEAGUE", s_title))
+    story.append(Paragraph("RÈGLEMENT OFFICIEL", s_subtitle))
+    story.append(Paragraph(
+        "Compétition officielle <b>eFootball Mobile</b> — Goma, RDC.<br/>"
+        "Format UEFA Champions League adaptatif de <b>12 à 36 équipes</b>.",
+        s_lead,
+    ))
+    story.append(Spacer(1, 8))
+    story.append(HRFlowable(width="100%", thickness=1.2, color=GOLD, spaceAfter=14))
+
+    # ==================================================
+    # HELPER : titre de section avec badge
+    # ==================================================
+    def section_header(num, title):
+        num_para = Paragraph(
+            f'<font color="white"><b>{num}</b></font>',
+            ParagraphStyle('num', fontName='Helvetica-Bold', fontSize=13,
+                           leading=16, alignment=TA_CENTER),
+        )
+        title_para = Paragraph(
+            f'<b>{title}</b>',
+            ParagraphStyle('title', fontName='Helvetica-Bold', fontSize=12,
+                           leading=16, textColor=NAVY),
+        )
+        tbl = Table([[num_para, title_para]], colWidths=[10*mm, None])
+        tbl.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, 0), CYAN),
+            ('BACKGROUND', (1, 0), (1, 0), GREY_BG),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('LEFTPADDING', (0, 0), (0, 0), 2),
+            ('RIGHTPADDING', (0, 0), (0, 0), 2),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('LEFTPADDING', (1, 0), (1, 0), 10),
+        ]))
+        return tbl
+
+    # ==================================================
+    # SECTION 1 — INSCRIPTION
+    # ==================================================
+    story.append(section_header("1", "Conditions d'inscription"))
+    story.append(Spacer(1, 6))
+    for txt in [
+        "<b>Une seule équipe</b> par joueur.",
+        f"Frais d'inscription : <b>{fee} FC</b> (montant configurable par l'organisation).",
+        "Validation du compte après vérification du paiement par l'administrateur.",
+    ]:
+        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
+    story.append(Spacer(1, 10))
+
+    # ==================================================
+    # SECTION 2 — RÉGLAGES
+    # ==================================================
+    story.append(section_header("2", "Réglages officiels des matchs"))
+    story.append(Spacer(1, 6))
+
+    rows = [
+        ["", "Phase de Ligue", "Phase Finale"],
+        ["Durée",            "10 minutes",              "10 min (Finale : 15 min)"],
+        ["Forme domicile",   "Excellente",              "Excellente"],
+        ["Forme extérieur",  "Excellente",              "Excellente"],
+        ["Remplacements",    "5 max",                   "5 max"],
+        ["Météo",            "Par défaut",              "Par défaut"],
+        ["Prolongations",    "Désactivées",             "Activées"],
+        ["Tirs au but",      "—",                       "Activés"],
+        ["Match nul",        "Autorisé",                "Impossible"],
+    ]
+
+    tbl = Table(rows, colWidths=[38*mm, 55*mm, 65*mm])
+    tbl.setStyle(TableStyle([
+        # Header
+        ('BACKGROUND', (0, 0), (-1, 0), NAVY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('ALIGN', (1, 0), (-1, 0), 'CENTER'),
+        # Body
+        ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (1, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9.5),
+        ('TEXTCOLOR', (0, 1), (0, -1), GREY_DARK),
+        ('TEXTCOLOR', (1, 1), (-1, -1), GREY_DARK),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # Grille
+        ('GRID', (0, 0), (-1, -1), 0.4, colors.HexColor("#d8dde7")),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, GREY_BG]),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    story.append(tbl)
+    story.append(Spacer(1, 10))
+
+    # ==================================================
+    # SECTION 3 — FORMAT
+    # ==================================================
+    story.append(section_header("3", "Format de la compétition"))
+    story.append(Spacer(1, 6))
+    for txt in [
+        "Format <b>adaptatif de 12 à 36 équipes</b>, dans l'esprit de l'UEFA Champions League.",
+        "<b>Phase de Ligue</b> : 4 à 8 matchs par équipe selon le nombre d'inscrits.",
+        "Qualifiés directs + barrages, puis <b>8<sup>es</sup> de finale ou Quarts</b> selon effectif.",
+        "<b>Phases finales en aller-retour</b> jouées sur une même journée.",
+        "<b>Finale en match unique</b>.",
+        "Création de la salle par l'équipe « domicile » (invitation via WhatsApp).",
+    ]:
+        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
+    story.append(Spacer(1, 10))
+
+    # ==================================================
+    # SECTION 4 — FENÊTRE DE JEU
+    # ==================================================
+    story.append(section_header("4", "Fenêtre de jeu (25 heures)"))
+    story.append(Spacer(1, 6))
+
+    window_tbl = Table(
+        [[Paragraph('<b>Ouverture</b><br/><font size="13" color="#e6c200"><b>J à 12h00</b></font>',
+                    ParagraphStyle('w', fontName='Helvetica', fontSize=10,
+                                   leading=15, alignment=TA_CENTER,
+                                   textColor=GREY_DARK)),
+          Paragraph('<b>Fermeture</b><br/><font size="13" color="#e6c200"><b>J+1 à 12h59</b></font>',
+                    ParagraphStyle('w', fontName='Helvetica', fontSize=10,
+                                   leading=15, alignment=TA_CENTER,
+                                   textColor=GREY_DARK))]],
+        colWidths=[80*mm, 80*mm],
+    )
+    window_tbl.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), CYAN_BG),
+        ('BOX', (0, 0), (-1, -1), 0.5, CYAN),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, CYAN),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    story.append(window_tbl)
+    story.append(Spacer(1, 6))
+
+    for txt in [
+        "Chaque journée ouvre à <b>12h00</b> et ferme à <b>12h59 le lendemain</b> (25 h).",
+        "Les joueurs fixent librement l'heure de leur match dans cette fenêtre via WhatsApp.",
+        "Les matchs <b>aller ET retour</b> se jouent <b>le même jour</b>.",
+        "Tout match non joué dans la fenêtre = <b>forfait 0 – 3</b>.",
+        "Signalement des litiges via la section « Mes matchs » dans les <b>15 minutes</b>.",
+    ]:
+        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
+    story.append(Spacer(1, 10))
+
+    # ==================================================
+    # SECTION 5 — RÉCOMPENSES
+    # ==================================================
+    story.append(section_header("5", "Répartition des récompenses"))
+    story.append(Spacer(1, 6))
+
+    prize_rows = [
+        ["Position", "% de la cagnotte"],
+        ["🥇 Champion",                    "40 %"],
+        ["🥈 Finaliste",                   "20 %"],
+        ["🥉 Demi-finalistes (× 2)",        "10 % chacun"],
+        ["🏛️ Organisation",                "20 %"],
+    ]
+    pt = Table(prize_rows, colWidths=[90*mm, 70*mm])
+    pt.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), NAVY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('TEXTCOLOR', (0, 1), (-1, -1), GREY_DARK),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('GRID', (0, 0), (-1, -1), 0.4, colors.HexColor("#d8dde7")),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, GOLD_BG]),
+        ('TOPPADDING', (0, 0), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    story.append(pt)
+    story.append(Spacer(1, 6))
+    story.append(Paragraph(
+        "Les montants exacts sont calculés automatiquement selon la cagnotte finale "
+        "(nombre d'équipes validées × frais d'inscription). "
+        "Prix versés aux 4 derniers survivants le jour de la finale.",
+        s_small,
+    ))
+    story.append(Spacer(1, 10))
+
+    # ==================================================
+    # SECTION 6 — DISPOSITIONS FINALES
+    # ==================================================
+    story.append(section_header("6", "Dispositions finales"))
+    story.append(Spacer(1, 6))
+    for txt in [
+        "Toute falsification de résultat entraîne une <b>exclusion définitive</b>.",
+        "Maximum <b>2 déconnexions</b> par match — au 3ᵉ, forfait 0-3.",
+        "La décision de l'organisation est <b>finale et souveraine</b>.",
+        "Cas non prévus : l'organisation tranche dans un esprit d'équité et de fair-play.",
+    ]:
+        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
+
+    # ==================================================
+    # PIED DE PAGE
+    # ==================================================
+    story.append(Spacer(1, 16))
+    story.append(HRFlowable(width="100%", thickness=0.8, color=GOLD, spaceAfter=8))
+    gen_date = timezone.localtime(timezone.now()).strftime('%d/%m/%Y à %Hh%M')
+    story.append(Paragraph(
+        f"Document généré le {gen_date} — Goma Champions League 2026<br/>"
+        f"<b>gomacl.onrender.com</b>",
+        s_footer,
+    ))
+
+    # ==================================================
+    # BUILD
+    # ==================================================
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer)
-
-    styles = getSampleStyleSheet()
-    elements = []
-
-    title_style = styles["Heading1"]
-    normal_style = styles["Normal"]
-
-    elements.append(Paragraph("GOMA CHAMPIONS LEAGUE 2026", title_style))
-    elements.append(Spacer(1, 0.3 * inch))
-    elements.append(Paragraph("REGLEMENT OFFICIEL", styles["Heading2"]))
-    elements.append(Spacer(1, 0.5 * inch))
-
-    content = render_to_string("core/rules_pdf_content.html")
-
-    for line in content.split("\n"):
-        elements.append(Paragraph(line, normal_style))
-        elements.append(Spacer(1, 0.2 * inch))
-
-    doc.build(elements)
-
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        leftMargin=18*mm,
+        rightMargin=18*mm,
+        topMargin=15*mm,
+        bottomMargin=15*mm,
+        title="Règlement Officiel — Goma Champions League 2026",
+        author="Goma Champions League",
+    )
+    doc.build(story)
     buffer.seek(0)
+
     response = HttpResponse(buffer, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="Reglement_GomaCL_{datetime.now().strftime("%Y%m%d")}.pdf"'
-
+    filename = f"Reglement_GomaCL_{datetime.now().strftime('%Y%m%d')}.pdf"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
-
 
 @role_required(['superadmin', 'organisateur'])
 def manage_competition(request):
@@ -1086,9 +1718,21 @@ def team_delete(request, pk):
 
 @login_required
 def edit_my_team(request):
-    team = get_object_or_404(Team, user=request.user)
-
-    form = TeamRegistrationForm(request.POST or None, instance=team)
+    # ✅ Patch #2
+    competition = Competition.objects.filter(is_active=True).first()
+    team = Team.objects.filter(
+        user=request.user, competition=competition
+    ).order_by('-created_at').first()
+    
+    if not team:
+        messages.error(request, _("Vous n'avez pas d'équipe associée."))
+        return redirect('home')
+    
+    form = TeamRegistrationForm(request.POST or None, instance=team, competition=competition)
+    if form.is_valid():
+        form.save()
+        return redirect('my_matches')
+    return render(request, 'core/edit_my_team.html', {'form': form})
 
     if form.is_valid():
         form.save()
@@ -1712,6 +2356,7 @@ def league_generate_8_matchdays(request):
     fmt = get_competition_format(n)
     k = fmt['opponents_per_team']
     n_rounds = fmt['matchdays']
+    has_bye = fmt['has_bye']
 
     if request.method != 'POST':
         return render(request, 'core/admin/league_generate_8_matchdays.html', {
@@ -1719,6 +2364,8 @@ def league_generate_8_matchdays(request):
             'fmt': fmt,
             'n_rounds': n_rounds,
             'k': k,
+            'has_bye': has_bye,
+            'n_teams': n,
         })
 
     start_date_str = (request.POST.get('start_date') or '').strip()
@@ -1740,18 +2387,26 @@ def league_generate_8_matchdays(request):
 
     deleted_count, _ = Match.objects.filter(phase=phase).delete()
 
-    random.shuffle(teams)
-    fixed = teams[0]
-    rotating = teams[1:]
+    # ✅ Algorithme du carrousel adapté aux impairs
+    # Si impair, on ajoute une équipe fictive "BYE" (None)
+    # Les matchs impliquant BYE ne sont PAS créés → repos tournant
+    rotation_list = teams[:]
+    random.shuffle(rotation_list)
+    if has_bye:
+        rotation_list.append(None)  # None = BYE fictif
+
+    n_eff = len(rotation_list)  # toujours pair
 
     created = 0
     with transaction.atomic():
         for r in range(1, n_rounds + 1):
-            half = len(rotating) // 2
-            left = [fixed] + rotating[:half]
-            right = rotating[half:][::-1]
+            # Construire les paires de la journée
+            half = n_eff // 2
+            left = rotation_list[:half]
+            right = rotation_list[half:][::-1]
             day_pairs = list(zip(left, right))
 
+            # Date de la journée (regroupée par paires de journées)
             day_index = (r - 1) // 2
             minute = 0 if (r % 2 == 1) else 1
 
@@ -1763,6 +2418,10 @@ def league_generate_8_matchdays(request):
             ).replace(hour=0, minute=minute, second=0, microsecond=0)
 
             for t1, t2 in day_pairs:
+                # ✅ Skip si BYE impliqué (repos tournant)
+                if t1 is None or t2 is None:
+                    continue
+
                 home, away = _order_pair(t1, t2)
                 Match.objects.create(
                     phase=phase,
@@ -1775,14 +2434,23 @@ def league_generate_8_matchdays(request):
                 )
                 created += 1
 
-            rotating = [rotating[-1]] + rotating[:-1]
+            # Rotation (méthode du carrousel)
+            # Fixe le premier, fait tourner le reste
+            rotation_list = (
+                [rotation_list[0]] +
+                [rotation_list[-1]] +
+                rotation_list[1:-1]
+            )
 
-    messages.success(
-        request,
+    msg = (
         f"✅ Calendrier généré: {created} matchs — "
-        f"{n_rounds} journées — {n} équipes × {k} adversaires. "
-        f"Ancien calendrier supprimé: {deleted_count} matchs."
+        f"{n_rounds} journées — {n} équipes × {k} adversaires."
     )
+    if has_bye:
+        msg += f" ⚠️ Repos tournant activé (nombre impair)."
+    msg += f" Ancien calendrier supprimé: {deleted_count} matchs."
+
+    messages.success(request, msg)
     return redirect('dashboard')
 
 @role_required(['superadmin', 'organisateur'])
@@ -2005,7 +2673,7 @@ def set_playoff_dates_view(request):
     else:
         if not retour_date:
             # si non fourni, par défaut lendemain
-            retour_date = aller_date + timezone.timedelta(days=1)
+            retour_date = aller_date + timedelta(days=1)
         retour_dt = timezone.make_aware(datetime.combine(retour_date, time(0, 0)), tz)
 
     with transaction.atomic():
