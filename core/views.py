@@ -1311,18 +1311,16 @@ def backup_database(request):
     response.write(output.getvalue())
     return response
 
-
-
 def download_rules_pdf(request):
     """
-    Génère le PDF officiel du règlement — design pro avec logo + sections colorées.
-    Lit le montant d'inscription depuis la compétition active.
+    Génère le PDF officiel du règlement.
+    Lit la cagnotte depuis la compétition active.
     """
     from io import BytesIO
     from django.contrib.staticfiles import finders
     from reportlab.platypus import (
         SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-        Image, HRFlowable, KeepTogether,
+        Image, HRFlowable,
     )
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.lib import colors
@@ -1330,304 +1328,198 @@ def download_rules_pdf(request):
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.enums import TA_CENTER
 
-    # ==================================================
-    # COULEURS
-    # ==================================================
-    NAVY      = colors.HexColor("#0b1423")
-    GOLD      = colors.HexColor("#e6c200")
-    GOLD_BG   = colors.HexColor("#fffbe6")
-    CYAN      = colors.HexColor("#00a7e1")
-    CYAN_BG   = colors.HexColor("#e6f6fd")
-    RED       = colors.HexColor("#dc3545")
-    RED_BG    = colors.HexColor("#fdecee")
-    GREEN     = colors.HexColor("#28a745")
-    GREEN_BG  = colors.HexColor("#e9f7ec")
-    GREY_DARK = colors.HexColor("#333333")
-    GREY      = colors.HexColor("#666666")
-    GREY_BG   = colors.HexColor("#f4f6fa")
-    WHITE     = colors.white
+    # ===== Couleurs =====
+    NAVY = colors.HexColor("#0b1423")
+    GOLD = colors.HexColor("#e6c200")
+    GREY = colors.HexColor("#666666")
+    DARK = colors.HexColor("#333333")
+    WHITE = colors.white
 
-    # ==================================================
-    # DONNÉES DYNAMIQUES
-    # ==================================================
+    # ===== Données dynamiques =====
     competition = Competition.objects.filter(is_active=True).first()
-    fee = (competition.registration_fee if competition else None) or 1000
+    n_teams = 0
+    fee = 2500
+    total = 0
 
-    # ==================================================
-    # STYLES
-    # ==================================================
-    s_kicker = ParagraphStyle('kicker', fontName='Helvetica-Bold', fontSize=9,
-                              leading=12, textColor=GREY, alignment=TA_CENTER,
-                              spaceAfter=2)
-    s_title = ParagraphStyle('title', fontName='Helvetica-Bold', fontSize=22,
-                             leading=26, textColor=NAVY, alignment=TA_CENTER,
-                             spaceAfter=2)
-    s_subtitle = ParagraphStyle('subtitle', fontName='Helvetica-Bold', fontSize=11,
-                                leading=14, textColor=GOLD, alignment=TA_CENTER,
-                                spaceAfter=8)
-    s_lead = ParagraphStyle('lead', fontName='Helvetica', fontSize=10,
-                            leading=14, textColor=GREY, alignment=TA_CENTER,
-                            spaceAfter=4)
+    if competition:
+        n_teams = Team.objects.filter(
+            payment_validated=True,
+            competition=competition
+        ).exclude(abbreviation="TBD").count()
+        fee = competition.registration_fee or 2500
+        total = n_teams * fee
+
+    cagnotte = {
+        'n_teams': n_teams,
+        'fee': fee,
+        'total': total,
+        'champion': int(total * 0.40),
+        'finaliste': int(total * 0.20),
+        'demi': int(total * 0.10),
+        'org': int(total * 0.20),
+    }
+
+    # ===== Styles =====
+    s_h1 = ParagraphStyle('h1', fontName='Helvetica-Bold', fontSize=18,
+                          leading=22, textColor=NAVY, alignment=TA_CENTER,
+                          spaceAfter=4)
+    s_h2 = ParagraphStyle('h2', fontName='Helvetica-Bold', fontSize=13,
+                          leading=18, textColor=GOLD, alignment=TA_CENTER,
+                          spaceAfter=10)
+    s_section = ParagraphStyle('section', fontName='Helvetica-Bold',
+                               fontSize=12, leading=16, textColor=NAVY,
+                               spaceBefore=14, spaceAfter=6)
     s_body = ParagraphStyle('body', fontName='Helvetica', fontSize=10,
-                            leading=15, textColor=GREY_DARK, spaceAfter=4)
-    s_bullet = ParagraphStyle('bullet', parent=s_body, leftIndent=12,
-                              bulletIndent=2, spaceAfter=3)
+                            leading=15, textColor=DARK, spaceAfter=3)
+    s_bullet = ParagraphStyle('bullet', parent=s_body, leftIndent=14,
+                              bulletIndent=4)
     s_footer = ParagraphStyle('footer', fontName='Helvetica', fontSize=8,
                               leading=10, textColor=GREY, alignment=TA_CENTER)
-    s_small = ParagraphStyle('small', fontName='Helvetica-Oblique', fontSize=8.5,
-                             leading=11, textColor=GREY, spaceAfter=6)
+    s_lead = ParagraphStyle('lead', fontName='Helvetica', fontSize=10,
+                            leading=14, textColor=GREY, alignment=TA_CENTER)
 
-    # ==================================================
-    # HEADER : LOGO
-    # ==================================================
+    # ===== Construction =====
     story = []
 
+    # Logo
     logo_path = finders.find('images/logo.png')
     if logo_path:
         try:
-            logo = Image(logo_path, width=20*mm, height=20*mm)
+            logo = Image(logo_path, width=22*mm, height=22*mm)
             logo.hAlign = 'CENTER'
             story.append(logo)
             story.append(Spacer(1, 4))
         except Exception:
             pass
 
-    story.append(Paragraph("SAISON 2026", s_kicker))
-    story.append(Paragraph("GOMA CHAMPIONS LEAGUE", s_title))
-    story.append(Paragraph("RÈGLEMENT OFFICIEL", s_subtitle))
+    story.append(Paragraph("EF-CHAMPIONS LEAGUE 2026", s_h1))
+    story.append(Paragraph("RÈGLEMENT OFFICIEL", s_h2))
     story.append(Paragraph(
-        "Compétition officielle <b>eFootball Mobile</b> — Goma, RDC.<br/>"
+        "Compétition officielle <b>eFootball Mobile</b> — RDC.<br/>"
         "Format UEFA Champions League adaptatif de <b>12 à 36 équipes</b>.",
         s_lead,
     ))
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 6))
     story.append(HRFlowable(width="100%", thickness=1.2, color=GOLD, spaceAfter=14))
 
-    # ==================================================
-    # HELPER : titre de section avec badge
-    # ==================================================
-    def section_header(num, title):
-        num_para = Paragraph(
-            f'<font color="white"><b>{num}</b></font>',
-            ParagraphStyle('num', fontName='Helvetica-Bold', fontSize=13,
-                           leading=16, alignment=TA_CENTER),
-        )
-        title_para = Paragraph(
-            f'<b>{title}</b>',
-            ParagraphStyle('title', fontName='Helvetica-Bold', fontSize=12,
-                           leading=16, textColor=NAVY),
-        )
-        tbl = Table([[num_para, title_para]], colWidths=[10*mm, None])
-        tbl.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, 0), CYAN),
-            ('BACKGROUND', (1, 0), (1, 0), GREY_BG),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
-            ('LEFTPADDING', (0, 0), (0, 0), 2),
-            ('RIGHTPADDING', (0, 0), (0, 0), 2),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('LEFTPADDING', (1, 0), (1, 0), 10),
-        ]))
-        return tbl
+    # ---------- 1. INSCRIPTION ----------
+    story.append(Paragraph("1. CONDITIONS D'INSCRIPTION", s_section))
+    story.append(Paragraph("•  Une seule équipe par joueur.", s_bullet))
+    story.append(Paragraph(f"•  Frais d'inscription : <b>{fee} FC</b> (montant configurable).", s_bullet))
+    story.append(Paragraph("•  Paiement via Airtel Money / Mobile Money.", s_bullet))
+    story.append(Paragraph("•  Validation après vérification de la preuve par l'administrateur.", s_bullet))
 
-    # ==================================================
-    # SECTION 1 — INSCRIPTION
-    # ==================================================
-    story.append(section_header("1", "Conditions d'inscription"))
-    story.append(Spacer(1, 6))
-    for txt in [
-        "<b>Une seule équipe</b> par joueur.",
-        f"Frais d'inscription : <b>{fee} FC</b> (montant configurable par l'organisation).",
-        "Validation du compte après vérification du paiement par l'administrateur.",
-    ]:
-        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
-    story.append(Spacer(1, 10))
+    # ---------- 2. RÉGLAGES ----------
+    story.append(Paragraph("2. RÉGLAGES OFFICIELS DES MATCHS", s_section))
 
-    # ==================================================
-    # SECTION 2 — RÉGLAGES
-    # ==================================================
-    story.append(section_header("2", "Réglages officiels des matchs"))
-    story.append(Spacer(1, 6))
-
-    rows = [
-        ["", "Phase de Ligue", "Phase Finale"],
-        ["Durée",            "10 minutes",              "10 min (Finale : 15 min)"],
-        ["Forme domicile",   "Excellente",              "Excellente"],
-        ["Forme extérieur",  "Excellente",              "Excellente"],
-        ["Remplacements",    "5 max",                   "5 max"],
-        ["Météo",            "Par défaut",              "Par défaut"],
-        ["Prolongations",    "Désactivées",             "Activées"],
-        ["Tirs au but",      "—",                       "Activés"],
-        ["Match nul",        "Autorisé",                "Impossible"],
+    reglages = [
+        ["Paramètre", "Phase de Ligue", "Phase Finale"],
+        ["Durée", "10 min", "10 min (Finale 15 min)"],
+        ["Forme domicile", "Excellente", "Excellente"],
+        ["Forme extérieur", "Excellente", "Excellente"],
+        ["Remplacements", "5 max", "5 max"],
+        ["Prolongations", "Désactivées", "Activées"],
+        ["Tirs au but", "—", "Activés"],
+        ["Match nul", "Autorisé", "Impossible"],
     ]
-
-    tbl = Table(rows, colWidths=[38*mm, 55*mm, 65*mm])
+    tbl = Table(reglages, colWidths=[45*mm, 55*mm, 60*mm])
     tbl.setStyle(TableStyle([
-        # Header
         ('BACKGROUND', (0, 0), (-1, 0), NAVY),
         ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('ALIGN', (1, 0), (-1, 0), 'CENTER'),
-        # Body
+        ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (1, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 9.5),
-        ('TEXTCOLOR', (0, 1), (0, -1), GREY_DARK),
-        ('TEXTCOLOR', (1, 1), (-1, -1), GREY_DARK),
-        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        # Grille
         ('GRID', (0, 0), (-1, -1), 0.4, colors.HexColor("#d8dde7")),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, GREY_BG]),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
     ]))
     story.append(tbl)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 4))
 
-    # ==================================================
-    # SECTION 3 — FORMAT
-    # ==================================================
-    story.append(section_header("3", "Format de la compétition"))
-    story.append(Spacer(1, 6))
-    for txt in [
-        "Format <b>adaptatif de 12 à 36 équipes</b>, dans l'esprit de l'UEFA Champions League.",
-        "<b>Phase de Ligue</b> : 4 à 8 matchs par équipe selon le nombre d'inscrits.",
-        "Qualifiés directs + barrages, puis <b>8<sup>es</sup> de finale ou Quarts</b> selon effectif.",
-        "<b>Phases finales en aller-retour</b> jouées sur une même journée.",
-        "<b>Finale en match unique</b>.",
-        "Création de la salle par l'équipe « domicile » (invitation via WhatsApp).",
-    ]:
-        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
-    story.append(Spacer(1, 10))
+    # ---------- 3. FORMAT ----------
+    story.append(Paragraph("3. FORMAT DE LA COMPÉTITION", s_section))
+    story.append(Paragraph("•  Format <b>adaptatif de 12 à 36 équipes</b> (esprit UCL).", s_bullet))
+    story.append(Paragraph("•  Phase de Ligue : <b>4 à 8 matchs</b> par équipe selon effectif.", s_bullet))
+    story.append(Paragraph("•  Qualifiés directs + barrages, puis <b>8es ou Quarts</b> selon effectif.", s_bullet))
+    story.append(Paragraph("•  Phases finales en <b>aller-retour sur une même journée</b>.", s_bullet))
+    story.append(Paragraph("•  Finale en <b>match unique</b>.", s_bullet))
 
-    # ==================================================
-    # SECTION 4 — FENÊTRE DE JEU
-    # ==================================================
-    story.append(section_header("4", "Fenêtre de jeu (25 heures)"))
-    story.append(Spacer(1, 6))
+    # ---------- 4. FENÊTRE ----------
+    story.append(Paragraph("4. FENÊTRE DE JEU (25 HEURES)", s_section))
+    story.append(Paragraph("•  Ouverture : <b>J à 12h00</b>  →  Fermeture : <b>J+1 à 12h59</b>.", s_bullet))
+    story.append(Paragraph("•  Les joueurs fixent librement l'heure du match dans cette fenêtre.", s_bullet))
+    story.append(Paragraph("•  Les matchs <b>aller ET retour</b> se jouent le même jour.", s_bullet))
+    story.append(Paragraph("•  Tout match non joué = <b>forfait 0 - 3</b>.", s_bullet))
+    story.append(Paragraph("•  Signalement des litiges via « Mes matchs » dans les 15 minutes.", s_bullet))
 
-    window_tbl = Table(
-        [[Paragraph('<b>Ouverture</b><br/><font size="13" color="#e6c200"><b>J à 12h00</b></font>',
-                    ParagraphStyle('w', fontName='Helvetica', fontSize=10,
-                                   leading=15, alignment=TA_CENTER,
-                                   textColor=GREY_DARK)),
-          Paragraph('<b>Fermeture</b><br/><font size="13" color="#e6c200"><b>J+1 à 12h59</b></font>',
-                    ParagraphStyle('w', fontName='Helvetica', fontSize=10,
-                                   leading=15, alignment=TA_CENTER,
-                                   textColor=GREY_DARK))]],
-        colWidths=[80*mm, 80*mm],
-    )
-    window_tbl.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), CYAN_BG),
-        ('BOX', (0, 0), (-1, -1), 0.5, CYAN),
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, CYAN),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-    ]))
-    story.append(window_tbl)
-    story.append(Spacer(1, 6))
+    # ---------- 5. RÉCOMPENSES ----------
+    story.append(Paragraph("5. RÉPARTITION DES RÉCOMPENSES", s_section))
 
-    for txt in [
-        "Chaque journée ouvre à <b>12h00</b> et ferme à <b>12h59 le lendemain</b> (25 h).",
-        "Les joueurs fixent librement l'heure de leur match dans cette fenêtre via WhatsApp.",
-        "Les matchs <b>aller ET retour</b> se jouent <b>le même jour</b>.",
-        "Tout match non joué dans la fenêtre = <b>forfait 0 – 3</b>.",
-        "Signalement des litiges via la section « Mes matchs » dans les <b>15 minutes</b>.",
-    ]:
-        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
-    story.append(Spacer(1, 10))
+    if n_teams > 0:
+        intro = (f"Cagnotte totale : <b>{total} FC</b> "
+                 f"({n_teams} équipes × {fee} FC).")
+    else:
+        intro = "Cagnotte calculée selon les inscriptions validées."
+    story.append(Paragraph(intro, s_body))
 
-    # ==================================================
-    # SECTION 5 — RÉCOMPENSES
-    # ==================================================
-    story.append(section_header("5", "Répartition des récompenses"))
-    story.append(Spacer(1, 6))
-
-    prize_rows = [
-        ["Position", "% de la cagnotte"],
-        ["🥇 Champion",                    "40 %"],
-        ["🥈 Finaliste",                   "20 %"],
-        ["🥉 Demi-finalistes (× 2)",        "10 % chacun"],
-        ["🏛️ Organisation",                "20 %"],
+    prizes = [
+        ["Position", "Part", "Montant"],
+        ["Champion", "40 %", f"{cagnotte['champion']} FC" if n_teams else "—"],
+        ["Finaliste", "20 %", f"{cagnotte['finaliste']} FC" if n_teams else "—"],
+        ["Demi-finalistes (×2)", "10 % chacun", f"{cagnotte['demi']} FC ×2" if n_teams else "—"],
+        ["Organisation", "20 %", f"{cagnotte['org']} FC" if n_teams else "—"],
     ]
-    pt = Table(prize_rows, colWidths=[90*mm, 70*mm])
-    pt.setStyle(TableStyle([
+    ptbl = Table(prizes, colWidths=[65*mm, 45*mm, 50*mm])
+    ptbl.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), NAVY),
         ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('TEXTCOLOR', (0, 1), (-1, -1), GREY_DARK),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9.5),
         ('GRID', (0, 0), (-1, -1), 0.4, colors.HexColor("#d8dde7")),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [WHITE, GOLD_BG]),
-        ('TOPPADDING', (0, 0), (-1, -1), 7),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor("#fffbe6")),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
     ]))
-    story.append(pt)
-    story.append(Spacer(1, 6))
+    story.append(ptbl)
+    story.append(Spacer(1, 4))
     story.append(Paragraph(
-        "Les montants exacts sont calculés automatiquement selon la cagnotte finale "
-        "(nombre d'équipes validées × frais d'inscription). "
         "Prix versés aux 4 derniers survivants le jour de la finale.",
-        s_small,
+        s_body,
     ))
-    story.append(Spacer(1, 10))
 
-    # ==================================================
-    # SECTION 6 — DISPOSITIONS FINALES
-    # ==================================================
-    story.append(section_header("6", "Dispositions finales"))
-    story.append(Spacer(1, 6))
-    for txt in [
-        "Toute falsification de résultat entraîne une <b>exclusion définitive</b>.",
-        "Maximum <b>2 déconnexions</b> par match — au 3ᵉ, forfait 0-3.",
-        "La décision de l'organisation est <b>finale et souveraine</b>.",
-        "Cas non prévus : l'organisation tranche dans un esprit d'équité et de fair-play.",
-    ]:
-        story.append(Paragraph(f"•&nbsp;&nbsp;{txt}", s_bullet))
+    # ---------- 6. DISPOSITIONS FINALES ----------
+    story.append(Paragraph("6. DISPOSITIONS FINALES", s_section))
+    story.append(Paragraph("•  Toute falsification entraîne une <b>exclusion définitive</b>.", s_bullet))
+    story.append(Paragraph("•  Maximum <b>2 déconnexions</b> par match — au 3ème, forfait 0-3.", s_bullet))
+    story.append(Paragraph("•  Toute décision de l'organisation est <b>finale et souveraine</b>.", s_bullet))
 
-    # ==================================================
-    # PIED DE PAGE
-    # ==================================================
+    # Footer
     story.append(Spacer(1, 16))
     story.append(HRFlowable(width="100%", thickness=0.8, color=GOLD, spaceAfter=8))
     gen_date = timezone.localtime(timezone.now()).strftime('%d/%m/%Y à %Hh%M')
     story.append(Paragraph(
-        f"Document généré le {gen_date} — Goma Champions League 2026<br/>"
-        f"<b>gomacl.onrender.com</b>",
+        f"Document généré le {gen_date} — Ef-Champions League 2026<br/>"
+        f"<b>efootcl.institut-angalisho.com</b>",
         s_footer,
     ))
 
-    # ==================================================
-    # BUILD
-    # ==================================================
+    # Build
     buffer = BytesIO()
     doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=18*mm,
-        rightMargin=18*mm,
-        topMargin=15*mm,
-        bottomMargin=15*mm,
-        title="Règlement Officiel — Goma Champions League 2026",
-        author="Goma Champions League",
+        buffer, pagesize=A4,
+        leftMargin=18*mm, rightMargin=18*mm,
+        topMargin=15*mm, bottomMargin=15*mm,
+        title="Règlement Officiel — Ef-Champions League 2026",
     )
     doc.build(story)
     buffer.seek(0)
 
     response = HttpResponse(buffer, content_type="application/pdf")
-    filename = f"Reglement_GomaCL_{datetime.now().strftime('%Y%m%d')}.pdf"
+    filename = f"Reglement_EfCL_{datetime.now().strftime('%Y%m%d')}.pdf"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 

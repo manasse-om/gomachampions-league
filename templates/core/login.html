@@ -1,234 +1,780 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Connexion - Goma Champions League 2026{% endblock %}
+{% block title %}Connexion — Ef-Champions League{% endblock %}
 
 {% block content %}
-<section class="py-5 login-pro">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-7 col-lg-5">
+<section class="lg-page">
+  <div class="container lg-container">
 
-        <div class="login-card-pro">
+    <!-- TABS (mobile seulement) -->
+    <div class="lg-tabs">
+      <button type="button" class="lg-tab is-active" data-switch="login">
+        <i class="fas fa-right-to-bracket"></i>
+        <span>Connexion</span>
+      </button>
+      <button type="button" class="lg-tab" data-switch="register">
+        <i class="fas fa-user-plus"></i>
+        <span>Inscription</span>
+      </button>
+    </div>
 
-          <!-- HEADER -->
-          <div class="login-card-pro__header text-center">
-            <img src="{% static 'images/logo.png' %}" alt="GCL" class="login-card-pro__logo">
-            <h2 class="mb-1 fw-black" style="letter-spacing:.6px;">Connexion</h2>
-            <p class="mb-0 text-light" style="opacity:.82;">
-              Accès joueurs & administration
-            </p>
+    <!-- CARD à bascule -->
+    <div class="lg-card" id="lgCard" data-mode="login">
+
+      <!-- ============================================ -->
+      <!-- PANEL : CONNEXION -->
+      <!-- ============================================ -->
+      <div class="lg-panel lg-panel--login">
+        <div class="lg-split">
+
+          <!-- OVERLAY gauche -->
+          <div class="lg-overlay">
+            <div class="lg-overlay__glow"></div>
+            <div class="lg-overlay__inner">
+              <div class="lg-overlay__logo-wrap">
+                <img src="{% static 'images/logo.png' %}" alt="EFCL" class="lg-overlay__logo">
+              </div>
+              <div class="lg-overlay__kicker">Ef-Champions League</div>
+              <h2 class="lg-overlay__title">Bonjour !</h2>
+              <p class="lg-overlay__text">
+                Première visite ? Créez votre équipe et rejoignez la compétition.
+              </p>
+              <button type="button" class="lg-ghost-btn" data-switch="register">
+                <i class="fas fa-user-plus"></i>
+                <span>Créer un compte</span>
+              </button>
+            </div>
           </div>
 
-          <!-- BODY -->
-          <div class="login-card-pro__body">
+          <!-- FORMULAIRE droite -->
+          <div class="lg-form-side">
+            <div class="lg-form-head">
+              <div class="lg-form-kicker">Accès joueur</div>
+              <h3 class="lg-form-title">Se connecter</h3>
+            </div>
 
             {% if messages %}
               {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} mb-3">
-                  {{ message }}
+                <div class="lg-alert lg-alert--{{ message.tags|default:'info' }}">
+                  <i class="fas fa-info-circle"></i>
+                  <span>{{ message }}</span>
                 </div>
               {% endfor %}
             {% endif %}
 
-            <form method="post" class="needs-validation" novalidate>
+            {% if form.errors %}
+              <div class="lg-alert lg-alert--danger">
+                <i class="fas fa-circle-exclamation"></i>
+                <span>Nom d'utilisateur ou mot de passe incorrect.</span>
+              </div>
+            {% endif %}
+
+            <form method="post" novalidate>
               {% csrf_token %}
+              {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
-              {# conserver next si tu le passes depuis la vue user_login #}
-              {% if next %}
-                <input type="hidden" name="next" value="{{ next }}">
-              {% endif %}
-
-              <!-- USERNAME -->
-              <div class="mb-3">
-                <label for="username" class="form-label text-light fw-semibold">
-                  <i class="fas fa-user me-2"></i>Nom d'utilisateur
-                </label>
-
-                <div class="input-group">
-                  <span class="input-group-text input-dark">
-                    <i class="fas fa-at"></i>
-                  </span>
+              <div class="lg-field">
+                <label for="username" class="lg-label">Nom d'utilisateur</label>
+                <div class="lg-input-wrap">
+                  <i class="fas fa-user lg-input-icon"></i>
                   <input type="text"
                          name="username"
                          id="username"
-                         class="form-control input-dark"
-                         placeholder="ex: fck"
+                         class="lg-input"
+                         placeholder="ex : fck"
                          autocomplete="username"
                          required
                          autofocus>
                 </div>
-
-                <small class="text-light d-block mt-2" style="opacity:.72;">
-                  Astuce : c’est souvent l’abréviation de l’équipe (ex: <strong>fck</strong>).
-                </small>
+                <div class="lg-hint">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Utilisez votre abréviation d'équipe (ex : <strong>fck</strong>)</span>
+                </div>
               </div>
 
-              <!-- PASSWORD -->
-              <div class="mb-2">
-                <label for="password" class="form-label text-light fw-semibold">
-                  <i class="fas fa-key me-2"></i>Mot de passe
-                </label>
-
-                <div class="input-group">
-                  <span class="input-group-text input-dark">
-                    <i class="fas fa-lock"></i>
-                  </span>
+              <div class="lg-field">
+                <label for="password" class="lg-label">Mot de passe</label>
+                <div class="lg-input-wrap">
+                  <i class="fas fa-lock lg-input-icon"></i>
                   <input type="password"
                          name="password"
                          id="password"
-                         class="form-control input-dark"
+                         class="lg-input lg-input--with-btn"
                          placeholder="••••••••"
                          autocomplete="current-password"
                          required>
-                  <button type="button" class="btn btn-outline-light btn-eye" id="togglePwd" aria-label="Afficher/Masquer">
+                  <button type="button"
+                          class="lg-eye"
+                          id="togglePwd"
+                          aria-label="Afficher / masquer le mot de passe">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
               </div>
 
-              <!-- LINKS ROW -->
-              <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-                <a href="{% url 'forgot_password' %}" class="login-link">
-                  Mot de passe oublié ?
-                </a>
-                <a href="{% url 'register_team' %}" class="login-link">
-                  S’inscrire
+              <div class="lg-links">
+                <a href="{% url 'forgot_password' %}" class="lg-link">
+                  <i class="fas fa-key"></i>
+                  <span>Mot de passe oublié ?</span>
                 </a>
               </div>
 
-              <!-- INFO -->
-              <div class="login-tip">
-                <i class="fas fa-circle-info me-2"></i>
-                En cas de problème, vérifie ton <strong>username</strong> (abréviation) et ton mot de passe.
-              </div>
-
-              <!-- SUBMIT -->
-              <div class="d-grid mt-3">
-                <button type="submit" class="btn btn-ucl-gold btn-lg">
-                  <i class="fas fa-right-to-bracket me-2"></i>Se connecter
-                </button>
-              </div>
+              <button type="submit" class="lg-submit lg-submit--gold">
+                <span>Se connecter</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
             </form>
 
-          </div>
-
-          <!-- FOOTER -->
-          <div class="login-card-pro__footer text-center">
-            <a href="{% url 'home' %}" class="text-light" style="opacity:.85;">
-              <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
-            </a>
+            <div class="lg-form-foot">
+              <a href="{% url 'home' %}" class="lg-link lg-link--dim">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour à l'accueil</span>
+              </a>
+            </div>
           </div>
 
         </div>
-
       </div>
+
+      <!-- ============================================ -->
+      <!-- PANEL : INSCRIPTION -->
+      <!-- ============================================ -->
+      <div class="lg-panel lg-panel--register">
+        <div class="lg-split lg-split--reverse">
+
+          <!-- FORMULAIRE gauche -->
+          <div class="lg-form-side">
+            <div class="lg-form-head">
+              <div class="lg-form-kicker">Nouveau joueur</div>
+              <h3 class="lg-form-title">Rejoindre la compétition</h3>
+            </div>
+
+            <p class="lg-intro-text">
+              L'inscription se fait en <strong>une seule page</strong>. Prévoyez 2 minutes
+              pour renseigner vos informations et joindre la preuve de paiement.
+            </p>
+
+            <div class="lg-checklist">
+              <div class="lg-check-item">
+                <div class="lg-check-icon"><i class="fas fa-user"></i></div>
+                <div>
+                  <div class="lg-check-title">Vos informations</div>
+                  <div class="lg-check-text">Nom complet et numéro WhatsApp</div>
+                </div>
+              </div>
+
+              <div class="lg-check-item">
+                <div class="lg-check-icon"><i class="fas fa-shield-halved"></i></div>
+                <div>
+                  <div class="lg-check-title">Votre équipe</div>
+                  <div class="lg-check-text">Nom, abréviation et logo (optionnel)</div>
+                </div>
+              </div>
+
+              <div class="lg-check-item">
+                <div class="lg-check-icon"><i class="fas fa-receipt"></i></div>
+                <div>
+                  <div class="lg-check-title">Preuve de paiement</div>
+                  <div class="lg-check-text">Capture Airtel Money ou Mobile Money</div>
+                </div>
+              </div>
+            </div>
+
+            <a href="{% url 'register_team' %}" class="lg-submit lg-submit--gold">
+              <span>Créer mon équipe</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+
+            <div class="lg-form-foot">
+              <a href="{% url 'home' %}" class="lg-link lg-link--dim">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour à l'accueil</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- OVERLAY droite -->
+          <div class="lg-overlay lg-overlay--register">
+            <div class="lg-overlay__glow"></div>
+            <div class="lg-overlay__inner">
+              <div class="lg-overlay__logo-wrap">
+                <img src="{% static 'images/logo.png' %}" alt="EFCL" class="lg-overlay__logo">
+              </div>
+              <div class="lg-overlay__kicker">Déjà membre ?</div>
+              <h2 class="lg-overlay__title">Bon retour !</h2>
+              <p class="lg-overlay__text">
+                Connectez-vous pour suivre vos matchs, votre classement et vos statistiques.
+              </p>
+              <button type="button" class="lg-ghost-btn" data-switch="login">
+                <i class="fas fa-right-to-bracket"></i>
+                <span>Se connecter</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
 <style>
-/* Page bg */
-.login-pro{
-  background: radial-gradient(900px 500px at 50% 0%, rgba(0,167,225,.16), transparent 55%),
-              linear-gradient(135deg,#0b1423,#00142d);
-  min-height: calc(100vh - 70px);
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.lg-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  padding: 32px 0 60px;
+  color: rgba(255,255,255,.92);
+  display: flex;
+  align-items: center;
+}
+.lg-container { max-width: 980px; width: 100%; }
+
+/* ============================================ */
+/* TABS (mobile uniquement) */
+/* ============================================ */
+.lg-tabs {
+  display: none;
+  gap: 6px;
+  background: rgba(17,28,47,.60);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 5px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(12px);
+}
+.lg-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.60);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.lg-tab i { font-size: 0.75rem; }
+.lg-tab.is-active {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+}
+@media (max-width: 767px) {
+  .lg-tabs { display: flex; }
 }
 
-/* Card */
-.login-card-pro{
-  background: rgba(17,28,47,.78);
-  border-radius: 18px;
-  box-shadow: 0 18px 55px rgba(0,0,0,.38);
-  border: 1px solid rgba(255,255,255,.10);
+/* ============================================ */
+/* CARD (avec animation de bascule) */
+/* ============================================ */
+.lg-card {
+  position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  min-height: 560px;
+  background: rgba(17,28,47,.60);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 24px 60px rgba(0,0,0,.40);
+  backdrop-filter: blur(14px);
 }
 
-/* Header */
-.login-card-pro__header{
-  background: linear-gradient(135deg, rgba(0,61,130,.95), rgba(0,167,225,.55));
-  padding: 28px 22px;
-  color: #fff;
+.lg-panel {
+  position: absolute;
+  inset: 0;
+  transition: transform .65s cubic-bezier(.4, 0, .2, 1),
+              opacity .5s ease;
+  will-change: transform, opacity;
 }
-.login-card-pro__logo{
-  height: 64px;
+
+/* Login : visible au départ */
+.lg-panel--login {
+  transform: translateX(0);
+  opacity: 1;
+  z-index: 2;
+}
+.lg-panel--register {
+  transform: translateX(100%);
+  opacity: 0;
+  z-index: 1;
+}
+
+/* Mode register : on inverse */
+.lg-card[data-mode="register"] .lg-panel--login {
+  transform: translateX(-100%);
+  opacity: 0;
+  z-index: 1;
+}
+.lg-card[data-mode="register"] .lg-panel--register {
+  transform: translateX(0);
+  opacity: 1;
+  z-index: 2;
+}
+
+/* ============================================ */
+/* SPLIT (2 colonnes) */
+/* ============================================ */
+.lg-split {
+  display: grid;
+  grid-template-columns: 42% 58%;
+  height: 100%;
+  min-height: 560px;
+}
+.lg-split--reverse { grid-template-columns: 58% 42%; }
+
+@media (max-width: 767px) {
+  .lg-split,
+  .lg-split--reverse {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .lg-split .lg-overlay { display: none; }
+}
+
+/* ============================================ */
+/* OVERLAY (côté décoratif) */
+/* ============================================ */
+.lg-overlay {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0e1a2e 0%, #0b1423 60%, #060a12 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+}
+.lg-overlay--register {
+  background: linear-gradient(225deg, #0e1a2e 0%, #0b1423 60%, #060a12 100%);
+}
+
+.lg-overlay__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(230,194,0,.12), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(0,167,225,.10), transparent 55%);
+  pointer-events: none;
+}
+
+.lg-overlay__inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 320px;
+}
+
+.lg-overlay__logo-wrap {
+  margin-bottom: 20px;
+}
+.lg-overlay__logo {
+  height: 72px;
   width: auto;
-  margin-bottom: 10px;
-  filter: drop-shadow(0 12px 22px rgba(0,0,0,.25));
+  filter: drop-shadow(0 8px 24px rgba(230,194,0,.35));
+  animation: lgFloat 5s ease-in-out infinite;
 }
-.fw-black{ font-weight: 900; }
-
-/* Body */
-.login-card-pro__body{
-  padding: 22px;
+@keyframes lgFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
 }
 
-/* Footer */
-.login-card-pro__footer{
-  padding: 14px 18px;
-  background: rgba(0,0,0,.10);
-  border-top: 1px solid rgba(255,255,255,.10);
-}
-
-/* Inputs */
-.input-dark{
-  background: rgba(15,26,44,.92) !important;
-  border: 1px solid rgba(255,255,255,.14) !important;
-  color: #fff !important;
-}
-.input-dark:focus{
-  border-color: rgba(0,167,225,.8) !important;
-  box-shadow: 0 0 0 .2rem rgba(0,167,225,.18) !important;
-}
-
-.input-group-text.input-dark{
-  background: rgba(15,26,44,.92);
-  border: 1px solid rgba(255,255,255,.14);
-  color: rgba(255,255,255,.78);
-}
-
-/* eye button */
-.btn-eye{
-  border-radius: 0 12px 12px 0;
-}
-.btn-eye:focus{
-  box-shadow: 0 0 0 .2rem rgba(0,167,225,.18);
-}
-
-/* links */
-.login-link{
-  color: rgba(255,255,255,.82);
+.lg-overlay__kicker {
+  color: #e6c200;
   font-weight: 800;
-  text-decoration: none;
-  font-size: .95rem;
+  font-size: 0.6875rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
-.login-link:hover{
+
+.lg-overlay__title {
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.75rem;
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.lg-overlay__text {
+  color: rgba(255,255,255,.65);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.lg-ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1.5px solid rgba(230,194,0,.80);
+  color: #e6c200;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+.lg-ghost-btn:hover {
+  background: rgba(230,194,0,.10);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(230,194,0,.15);
+}
+
+/* ============================================ */
+/* FORM SIDE */
+/* ============================================ */
+.lg-form-side {
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+}
+@media (max-width: 767px) {
+  .lg-form-side { padding: 28px 20px; }
+}
+
+.lg-form-head { margin-bottom: 24px; }
+.lg-form-kicker {
+  color: rgba(255,255,255,.45);
+  font-weight: 800;
+  font-size: 0.6875rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.lg-form-title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.5rem;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================ */
+/* CHAMPS */
+/* ============================================ */
+.lg-field { margin-bottom: 18px; }
+.lg-label {
+  display: block;
+  color: rgba(255,255,255,.75);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+
+.lg-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.lg-input-icon {
+  position: absolute;
+  left: 14px;
+  color: rgba(255,255,255,.35);
+  font-size: 0.875rem;
+  pointer-events: none;
+  transition: color .2s ease;
+}
+.lg-input {
+  width: 100%;
+  padding: 13px 14px 13px 42px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.lg-input--with-btn { padding-right: 48px; }
+.lg-input:focus {
+  border-color: rgba(230,194,0,.50);
+  background: rgba(230,194,0,.04);
+  box-shadow: 0 0 0 4px rgba(230,194,0,.08);
+}
+.lg-input:focus ~ .lg-input-icon,
+.lg-input-wrap:focus-within .lg-input-icon {
+  color: #e6c200;
+}
+.lg-input::placeholder { color: rgba(255,255,255,.30); }
+
+/* Eye toggle */
+.lg-eye {
+  position: absolute;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.50);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s ease;
+}
+.lg-eye:hover {
+  background: rgba(255,255,255,.06);
   color: #e6c200;
 }
 
-/* tip */
-.login-tip{
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.86);
-  padding: 10px 12px;
-  font-size: .95rem;
+/* Hint */
+.lg-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: rgba(255,255,255,.50);
+  font-size: 0.75rem;
+}
+.lg-hint i { color: #00a7e1; }
+.lg-hint strong { color: rgba(255,255,255,.85); }
+
+/* Links */
+.lg-links {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+.lg-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.70);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+.lg-link:hover { color: #e6c200; }
+.lg-link i { font-size: 0.75rem; }
+.lg-link--dim { color: rgba(255,255,255,.45); }
+.lg-link--dim:hover { color: #e6c200; }
+
+/* ============================================ */
+/* SUBMIT */
+/* ============================================ */
+.lg-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.lg-submit--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  box-shadow: 0 8px 22px rgba(230,194,0,.22);
+}
+.lg-submit--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(230,194,0,.35);
+  color: #0b1423;
+}
+.lg-submit i {
+  transition: transform .2s ease;
+  font-size: 0.8125rem;
+}
+.lg-submit:hover i { transform: translateX(4px); }
+
+.lg-form-foot {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  text-align: center;
+}
+
+/* ============================================ */
+/* REGISTER INTRO */
+/* ============================================ */
+.lg-intro-text {
+  color: rgba(255,255,255,.70);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+.lg-intro-text strong { color: #fff; }
+
+.lg-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+.lg-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.lg-check-item:hover {
+  border-color: rgba(230,194,0,.25);
+  transform: translateX(3px);
+}
+.lg-check-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(230,194,0,.10);
+  border: 1px solid rgba(230,194,0,.22);
+  color: #e6c200;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.lg-check-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+.lg-check-text {
+  color: rgba(255,255,255,.55);
+  font-size: 0.75rem;
+  margin-top: 3px;
+}
+
+/* ============================================ */
+/* ALERTS */
+/* ============================================ */
+.lg-alert {
+  display: flex;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.lg-alert i { margin-top: 2px; flex-shrink: 0; }
+.lg-alert--info,
+.lg-alert--success {
+  background: rgba(0,167,225,.08);
+  border: 1px solid rgba(0,167,225,.25);
+  color: rgba(255,255,255,.88);
+}
+.lg-alert--info i,
+.lg-alert--success i { color: #00d4ff; }
+.lg-alert--warning {
+  background: rgba(255,193,7,.08);
+  border: 1px solid rgba(255,193,7,.28);
+  color: rgba(255,255,255,.90);
+}
+.lg-alert--warning i { color: #ffc107; }
+.lg-alert--danger,
+.lg-alert--error {
+  background: rgba(220,53,69,.08);
+  border: 1px solid rgba(220,53,69,.28);
+  color: rgba(255,255,255,.90);
+}
+.lg-alert--danger i,
+.lg-alert--error i { color: #ff6b6b; }
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 767px) {
+  .lg-page { padding: 20px 0 40px; align-items: flex-start; }
+  .lg-card {
+    min-height: auto;
+    border-radius: 16px;
+  }
+  .lg-panel {
+    position: relative;
+    inset: auto;
+    transform: none !important;
+    opacity: 1 !important;
+    display: none;
+  }
+  .lg-card[data-mode="login"] .lg-panel--login { display: block; }
+  .lg-card[data-mode="register"] .lg-panel--register { display: block; }
+  .lg-split { min-height: auto; }
 }
 </style>
 
+<!-- ============================================ -->
+<!-- SCRIPT : bascule + œil -->
+<!-- ============================================ -->
 <script>
-document.addEventListener("DOMContentLoaded", function(){
-  const btn = document.getElementById("togglePwd");
-  const input = document.getElementById("password");
-  if(!btn || !input) return;
+document.addEventListener("DOMContentLoaded", function () {
+  const card = document.getElementById("lgCard");
+  const switches = document.querySelectorAll("[data-switch]");
+  const tabs = document.querySelectorAll(".lg-tab");
 
-  btn.addEventListener("click", function(){
-    const isPwd = input.getAttribute("type") === "password";
-    input.setAttribute("type", isPwd ? "text" : "password");
-    btn.innerHTML = isPwd ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+  // Bascule entre les deux panels
+  function setMode(mode) {
+    if (!card) return;
+    card.setAttribute("data-mode", mode);
+
+    tabs.forEach(function (t) {
+      t.classList.toggle("is-active", t.getAttribute("data-switch") === mode);
+    });
+
+    // Scroll top pour voir le changement sur mobile
+    const y = card.getBoundingClientRect().top + window.pageYOffset - 80;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  }
+
+  switches.forEach(function (el) {
+    el.addEventListener("click", function () {
+      setMode(el.getAttribute("data-switch"));
+    });
   });
+
+  // Toggle mot de passe
+  const eye = document.getElementById("togglePwd");
+  const pwd = document.getElementById("password");
+  if (eye && pwd) {
+    eye.addEventListener("click", function () {
+      const isPwd = pwd.getAttribute("type") === "password";
+      pwd.setAttribute("type", isPwd ? "text" : "password");
+      eye.innerHTML = isPwd
+        ? '<i class="fas fa-eye-slash"></i>'
+        : '<i class="fas fa-eye"></i>';
+    });
+  }
 });
 </script>
 {% endblock %}

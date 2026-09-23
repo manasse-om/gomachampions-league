@@ -1,105 +1,114 @@
 {% load roles %}
 
-<nav class="ucl-bottomnav" aria-label="Navigation mobile">
-  <a class="nav-link ucl-bottomnav__item" href="{% url 'home' %}">
+<nav class="mbn-nav" aria-label="Navigation mobile">
+
+  <a class="mbn-item" href="{% url 'home' %}">
     <i class="fas fa-house"></i>
     <span>Accueil</span>
   </a>
 
-  <a class="nav-link ucl-bottomnav__item" href="{% url 'fixtures' %}">
+  <a class="mbn-item" href="{% url 'fixtures' %}">
     <i class="fas fa-calendar-days"></i>
     <span>Calendrier</span>
   </a>
 
-  <a class="nav-link ucl-bottomnav__item" href="{% url 'standings' %}">
+  <a class="mbn-item" href="{% url 'standings' %}">
     <i class="fas fa-ranking-star"></i>
     <span>Classement</span>
   </a>
 
-  <a class="nav-link ucl-bottomnav__item" href="{% url 'results' %}">
+  <a class="mbn-item" href="{% url 'results' %}">
     <i class="fas fa-list-check"></i>
     <span>Résultats</span>
   </a>
 
-  {# ✅ Mes matchs (si admin sans team, on envoie vers dashboard pour éviter “pas d’équipe”) #}
   {% if user.is_authenticated and user|has_role:"superadmin,organisateur,paiement,match" and not user.team %}
-    <a class="nav-link ucl-bottomnav__item" href="{% url 'dashboard' %}">
+    <a class="mbn-item" href="{% url 'dashboard' %}">
       <i class="fas fa-shield-halved"></i>
       <span>Admin</span>
     </a>
   {% else %}
-    <a class="nav-link ucl-bottomnav__item" href="{% url 'my_matches' %}">
+    <a class="mbn-item" href="{% url 'my_matches' %}">
       <i class="fas fa-futbol"></i>
       <span>Mes matchs</span>
     </a>
   {% endif %}
 
-  {# ✅ Connexion TOUJOURS visible #}
-  <a class="nav-link ucl-bottomnav__item" href="{% url 'login' %}">
-    <i class="fas fa-right-to-bracket"></i>
-    <span>Connexion</span>
-  </a>
+  {% if user.is_authenticated %}
+    <a class="mbn-item" href="{% url 'logout' %}">
+      <i class="fas fa-right-from-bracket"></i>
+      <span>Quitter</span>
+    </a>
+  {% else %}
+    <a class="mbn-item" href="{% url 'login' %}">
+      <i class="fas fa-right-to-bracket"></i>
+      <span>Connexion</span>
+    </a>
+  {% endif %}
+
 </nav>
 
 <style>
-/* ===== Mobile bottom nav (6 items) ===== */
-.ucl-bottomnav{
+/* ============================================ */
+/* MOBILE BOTTOM NAV */
+/* ============================================ */
+.mbn-nav {
   position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 1030;
   display: flex;
   justify-content: space-around;
-  gap: 4px;
-
-  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
-  background: rgba(0, 18, 51, 0.98);
-  border-top: 1px solid rgba(230, 194, 0, 0.22);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  gap: 2px;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  background: rgba(6, 10, 18, 0.96);
+  border-top: 1px solid rgba(230, 194, 0, 0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.ucl-bottomnav__item{
+.mbn-item {
   flex: 1;
   text-align: center;
-  color: rgba(255,255,255,.82) !important;
+  color: rgba(255,255,255,.70);
   text-decoration: none;
-  padding: 8px 4px;
-  border-radius: 14px;
-  font-weight: 900;
-  font-size: .74rem;
-  line-height: 1.05;
+  padding: 8px 2px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.625rem;
+  line-height: 1;
   transition: background .15s ease, color .15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
-.ucl-bottomnav__item i{
-  display:block;
-  font-size: 1.12rem;
-  margin-bottom: 5px;
-  color: rgba(255,255,255,.88);
+.mbn-item i {
+  font-size: 1rem;
+  color: rgba(255,255,255,.80);
+  transition: color .15s ease;
 }
 
-.ucl-bottomnav__item:hover{
+.mbn-item:hover {
   background: rgba(255,255,255,.06);
-  color: #fff !important;
+  color: #fff;
 }
+.mbn-item:hover i { color: #fff; }
 
-/* Active (ucl-ui.js ajoute .active sur a.nav-link) */
-.ucl-bottomnav__item.active{
-  background: rgba(230,194,0,.14);
-  color: #fff !important;
-  border: 1px solid rgba(230,194,0,.22);
+/* Active state */
+.mbn-item.active {
+  background: rgba(230,194,0,.12);
+  color: #e6c200;
 }
-.ucl-bottomnav__item.active i{
-  color: #ffed4e;
-}
+.mbn-item.active i { color: #e6c200; }
 
-/* Afficher uniquement sur mobile/tablette */
-@media (min-width: 992px){
-  .ucl-bottomnav{ display:none; }
+/* ============================================ */
+/* RESPONSIVE */
+/* ============================================ */
+@media (min-width: 992px) {
+  .mbn-nav { display: none; }
 }
-
-/* Important: laisser de l'espace en bas pour le menu */
-@media (max-width: 991px){
-  body{ padding-bottom: 92px; }
+@media (max-width: 991px) {
+  body { padding-bottom: 82px; }
 }
 </style>

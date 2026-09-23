@@ -1,108 +1,113 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Classement - Goma Champions League 2026{% endblock %}
+{% block title %}Classement — Ef-Champions League{% endblock %}
 
 {% block content %}
-<section class="ucl-section py-4 py-md-5">
-  <div class="container">
+<section class="st-page">
 
-    <!-- HEADER / TITRE -->
-    <div class="text-center mb-4 mb-md-5">
-      <h1 class="ucl-main-title mb-1">Classement</h1>
+  <div class="container st-container">
+
+    <!-- HEADER -->
+    <div class="st-header">
+      <div class="st-header__kicker">
+        <i class="fas fa-trophy"></i> PHASE DE LIGUE
+      </div>
+      <h1 class="st-header__title">Classement</h1>
       {% if competition %}
-        <p class="ucl-subtitle mb-1">{{ competition.name }}</p>
+        <div class="st-header__sub">{{ competition.name }}</div>
       {% endif %}
       {% if fmt %}
-        <p class="ucl-format-label mb-0">{{ fmt.label }}</p>
+        <div class="st-header__format">{{ fmt.label }}</div>
       {% endif %}
     </div>
 
     <!-- LÉGENDE -->
     {% if fmt %}
-    <div class="d-flex gap-2 gap-md-3 flex-wrap justify-content-center mb-4">
-      <div class="legend-pill legend-pill--direct">
-        <span class="legend-dot dot-direct"></span> Top {{ direct_end }} &rarr; Qualification directe
+    <div class="st-legend">
+      <div class="st-legend__item st-legend__item--direct">
+        <span class="st-legend__dot"></span>
+        Top {{ direct_end }} → Qualifiés directs
       </div>
-      <div class="legend-pill legend-pill--playoff">
-        <span class="legend-dot dot-playoff"></span> Pos. {{ direct_end|add:1 }}–{{ playoff_end }} &rarr; Barrages
+      {% if fmt.playoff_ties > 0 %}
+      <div class="st-legend__item st-legend__item--playoff">
+        <span class="st-legend__dot"></span>
+        Pos. {{ direct_end|add:1 }}–{{ playoff_end }} → Barrages
       </div>
+      {% endif %}
       {% if fmt.eliminated_after_league > 0 %}
-      <div class="legend-pill legend-pill--eliminated">
-        <span class="legend-dot dot-eliminated"></span> Pos. {{ playoff_end|add:1 }}+ &rarr; Éliminés
+      <div class="st-legend__item st-legend__item--elim">
+        <span class="st-legend__dot"></span>
+        Pos. {{ playoff_end|add:1 }}+ → Éliminés
       </div>
       {% endif %}
     </div>
     {% endif %}
 
-    <!-- TABLEAU DE CLASSEMENT -->
-    <div class="standings-wrap">
-      <div class="table-responsive">
-        <table class="table standings-table align-middle mb-0">
+    <!-- TABLEAU -->
+    <div class="st-card">
+      <div class="st-tablewrap">
+        <table class="st-table">
           <thead>
             <tr>
-              <th class="text-center th-pos">Pos</th>
-              <th class="th-team">Équipe</th>
-              <th class="text-center">MJ</th>
-              <th class="text-center">V</th>
-              <th class="text-center">N</th>
-              <th class="text-center">D</th>
-              <th class="text-center col-optional">BP</th>
-              <th class="text-center col-optional">BC</th>
-              <th class="text-center col-optional">Diff</th>
-              <th class="text-center th-pts">Pts</th>
+              <th class="st-th-pos">#</th>
+              <th class="st-th-team">Équipe</th>
+              <th class="st-th-num">MJ</th>
+              <th class="st-th-num">V</th>
+              <th class="st-th-num">N</th>
+              <th class="st-th-num">D</th>
+              <th class="st-th-num st-hide-sm">BP</th>
+              <th class="st-th-num st-hide-sm">BC</th>
+              <th class="st-th-num st-hide-sm">+/-</th>
+              <th class="st-th-pts">Pts</th>
             </tr>
           </thead>
           <tbody>
             {% for team in teams %}
-            <tr class="
-              {% if forloop.counter <= direct_end %}
-                row-direct
-              {% elif forloop.counter <= playoff_end %}
-                row-playoff
-              {% else %}
-                row-eliminated
-              {% endif %}
-            ">
-              <td class="text-center">
-                <span class="pos-num
-                  {% if forloop.counter <= direct_end %}pos-direct
-                  {% elif forloop.counter <= playoff_end %}pos-playoff
-                  {% else %}pos-eliminated{% endif %}
-                ">{{ forloop.counter }}</span>
-              </td>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="team-pill">{{ team.abbreviation }}</span>
-                  <div class="team-info">
-                    <div class="team-name">{{ team.team_name }}</div>
-                    <div class="player-name">{{ team.player_name }}</div>
+              <tr class="st-row
+                {% if forloop.counter <= direct_end %}st-row--direct
+                {% elif forloop.counter <= playoff_end %}st-row--playoff
+                {% else %}st-row--elim{% endif %}">
+
+                <td class="st-td-pos">
+                  <span class="st-pos
+                    {% if forloop.counter <= direct_end %}st-pos--direct
+                    {% elif forloop.counter <= playoff_end %}st-pos--playoff
+                    {% else %}st-pos--elim{% endif %}">
+                    {{ forloop.counter }}
+                  </span>
+                </td>
+
+                <td class="st-td-team">
+                  <div class="st-team">
+                    {% include "core/partials/_team_logo.html" with team=team size="sm" %}
+                    <div class="st-team__info">
+                      <div class="st-team__name">{{ team.team_name }}</div>
+                      <div class="st-team__player">{{ team.player_name }}</div>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td class="text-center fw-semibold text-cell">{{ team.played }}</td>
-              <td class="text-center stat-win">{{ team.wins }}</td>
-              <td class="text-center text-cell">{{ team.draws }}</td>
-              <td class="text-center stat-loss">{{ team.losses }}</td>
-              <td class="text-center col-optional text-cell">{{ team.goals_for }}</td>
-              <td class="text-center col-optional text-cell">{{ team.goals_against }}</td>
-              <td class="text-center col-optional fw-bold
-                {% if team.goal_difference > 0 %}stat-win
-                {% elif team.goal_difference < 0 %}stat-loss
-                {% else %}text-cell
-                {% endif %}">
-                {{ team.goal_difference|stringformat:"+d" }}
-              </td>
-              <td class="text-center th-pts stat-pts">
-                {{ team.points }}
-              </td>
-            </tr>
+                </td>
+
+                <td class="st-td-num">{{ team.played }}</td>
+                <td class="st-td-num st-td-win">{{ team.wins }}</td>
+                <td class="st-td-num">{{ team.draws }}</td>
+                <td class="st-td-num st-td-loss">{{ team.losses }}</td>
+                <td class="st-td-num st-hide-sm">{{ team.goals_for }}</td>
+                <td class="st-td-num st-hide-sm">{{ team.goals_against }}</td>
+                <td class="st-td-num st-hide-sm
+                  {% if team.goal_difference > 0 %}st-td-win
+                  {% elif team.goal_difference < 0 %}st-td-loss{% endif %}">
+                  {{ team.goal_difference|stringformat:"+d" }}
+                </td>
+                <td class="st-td-pts">{{ team.points }}</td>
+              </tr>
             {% empty %}
-            <tr>
-              <td colspan="10" class="text-center py-5 empty-msg">
-                Aucune équipe validée pour le moment.
-              </td>
-            </tr>
+              <tr>
+                <td colspan="10" class="st-empty">
+                  <i class="fas fa-inbox"></i>
+                  <div>Aucune équipe validée pour le moment.</div>
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
@@ -113,221 +118,217 @@
 </section>
 
 <style>
-/* ==========================================================================
-   DESIGN SOMBRE PREMIUM - STYLE CHAMPIONS LEAGUE
-   ========================================================================== */
-
-.ucl-section {
-  background: 
-    radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.12) 0%, transparent 60%),
-    linear-gradient(180deg, #030712 0%, #0b132b 50%, #030712 100%);
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.st-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
   min-height: 100vh;
-  color: #ffffff;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--color-text);
+  padding: 32px 0 60px;
 }
+.st-container { max-width: 1000px; }
 
-.ucl-main-title {
-  font-weight: 900;
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-
-.ucl-subtitle {
-  color: #ffcc00;
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.5px;
-}
-
-.ucl-format-label {
-  color: #94a3b8;
-  font-size: 0.88rem;
-  font-weight: 500;
-}
-
-/* Container & Tableau */
-.standings-wrap {
-  background: #0f172a !important;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.standings-table {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
-}
-
-/* En-tête */
-.standings-table thead th {
-  background: #090d16 !important;
-  color: #94a3b8 !important;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 0.75rem;
-  border: none;
-  padding: 16px 12px;
-  font-weight: 800;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-.standings-table thead th.th-pts {
-  color: #ffcc00 !important;
-}
-
-/* Corps du Tableau */
-.standings-table tbody tr {
-  background-color: #0f172a !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  transition: background 0.15s ease;
-}
-
-.standings-table tbody tr:hover {
-  background-color: #1e293b !important;
-}
-
-.standings-table tbody td {
-  padding: 14px 12px;
-  border: none;
-  background-color: transparent !important;
-}
-
-/* Texte des cellules */
-.text-cell {
-  color: #cbd5e1 !important;
-  font-size: 0.95rem;
-}
-
-/* Indicateurs latéraux */
-.row-direct {
-  border-left: 4px solid #00f2fe !important;
-}
-
-.row-playoff {
-  border-left: 4px solid #ffcc00 !important;
-}
-
-.row-eliminated {
-  border-left: 4px solid #ef4444 !important;
-  opacity: 0.75;
-}
-
-/* Badges positions */
-.pos-num {
+/* ============================================ */
+/* HEADER */
+/* ============================================ */
+.st-header { text-align: center; margin-bottom: 24px; }
+.st-header__kicker {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  gap: 6px;
+  color: var(--color-text-dim);
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-size: var(--fs-xs);
+  margin-bottom: 8px;
+}
+.st-header__kicker i { color: var(--color-gold); }
+.st-header__title {
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.st-header__sub {
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  margin-top: 4px;
+}
+.st-header__format {
+  color: var(--color-text-dim);
+  font-size: var(--fs-sm);
+  margin-top: 2px;
 }
 
-.pos-direct {
-  background: rgba(0, 242, 254, 0.15);
-  color: #00f2fe;
-}
-
-.pos-playoff {
-  background: rgba(255, 204, 0, 0.15);
-  color: #ffcc00;
-}
-
-.pos-eliminated {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-/* Abréviation Équipe */
-.team-pill {
-  display: inline-flex;
-  align-items: center;
+/* ============================================ */
+/* LÉGENDE */
+/* ============================================ */
+.st-legend {
+  display: flex;
   justify-content: center;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 0.78rem;
-  letter-spacing: 0.5px;
-  min-width: 42px;
-  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
 }
-
-.team-name {
-  font-weight: 700;
-  color: #ffffff !important;
-  font-size: 0.95rem;
-}
-
-.player-name {
-  font-size: 0.78rem;
-  color: #94a3b8 !important;
-  font-weight: 500;
-}
-
-/* Couleurs des chiffres */
-.stat-win {
-  color: #34d399 !important;
-  font-weight: 700;
-}
-
-.stat-loss {
-  color: #f87171 !important;
-  font-weight: 700;
-}
-
-.stat-pts {
-  font-weight: 900;
-  color: #ffcc00 !important;
-  font-size: 1.1rem;
-}
-
-.empty-msg {
-  color: #94a3b8 !important;
-  font-style: italic;
-}
-
-/* Légende */
-.legend-pill {
+.st-legend__item {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  border-radius: 20px;
+  border-radius: 999px;
   font-weight: 600;
-  font-size: 0.82rem;
-  background: #0f172a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #e2e8f0;
+  font-size: var(--fs-sm);
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
 }
-
-.legend-dot {
+.st-legend__dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   display: inline-block;
 }
+.st-legend__item--direct .st-legend__dot { background: var(--color-cyan); box-shadow: 0 0 8px var(--color-cyan); }
+.st-legend__item--playoff .st-legend__dot { background: var(--color-gold); box-shadow: 0 0 8px var(--color-gold); }
+.st-legend__item--elim .st-legend__dot { background: var(--color-red); box-shadow: 0 0 8px var(--color-red); }
 
-.dot-direct { background: #00f2fe; box-shadow: 0 0 6px #00f2fe; }
-.dot-playoff { background: #ffcc00; box-shadow: 0 0 6px #ffcc00; }
-.dot-eliminated { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+/* ============================================ */
+/* CARD */
+/* ============================================ */
+.st-card {
+  background: rgba(17,28,47,.60);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.30);
+}
+.st-tablewrap { overflow-x: auto; }
 
-/* Mobile */
+/* ============================================ */
+/* TABLE */
+/* ============================================ */
+.st-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-base);
+}
+
+.st-table thead th {
+  background: rgba(9,13,22,.85);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--color-border-strong);
+  white-space: nowrap;
+  text-align: center;
+}
+.st-table thead th.st-th-team { text-align: left; }
+.st-table thead th.st-th-pts { color: var(--color-gold); }
+
+.st-row { transition: background .15s ease; }
+.st-row:hover { background: rgba(255,255,255,.04); }
+
+.st-table tbody td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  color: var(--color-text);
+  text-align: center;
+  vertical-align: middle;
+}
+.st-table tbody tr:last-child td { border-bottom: none; }
+
+/* Zones latérales */
+.st-row--direct td:first-child { border-left: 3px solid var(--color-cyan); }
+.st-row--playoff td:first-child { border-left: 3px solid var(--color-gold); }
+.st-row--elim td:first-child { border-left: 3px solid var(--color-red); opacity: .75; }
+
+/* Position */
+.st-td-pos { width: 50px; }
+.st-pos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: var(--fs-sm);
+}
+.st-pos--direct { background: rgba(0,167,225,.15); color: var(--color-cyan); }
+.st-pos--playoff { background: rgba(230,194,0,.15); color: var(--color-gold); }
+.st-pos--elim { background: rgba(220,53,69,.15); color: var(--color-red); }
+
+/* Team cell */
+.st-td-team { text-align: left; }
+.st-team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.st-team__info { min-width: 0; }
+.st-team__name {
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--fs-base);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.st-team__player {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+/* Numbers */
+.st-td-num { font-weight: 600; color: var(--color-text-dim); }
+.st-td-win { color: var(--color-green); font-weight: 700; }
+.st-td-loss { color: var(--color-red); font-weight: 700; }
+
+.st-td-pts {
+  font-weight: 800;
+  color: var(--color-gold);
+  font-size: var(--fs-md);
+  background: rgba(230,194,0,.04);
+}
+
+/* Empty */
+.st-empty {
+  padding: 48px 20px !important;
+  color: var(--color-text-muted);
+  font-size: var(--fs-md);
+}
+.st-empty i {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  opacity: .4;
+}
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
 @media (max-width: 768px) {
-  .col-optional {
-    display: none !important;
-  }
-  
-  .standings-table thead th, 
-  .standings-table tbody td {
-    padding: 10px 6px;
-  }
+  .st-page { padding: 20px 0 40px; }
+  .st-hide-sm { display: none !important; }
+  .st-table thead th,
+  .st-table tbody td { padding: 10px 6px; }
+  .st-td-pos { width: 40px; }
+  .st-team { gap: 8px; }
+  .st-team__player { font-size: 0.625rem; }
+  .st-legend__item { font-size: var(--fs-xs); padding: 5px 10px; }
 }
 </style>
 {% endblock %}

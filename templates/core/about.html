@@ -1,40 +1,609 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}À propos - Goma Champions League 2026{% endblock %}
+{% block title %}À propos — Ef-Champions League{% endblock %}
 
 {% block content %}
-<section class="py-5">
-    <div class="container">
-        <h1 class="section-title text-center mb-5">
-            <i class="fas fa-info-circle me-2"></i>
-            À PROPOS
-        </h1>
-        
-        <div class="card mb-4">
-            <div class="card-body">
-                <h3>🏆 Goma Champions League 2026</h3>
-                <p>
-                    Compétition de eFootball 2026 (mobile) organisée à Goma, RDC.
-                    Format inspiré de la UEFA Champions League.
-                </p>
-            </div>
-        </div>
-        
-        <h3 class="text-center mb-4">👥 LES ORGANISATEURS</h3>
-        <div class="row g-4">
-            {% for organizer in organizers %}
-            <div class="col-md-6">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <i class="fas fa-user-circle fa-3x text-primary mb-3"></i>
-                        <h5>{{ organizer.name }}</h5>
-                        <p class="text-muted">{{ organizer.role }}</p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+<section class="ab-page">
+
+  <div class="container ab-container">
+
+    <!-- ============================================ -->
+    <!-- HERO -->
+    <!-- ============================================ -->
+    <div class="ab-hero">
+      <div class="ab-hero__glow"></div>
+
+      <div class="ab-hero__logo-wrap">
+        <img src="{% static 'images/logo.png' %}" alt="Ef-Champions League" class="ab-hero__logo">
+      </div>
+
+      <div class="ab-hero__kicker">
+        <i class="fas fa-circle-info"></i>
+        À PROPOS
+      </div>
+
+      <h1 class="ab-hero__title">Ef-Champions League</h1>
+      <div class="ab-hero__season">SAISON 2026</div>
+
+      <p class="ab-hero__lead">
+        La compétition eFootball Mobile de référence.<br>
+        Organisée avec passion, jouée avec fair-play.
+      </p>
     </div>
+
+    <!-- ============================================ -->
+    <!-- MISSION -->
+    <!-- ============================================ -->
+    <div class="ab-card">
+      <div class="ab-card__head">
+        <div class="ab-card__icon">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <div>
+          <div class="ab-card__title">Notre mission</div>
+          <div class="ab-card__sub">Un tournoi eFootball de haut niveau</div>
+        </div>
+      </div>
+
+      <p class="ab-card__text">
+        <strong>Ef-Champions League</strong> est une compétition officielle de
+        <strong>eFootball Mobile</strong> qui rassemble les meilleurs joueurs autour
+        d'un format inspiré de l'UEFA Champions League.
+      </p>
+
+      <p class="ab-card__text">
+        Notre ambition : offrir une expérience <strong>professionnelle, équitable et
+        passionnante</strong>, avec une organisation transparente, une communication claire
+        et une vraie valorisation des performances sportives.
+      </p>
+
+      <!-- Piliers -->
+      <div class="ab-pillars">
+        <div class="ab-pillar">
+          <div class="ab-pillar__icon"><i class="fas fa-scale-balanced"></i></div>
+          <div>
+            <div class="ab-pillar__title">Équité</div>
+            <div class="ab-pillar__text">Règlement clair pour tous</div>
+          </div>
+        </div>
+
+        <div class="ab-pillar">
+          <div class="ab-pillar__icon"><i class="fas fa-bolt"></i></div>
+          <div>
+            <div class="ab-pillar__title">Intensité</div>
+            <div class="ab-pillar__text">Des matchs à enjeu</div>
+          </div>
+        </div>
+
+        <div class="ab-pillar">
+          <div class="ab-pillar__icon"><i class="fas fa-handshake"></i></div>
+          <div>
+            <div class="ab-pillar__title">Respect</div>
+            <div class="ab-pillar__text">Fair-play avant tout</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- CHIFFRES CLÉS -->
+    <!-- ============================================ -->
+    <div class="ab-stats">
+      <div class="ab-stat">
+        <div class="ab-stat__value">12–36</div>
+        <div class="ab-stat__label">Équipes</div>
+      </div>
+      <div class="ab-stat">
+        <div class="ab-stat__value">4–8</div>
+        <div class="ab-stat__label">Journées</div>
+      </div>
+      <div class="ab-stat">
+        <div class="ab-stat__value">25h</div>
+        <div class="ab-stat__label">Fenêtre de jeu</div>
+      </div>
+      <div class="ab-stat">
+        <div class="ab-stat__value">1</div>
+        <div class="ab-stat__label">Champion</div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ORGANISATEURS -->
+    <!-- ============================================ -->
+    <div class="ab-section-head">
+      <div class="ab-section-head__kicker">
+        <i class="fas fa-users"></i>
+        L'ÉQUIPE
+      </div>
+      <h2 class="ab-section-head__title">Les Organisateurs</h2>
+      <p class="ab-section-head__sub">
+        Derrière la compétition, une équipe passionnée
+      </p>
+    </div>
+
+    <div class="ab-orgs">
+      {% for organizer in organizers %}
+      <article class="ab-org">
+        <div class="ab-org__avatar">
+          <i class="fas fa-user-tie"></i>
+        </div>
+        <div class="ab-org__body">
+          <h3 class="ab-org__name">{{ organizer.name }}</h3>
+          <div class="ab-org__role">{{ organizer.role }}</div>
+        </div>
+        <div class="ab-org__badge">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <!-- ============================================ -->
+    <!-- CTA CONTACT -->
+    <!-- ============================================ -->
+    <div class="ab-cta">
+      <div class="ab-cta__icon">
+        <i class="fab fa-whatsapp"></i>
+      </div>
+      <div class="ab-cta__body">
+        <div class="ab-cta__title">Une question ?</div>
+        <div class="ab-cta__text">
+          Rejoignez le groupe WhatsApp officiel pour toute information,
+          assistance ou réclamation.
+        </div>
+      </div>
+      <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto"
+         target="_blank" rel="noopener"
+         class="ab-cta__btn">
+        <span>Rejoindre le groupe</span>
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+  </div>
 </section>
+
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
+<style>
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.ab-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+  padding: 40px 0 60px;
+}
+.ab-container { max-width: 900px; }
+
+/* ============================================ */
+/* HERO */
+/* ============================================ */
+.ab-hero {
+  position: relative;
+  text-align: center;
+  padding: 20px 0 40px;
+}
+.ab-hero__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(230,194,0,.08), transparent 45%),
+    radial-gradient(circle at 70% 30%, rgba(0,167,225,.10), transparent 45%);
+  pointer-events: none;
+}
+
+.ab-hero__logo-wrap {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 20px;
+}
+.ab-hero__logo {
+  height: 88px;
+  width: auto;
+  filter: drop-shadow(0 12px 32px rgba(230,194,0,.35));
+  animation: abFloat 5s ease-in-out infinite;
+}
+@keyframes abFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.ab-hero__kicker {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+  letter-spacing: 4px;
+  font-size: 0.6875rem;
+  margin-bottom: 12px;
+}
+.ab-hero__kicker i { color: #e6c200; }
+
+.ab-hero__title {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  font-weight: 900;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.ab-hero__season {
+  position: relative;
+  z-index: 2;
+  color: #e6c200;
+  font-weight: 800;
+  font-size: 0.875rem;
+  letter-spacing: 5px;
+  margin-top: 8px;
+}
+.ab-hero__lead {
+  position: relative;
+  z-index: 2;
+  color: rgba(255,255,255,.70);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  max-width: 520px;
+  margin: 18px auto 0;
+}
+
+/* ============================================ */
+/* CARD MISSION */
+/* ============================================ */
+.ab-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  padding: 28px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.30);
+  margin-bottom: 24px;
+}
+@media (max-width: 640px) { .ab-card { padding: 22px 18px; } }
+
+.ab-card__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.ab-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(230,194,0,.15), rgba(230,194,0,.04));
+  border: 1px solid rgba(230,194,0,.30);
+  color: #e6c200;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.ab-card__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+}
+.ab-card__sub {
+  color: rgba(255,255,255,.50);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.ab-card__text {
+  color: rgba(255,255,255,.75);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+.ab-card__text strong { color: #fff; }
+.ab-card__text:last-of-type { margin-bottom: 22px; }
+
+/* ============================================ */
+/* PILIERS */
+/* ============================================ */
+.ab-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 640px) { .ab-pillars { grid-template-columns: 1fr; } }
+
+.ab-pillar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.ab-pillar:hover {
+  border-color: rgba(230,194,0,.28);
+  transform: translateY(-2px);
+}
+.ab-pillar__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,167,225,.10);
+  border: 1px solid rgba(0,167,225,.22);
+  color: #00d4ff;
+  font-size: 0.9375rem;
+  flex-shrink: 0;
+}
+.ab-pillar__title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.ab-pillar__text {
+  color: rgba(255,255,255,.55);
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+/* ============================================ */
+/* STATS */
+/* ============================================ */
+.ab-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 40px;
+}
+@media (max-width: 640px) { .ab-stats { grid-template-columns: repeat(2, 1fr); } }
+
+.ab-stat {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 18px 12px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  transition: border-color .2s ease, transform .2s ease;
+}
+.ab-stat:hover {
+  border-color: rgba(230,194,0,.28);
+  transform: translateY(-3px);
+}
+.ab-stat__value {
+  color: #e6c200;
+  font-weight: 900;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.ab-stat__label {
+  color: rgba(255,255,255,.55);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+
+/* ============================================ */
+/* SECTION HEAD */
+/* ============================================ */
+.ab-section-head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.ab-section-head__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.50);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: 0.6875rem;
+  margin-bottom: 8px;
+}
+.ab-section-head__kicker i { color: #e6c200; }
+.ab-section-head__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 3vw, 1.625rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.ab-section-head__sub {
+  color: rgba(255,255,255,.55);
+  font-size: 0.8125rem;
+  margin-top: 6px;
+}
+
+/* ============================================ */
+/* ORGANISATEURS */
+/* ============================================ */
+.ab-orgs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.ab-org {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  overflow: hidden;
+}
+.ab-org::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #e6c200, rgba(230,194,0,.30));
+  opacity: .6;
+  transition: opacity .25s ease;
+}
+.ab-org:hover {
+  transform: translateY(-3px);
+  border-color: rgba(230,194,0,.28);
+  box-shadow: 0 12px 30px rgba(0,0,0,.30);
+}
+.ab-org:hover::before { opacity: 1; }
+
+.ab-org__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(0,167,225,.15), rgba(0,167,225,.04));
+  border: 1px solid rgba(0,167,225,.28);
+  color: #00d4ff;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+.ab-org__body { min-width: 0; flex: 1; }
+.ab-org__name {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  margin: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ab-org__role {
+  color: rgba(255,255,255,.55);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+.ab-org__badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(230,194,0,.08);
+  border: 1px solid rgba(230,194,0,.20);
+  color: #e6c200;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+  transition: all .2s ease;
+}
+.ab-org:hover .ab-org__badge {
+  background: rgba(230,194,0,.16);
+  transform: scale(1.05);
+}
+
+/* ============================================ */
+/* CTA */
+/* ============================================ */
+.ab-cta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  background: linear-gradient(135deg, rgba(37,211,102,.06), rgba(37,211,102,.02));
+  border: 1px solid rgba(37,211,102,.22);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap;
+}
+.ab-cta__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #fff;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 8px 22px rgba(37,211,102,.25);
+}
+.ab-cta__body { flex: 1; min-width: 200px; }
+.ab-cta__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9375rem;
+}
+.ab-cta__text {
+  color: rgba(255,255,255,.60);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+.ab-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: linear-gradient(135deg, #128c7e, #25d366);
+  color: #fff !important;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(37,211,102,.22);
+  transition: transform .2s ease, box-shadow .2s ease;
+  white-space: nowrap;
+}
+.ab-cta__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(37,211,102,.38);
+  color: #fff !important;
+}
+.ab-cta__btn i {
+  font-size: 0.75rem;
+  transition: transform .2s ease;
+}
+.ab-cta__btn:hover i { transform: translateX(4px); }
+
+@media (max-width: 640px) {
+  .ab-cta { flex-direction: column; text-align: center; }
+  .ab-cta__body { min-width: 0; }
+  .ab-cta__btn { width: 100%; justify-content: center; }
+}
+
+/* ============================================ */
+/* MOBILE
+/* ============================================ */
+@media (max-width: 640px) {
+  .ab-page { padding: 24px 0 40px; }
+  .ab-hero { padding: 10px 0 28px; }
+  .ab-hero__logo { height: 70px; }
+  .ab-hero__title { font-size: 1.375rem; }
+  .ab-card__head { gap: 12px; }
+  .ab-card__icon { width: 46px; height: 46px; font-size: 1.125rem; }
+  .ab-stat__value { font-size: 1.25rem; }
+}
+</style>
 {% endblock %}

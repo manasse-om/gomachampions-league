@@ -1,100 +1,122 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Équipes - Goma Champions League 2026{% endblock %}
+{% block title %}Équipes — Ef-Champions League{% endblock %}
 
 {% block content %}
-<section class="py-5 calendar-pro">
-  <div class="container">
+<section class="tl-page">
+
+  <div class="container tl-container">
 
     <!-- HEADER -->
-    <div class="text-center mb-4">
-      <h1 class="display-6 fw-bold text-white mb-1" style="letter-spacing:.6px;">
-        Toutes les équipes
-      </h1>
-      <p class="text-gold mb-0">
-        {{ teams|length }} / 36 équipes validées
-      </p>
-    </div>
-
-    <!-- BARRE DE RECHERCHE -->
-    <div class="mb-3">
-      <div class="input-group">
-        <span class="input-group-text input-dark">
-          <i class="fas fa-search"></i>
-        </span>
-        <input
-          type="search"
-          id="searchTeams"
-          class="form-control input-dark"
-          placeholder="Rechercher équipe / joueur / abréviation..."
-          autocomplete="off">
+    <div class="tl-header">
+      <div class="tl-header__kicker">
+        <i class="fas fa-users"></i> SAISON 2026
       </div>
-      <div class="text-end mt-1">
-        <small class="text-light" style="opacity:.7;">
-          <span id="teamsVisible">{{ teams|length }}</span> / {{ teams|length }} équipes affichées
-        </small>
+      <h1 class="tl-header__title">Les Équipes</h1>
+      <div class="tl-header__sub">
+        <strong>{{ teams|length }}</strong> équipe{{ teams|length|pluralize }} en compétition
       </div>
     </div>
 
+    <!-- RECHERCHE -->
+    <div class="tl-search">
+      <i class="fas fa-search tl-search__icon"></i>
+      <input
+        type="search"
+        id="searchTeams"
+        class="tl-search__input"
+        placeholder="Rechercher une équipe, un joueur ou une abréviation…"
+        autocomplete="off">
+      <div class="tl-search__count">
+        <span id="teamsVisible">{{ teams|length }}</span> / {{ teams|length }}
+      </div>
+    </div>
 
     <!-- TABLEAU -->
-    <div class="ucl-tablewrap">
-      <div class="table-responsive">
-        <table class="table ucl-table" id="teamsTable">
+    <div class="tl-card">
+      <div class="tl-tablewrap">
+        <table class="tl-table" id="teamsTable">
           <thead>
             <tr>
-              <th style="width:60px;">#</th>
-              <th>Équipe</th>
-              <th>Abréviation</th>
-              <th>Joueur</th>
-              <th class="text-center">Points</th>
-              <th class="text-center">Statut</th>
-              <th class="text-center">Contact</th>
+              <th class="tl-th-pos">#</th>
+              <th class="tl-th-team">Équipe</th>
+              <th class="tl-th-player">Joueur</th>
+              <th class="tl-th-num">MJ</th>
+              <th class="tl-th-num">V</th>
+              <th class="tl-th-num tl-hide-md">N</th>
+              <th class="tl-th-num tl-hide-md">D</th>
+              <th class="tl-th-num tl-hide-md">BP</th>
+              <th class="tl-th-num tl-hide-md">BC</th>
+              <th class="tl-th-num tl-hide-md">+/-</th>
+              <th class="tl-th-pts">Pts</th>
+              <th class="tl-th-action"></th>
             </tr>
           </thead>
           <tbody>
             {% for team in teams %}
-            <tr class="team-row">
-              <td class="ucl-pos">{{ forloop.counter }}</td>
+            <tr class="tl-row team-row"
+                data-name="{{ team.team_name|lower }} {{ team.player_name|lower }} {{ team.abbreviation|lower }}">
 
-              <td>
-                <div class="team-row">
-                  <div class="team-logo">
-                    {{ team.team_name|slice:":1"|upper }}
-                  </div>
-                  <div class="team-meta">
-                    <div class="team-name">{{ team.team_name }}</div>
+              <td class="tl-td-pos">
+                <span class="tl-pos">{{ forloop.counter }}</span>
+              </td>
+
+              <td class="tl-td-team">
+                <div class="tl-team">
+                  {% include "core/partials/_team_logo.html" with team=team size="sm" %}
+                  <div class="tl-team__info">
+                    <div class="tl-team__name">{{ team.team_name }}</div>
+                    <div class="tl-team__abbr">{{ team.abbreviation }}</div>
                   </div>
                 </div>
               </td>
 
-              <td>
-                <span class="ucl-pill">{{ team.abbreviation }}</span>
+              <td class="tl-td-player">
+                <i class="fas fa-user tl-td-player__icon"></i>
+                {{ team.player_name }}
               </td>
 
-              <td>{{ team.player_name }}</td>
-
-              <td class="text-center ucl-pts">{{ team.points }}</td>
-
-              <td class="text-center">
-                {% if team.payment_validated %}
-                  <span class="badge bg-success">✅ Validé</span>
-                {% else %}
-                  <span class="badge bg-warning text-dark">En attente</span>
-                {% endif %}
+              <td class="tl-td-num">{{ team.played }}</td>
+              <td class="tl-td-num tl-td-win">{{ team.wins }}</td>
+              <td class="tl-td-num tl-hide-md">{{ team.draws }}</td>
+              <td class="tl-td-num tl-td-loss tl-hide-md">{{ team.losses }}</td>
+              <td class="tl-td-num tl-hide-md">{{ team.goals_for }}</td>
+              <td class="tl-td-num tl-hide-md">{{ team.goals_against }}</td>
+              <td class="tl-td-num tl-hide-md
+                {% if team.goal_difference > 0 %}tl-td-win
+                {% elif team.goal_difference < 0 %}tl-td-loss{% endif %}">
+                {{ team.goal_difference|stringformat:"+d" }}
               </td>
+              <td class="tl-td-pts">{{ team.points }}</td>
 
-              <td class="text-center">
-                <a class="wa-dot" href="https://wa.me/{{ team.whatsapp|cut:'+' }}" target="_blank" title="Contacter sur WhatsApp">
+              <td class="tl-td-action">
+                {% if team.whatsapp %}
+                <a class="tl-wa"
+                   href="https://wa.me/{{ team.whatsapp|cut:'+' }}"
+                   target="_blank" rel="noopener"
+                   title="Contacter {{ team.player_name }} sur WhatsApp">
                   <i class="fab fa-whatsapp"></i>
                 </a>
+                {% endif %}
               </td>
-
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="12" class="tl-empty">
+                <i class="fas fa-inbox"></i>
+                <div>Aucune équipe validée pour le moment.</div>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
+      </div>
+
+      <!-- Message si aucun résultat -->
+      <div id="noResults" class="tl-no-results" style="display:none;">
+        <i class="fas fa-search"></i>
+        <div>Aucune équipe ne correspond à votre recherche.</div>
       </div>
     </div>
 
@@ -102,84 +124,305 @@
 </section>
 
 <style>
-.calendar-pro{
-  background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 100%);
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.tl-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
   min-height: 100vh;
-  color:#eee;
+  color: var(--color-text);
+  padding: 32px 0 60px;
 }
-.text-gold{ color:#e6c200 !important; }
+.tl-container { max-width: 1100px; }
 
-#searchTeams{
-  font-size: 1rem;
+/* ============================================ */
+/* HEADER */
+/* ============================================ */
+.tl-header { text-align: center; margin-bottom: 24px; }
+.tl-header__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-dim);
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-size: var(--fs-xs);
+  margin-bottom: 8px;
+}
+.tl-header__kicker i { color: var(--color-gold); }
+.tl-header__title {
+  font-weight: 800;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.tl-header__sub {
+  color: var(--color-text-dim);
+  font-size: var(--fs-sm);
+  margin-top: 6px;
+}
+.tl-header__sub strong { color: var(--color-gold); }
+
+/* ============================================ */
+/* RECHERCHE */
+/* ============================================ */
+.tl-search {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto 20px;
+}
+.tl-search__icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: var(--fs-base);
+  pointer-events: none;
+}
+.tl-search__input {
+  width: 100%;
+  padding: 12px 100px 12px 44px;
+  background: rgba(17,28,47,.60);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.tl-search__input:focus {
+  border-color: rgba(230,194,0,.45);
+  box-shadow: 0 0 0 4px rgba(230,194,0,.08);
+}
+.tl-search__input::placeholder { color: var(--color-text-muted); }
+.tl-search__count {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
 }
 
-.team-row:hover{
-  background: rgba(230,194,0,.06);
+/* ============================================ */
+/* CARD + TABLE */
+/* ============================================ */
+.tl-card {
+  background: rgba(17,28,47,.60);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.30);
+}
+.tl-tablewrap { overflow-x: auto; }
+
+.tl-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-base);
 }
 
-.wa-dot{
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+/* Header */
+.tl-table thead th {
+  background: rgba(9,13,22,.85);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--color-border-strong);
+  white-space: nowrap;
+  text-align: center;
+}
+.tl-table thead th.tl-th-team,
+.tl-table thead th.tl-th-player { text-align: left; }
+.tl-table thead th.tl-th-pts { color: var(--color-gold); }
+.tl-table thead th.tl-th-action { width: 50px; }
+
+/* Rows */
+.tl-row { transition: background .15s ease; }
+.tl-row:hover { background: rgba(255,255,255,.04); }
+
+.tl-table tbody td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  color: var(--color-text);
+  text-align: center;
+  vertical-align: middle;
+}
+.tl-table tbody tr:last-child td { border-bottom: none; }
+
+/* Position */
+.tl-td-pos { width: 44px; }
+.tl-pos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--color-text-dim);
+  font-weight: 800;
+  font-size: var(--fs-xs);
+}
+
+/* Team cell */
+.tl-td-team { text-align: left; min-width: 180px; }
+.tl-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tl-team__info { min-width: 0; }
+.tl-team__name {
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--fs-base);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-team__abbr {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+/* Player cell */
+.tl-td-player {
+  text-align: left;
+  color: var(--color-text-dim);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+.tl-td-player__icon {
+  color: var(--color-text-muted);
+  margin-right: 6px;
+  font-size: 0.6875rem;
+}
+
+/* Numbers */
+.tl-td-num {
+  font-weight: 600;
+  color: var(--color-text-dim);
+  font-size: var(--fs-sm);
+  width: 44px;
+}
+.tl-td-win { color: var(--color-green); font-weight: 700; }
+.tl-td-loss { color: var(--color-red); font-weight: 700; }
+
+.tl-td-pts {
+  font-weight: 800;
+  color: var(--color-gold);
+  font-size: var(--fs-md);
+  background: rgba(230,194,0,.04);
+  width: 56px;
+}
+
+/* Action */
+.tl-td-action { width: 50px; }
+.tl-wa {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(37,211,102,.35);
   background: rgba(37,211,102,.10);
   color: rgba(255,255,255,.92);
-  font-weight: 900;
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  transition: all .2s ease;
 }
-.wa-dot:hover{
-  background: rgba(37,211,102,.18);
-  color:#fff;
-}
-
-.team-logo{
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight: 1000;
-  font-size: .95rem;
-  color: #0a0e17;
-  background: linear-gradient(45deg, #e6c200, #ffed4e);
-  flex: 0 0 auto;
+.tl-wa:hover {
+  background: rgba(37,211,102,.22);
+  color: #fff;
+  transform: scale(1.08);
 }
 
-@media (max-width: 768px){
-  .team-logo{ width:28px; height:28px; }
+/* Empty */
+.tl-empty {
+  padding: 60px 20px !important;
+  color: var(--color-text-muted);
+  font-size: var(--fs-md);
+}
+.tl-empty i {
+  display: block;
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  opacity: .4;
+}
+.tl-no-results {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--fs-md);
+}
+.tl-no-results i {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  opacity: .4;
 }
 
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 768px) {
+  .tl-page { padding: 20px 0 40px; }
+  .tl-hide-md { display: none !important; }
+  .tl-table thead th,
+  .tl-table tbody td { padding: 8px 6px; }
+  .tl-td-pos { width: 36px; }
+  .tl-team__name { font-size: var(--fs-sm); }
+  .tl-td-player { display: none; }
+  .tl-td-pts { width: 48px; font-size: var(--fs-base); }
+  .tl-td-num { width: 36px; }
+}
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function(){
-
-  const searchInput = document.getElementById("searchTeams");
-  const rows = document.querySelectorAll(".team-row");
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("searchTeams");
+  const table = document.getElementById("teamsTable");
   const counter = document.getElementById("teamsVisible");
+  const noResults = document.getElementById("noResults");
+  if (!input || !table) return;
 
-  searchInput.addEventListener("input", function(){
-    const query = this.value.toLowerCase().trim();
+  const rows = table.querySelectorAll("tbody .team-row");
+
+  input.addEventListener("input", function () {
+    const q = this.value.toLowerCase().trim();
     let visible = 0;
 
-    rows.forEach(row => {
-      const text = row.textContent.toLowerCase();
-
-      if(text.includes(query)){
+    rows.forEach(function (row) {
+      const text = row.getAttribute("data-name") || row.textContent.toLowerCase();
+      if (!q || text.includes(q)) {
         row.style.display = "";
-        visible +=1;
+        visible++;
       } else {
         row.style.display = "none";
       }
     });
 
-    counter.textContent = visible;
+    if (counter) counter.textContent = visible;
+    if (noResults) noResults.style.display = (visible === 0) ? "block" : "none";
   });
-
 });
 </script>
-
 {% endblock %}

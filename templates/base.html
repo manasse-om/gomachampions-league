@@ -1,44 +1,122 @@
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Goma Champions League 2026{% endblock %}</title>
-    
-    <!-- Favicon -->
+    <title>{% block title %}Ef-Champions League 2026{% endblock %}</title>
+
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    
-    <!-- Google Fonts -->
+
+    <!-- Inter Font (unique) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/ucl-theme.css' %}">
     <link rel="stylesheet" href="{% static 'css/ucl-navbar.css' %}">
 
-        <!-- Inter Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <!-- ============================================ -->
+    <!-- VARIABLES GLOBALES + TYPOGRAPHIE -->
+    <!-- ============================================ -->
+    <style>
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+      /* Échelle typographique universelle */
+      --fs-xs:   0.6875rem;  /* 11px */
+      --fs-sm:   0.75rem;    /* 12px */
+      --fs-base: 0.875rem;   /* 14px */
+      --fs-md:   0.9375rem;  /* 15px */
+      --fs-lg:   1rem;       /* 16px */
+      --fs-xl:   1.125rem;   /* 18px */
+      --fs-2xl:  1.375rem;   /* 22px */
+      --fs-3xl:  1.75rem;    /* 28px */
+
+      /* Palette */
+      --color-bg-0:    #060a12;
+      --color-bg-1:    #0b1423;
+      --color-bg-2:    #0e1a2e;
+      --color-surface: rgba(17,28,47,.60);
+      --color-border:  rgba(255,255,255,.08);
+      --color-border-strong: rgba(255,255,255,.14);
+
+      --color-text:    rgba(255,255,255,.92);
+      --color-text-dim: rgba(255,255,255,.60);
+      --color-text-muted: rgba(255,255,255,.40);
+
+      --color-gold:  #e6c200;
+      --color-cyan:  #00a7e1;
+      --color-green: #47d18c;
+      --color-red:   #ff6b6b;
+      --color-amber: #ffc107;
+    }
+
+    html, body {
+      font-family: var(--font-sans);
+      font-size: var(--fs-base);
+      font-weight: 500;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.01em;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-sans);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    /* ============================================ */
+    /* TEAM LOGO SYSTEM (global) */
+    /* ============================================ */
+    .tlogo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      object-fit: contain;
+      flex-shrink: 0;
+      padding: 2px;
+      vertical-align: middle;
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    .tlogo:hover {
+      transform: scale(1.05);
+      border-color: rgba(230,194,0,.30);
+    }
+    .tlogo--xs  { width: 20px;  height: 20px;  font-size: 0.5625rem; }
+    .tlogo--sm  { width: 28px;  height: 28px;  font-size: 0.6875rem; }
+    .tlogo--md  { width: 40px;  height: 40px;  font-size: 0.8125rem; }
+    .tlogo--lg  { width: 56px;  height: 56px;  font-size: 1rem; }
+    .tlogo--xl  { width: 80px;  height: 80px;  font-size: 1.25rem; }
+    .tlogo--xxl { width: 120px; height: 120px; font-size: 1.75rem; }
+    .tlogo--fallback {
+      background: linear-gradient(135deg, #0b1423, #1a2942);
+      color: #e6c200;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    </style>
+
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
-    <!-- Navbar -->
     {% include 'partials/navbar.html' %}
-    
-    <!-- Messages -->
+
     {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}
@@ -50,45 +128,20 @@
         {% endfor %}
     </div>
     {% endif %}
-    
-    <!-- Main Content -->
+
     <main>
         {% block content %}{% endblock %}
     </main>
-    
-    <!-- Footer -->
+
     {% include 'partials/footer.html' %}
-    
-    <!-- Bootstrap JS -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/ucl-ui.js' %}"></script>
-    
+
     {% block extra_js %}{% endblock %}
 
-    <script>
-const toggleBtn = document.getElementById("themeToggle");
-
-toggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-
-    if(document.body.classList.contains("dark-mode")) {
-        localStorage.setItem("theme", "dark");
-    } else {
-        localStorage.setItem("theme", "light");
-    }
-});
-
-window.onload = () => {
-    if(localStorage.getItem("theme") === "dark") {
-        document.body.classList.add("dark-mode");
-    }
-};
-</script>
-{% include 'partials/mobile_bottom_nav.html' %}
-<script src="{% static 'js/countdown.js' %}"></script>
-<script src="{% static 'js/countdown.js' %}"></script>
+    {% include 'partials/mobile_bottom_nav.html' %}
+    <script src="{% static 'js/countdown.js' %}"></script>
 </body>
 </html>

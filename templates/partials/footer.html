@@ -1,158 +1,249 @@
 {% load static %}
 
-<footer class="footer-pro">
-    <div class="container">
-        <div class="row g-5 align-items-center">
+<footer class="ft-footer">
+  <div class="container">
 
-            <!-- COLONNE 1 : À PROPOS + BOUTON WHATSAPP -->
-            <div class="col-lg-5">
-                <div class="d-flex align-items-center mb-4">
-                    <img src="{% static 'images/logo.png' %}" alt="Goma CL" class="footer-logo me-3">
-                    <div>
-                        <h4 class="text-white fw-bold mb-0">GOMA CHAMPIONS LEAGUE</h4>
-                        <p class="text-gold small mb-0" style="letter-spacing: 2px;">PREMIÈRE ÉDITION • 2026</p>
-                    </div>
-                </div>
-                <p class="text-light mb-4" style="opacity: 0.9; line-height: 1.7;">
-                    La plus grande compétition eFootball mobile de l'Est de la RDC.<br>
-                    Format officiel UEFA Champions League – 36 équipes.
-                </p>
+    <div class="row g-4 ft-grid">
 
-                <!-- BOUTON WHATSAPP ULTRA CLASSE -->
-                <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto" 
-                   target="_blank" 
-                   class="btn-whatsapp-pro">
-                    <i class="fab fa-whatsapp fa-lg me-2"></i>
-                    Rejoindre le groupe officiel WhatsApp
-                </a>
-            </div>
-
-            <!-- COLONNE 2 : LIENS RAPIDES -->
-            <div class="col-lg-3 col-md-6">
-                <h5 class="text-gold fw-semibold mb-4 text-uppercase" style="letter-spacing: 2px;">
-                    Navigation
-                </h5>
-                <ul class="list-unstyled footer-links">
-                    <li><a href="{% url 'home' %}"><i class="fas fa-angle-right me-2"></i>Accueil</a></li>
-                    <li><a href="{% url 'standings' %}"><i class="fas fa-angle-right me-2"></i>Classement</a></li>
-                    <li><a href="{% url 'fixtures' %}"><i class="fas fa-angle-right me-2"></i>Calendrier</a></li>
-                    <li><a href="{% url 'results' %}"><i class="fas fa-angle-right me-2"></i>Résultats</a></li>
-                    <li><a href="{% url 'bracket' %}"><i class="fas fa-angle-right me-2"></i>Bracket</a></li>
-                    <li><a href="{% url 'rules' %}"><i class="fas fa-angle-right me-2"></i>Règlement</a></li>
-                    <li><a href="{% url 'season_history' %}"><i class="fas fa-angle-right me-2"></i>Archives</a></li>
-                </ul>
-            </div>
-
-            <!-- COLONNE 3 : ORGANISATEURS -->
-            <div class="col-lg-4 col-md-6">
-                <h5 class="text-gold fw-semibold mb-4 text-uppercase" style="letter-spacing: 2px;">
-                    Organisateurs
-                </h5>
-                <ul class="list-unstyled text-light organizers-list">
-                    <li><i class="fas fa-crown text-gold me-2"></i>Manassé Ombeni</li>
-                    <li><i class="fas fa-star text-gold me-2"></i>The Luckiest</li>
-                    <li><i class="fas fa-medal text-gold me-2"></i>Job Badesire</li>
-                    <li><i class="fas fa-trophy text-gold me-2"></i>Héritier DJO</li>
-                    <li><i class="fas fa-shield-alt text-gold me-2"></i>Joachim</li>
-                    <li><i class="fas fa-gem text-gold me-2"></i>Ildephonse</li>
-                </ul>
-            </div>
+      <!-- COLONNE 1 : À PROPOS + WHATSAPP -->
+      <div class="col-lg-5">
+        <div class="ft-brand">
+          <img src="{% static 'images/logo.png' %}" alt="Ef-Champions League" class="ft-logo">
+          <div>
+            <div class="ft-brand-name">Ef-Champions League</div>
+            <div class="ft-brand-sub">SAISON 2026</div>
+          </div>
         </div>
 
-        <!-- LIGNE SÉPARATRICE + COPYRIGHT -->
-        <hr class="footer-divider my-5">
+        <p class="ft-desc">
+          La compétition eFootball Mobile de référence.<br>
+          Format UEFA Champions League adaptatif — 12 à 36 équipes.
+        </p>
 
-        <div class="row align-items-center text-center text-md-start">
-            <div class="col-md-6">
-                <p class="mb-0 text-light" style="opacity: 0.8;">
-                    © 2026 Goma Champions League • Tous droits réservés
-                </p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <p class="mb-0 text-light" style="opacity: 0.8;">
-                    <i class="fas fa-gamepad me-2 text-gold"></i>
-                    Powered by eFootball 2026
-                </p>
-            </div>
-        </div>
+        <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto"
+           target="_blank" rel="noopener"
+           class="ft-wa">
+          <i class="fab fa-whatsapp"></i>
+          <span>Rejoindre le groupe officiel</span>
+          <i class="fas fa-arrow-right ft-wa-arrow"></i>
+        </a>
+      </div>
+
+      <!-- COLONNE 2 : NAVIGATION -->
+      <div class="col-lg-3 col-md-6">
+        <h5 class="ft-title">Navigation</h5>
+        <ul class="ft-links">
+          <li><a href="{% url 'home' %}"><i class="fas fa-angle-right"></i> Accueil</a></li>
+          <li><a href="{% url 'standings' %}"><i class="fas fa-angle-right"></i> Classement</a></li>
+          <li><a href="{% url 'fixtures' %}"><i class="fas fa-angle-right"></i> Calendrier</a></li>
+          <li><a href="{% url 'results' %}"><i class="fas fa-angle-right"></i> Résultats</a></li>
+          <li><a href="{% url 'bracket' %}"><i class="fas fa-angle-right"></i> Phase finale</a></li>
+          <li><a href="{% url 'rules' %}"><i class="fas fa-angle-right"></i> Règlement</a></li>
+          <li><a href="{% url 'season_history' %}"><i class="fas fa-angle-right"></i> Archives</a></li>
+        </ul>
+      </div>
+
+      <!-- COLONNE 3 : ORGANISATEURS -->
+      <div class="col-lg-4 col-md-6">
+        <h5 class="ft-title">Organisateurs</h5>
+        <ul class="ft-orgs">
+          <li><i class="fas fa-crown"></i> Manassé Ombeni</li>
+          <li><i class="fas fa-star"></i> The Luckiest</li>
+          <li><i class="fas fa-medal"></i> Job Badesire</li>
+          <li><i class="fas fa-trophy"></i> Héritier DJO</li>
+          <li><i class="fas fa-shield-halved"></i> Joachim</li>
+          <li><i class="fas fa-gem"></i> Ildephonse</li>
+        </ul>
+      </div>
+
     </div>
+
+    <div class="ft-bottom">
+      <div class="ft-bottom__row">
+        <div class="ft-bottom__copy">
+          © 2026 Ef-Champions League <span class="ft-sep">•</span> Tous droits réservés
+        </div>
+        <div class="ft-bottom__credit">
+          <i class="fas fa-gamepad"></i>
+          Powered by eFootball
+        </div>
+      </div>
+    </div>
+
+  </div>
 </footer>
 
 <style>
-.footer-pro {
-    background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 50%, #0b1425 100%);
-    padding: 80px 0 40px;
-    color: #ddd;
-    border-top: 4px solid #e6c200;
+/* ============================================ */
+/* FOOTER */
+/* ============================================ */
+.ft-footer {
+  background: linear-gradient(180deg, #060a12 0%, #0b1423 100%);
+  padding: 56px 0 24px;
+  color: rgba(255,255,255,.80);
+  border-top: 1px solid rgba(230,194,0,.15);
+  margin-top: 60px;
+}
+.ft-grid { margin-bottom: 40px; }
+
+/* Brand */
+.ft-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.ft-logo {
+  height: 48px;
+  width: auto;
+  filter: drop-shadow(0 2px 10px rgba(230,194,0,.30));
+}
+.ft-brand-name {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+.ft-brand-sub {
+  color: #e6c200;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: 2px;
+  margin-top: 2px;
 }
 
-.footer-logo {
-    height: 65px;
-    filter: drop-shadow(0 0 10px #e6c200);
+.ft-desc {
+  color: rgba(255,255,255,.60);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  margin-bottom: 18px;
+  max-width: 400px;
 }
 
-.text-gold {
-    color: #e6c200 !important;
+/* WhatsApp button */
+.ft-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  background: linear-gradient(135deg, #128c7e, #25d366);
+  color: #fff !important;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(37,211,102,.20);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.ft-wa:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(37,211,102,.35);
+  color: #fff !important;
+}
+.ft-wa-arrow {
+  margin-left: auto;
+  opacity: .85;
+  transition: transform .2s ease;
+}
+.ft-wa:hover .ft-wa-arrow { transform: translateX(4px); }
+
+/* Titles */
+.ft-title {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 16px;
 }
 
-/* BOUTON WHATSAPP PRO */
-.btn-whatsapp-pro {
-    background: linear-gradient(135deg, #25d366, #128c7e);
-    color: white;
-    padding: 14px 28px;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 1.02rem;
-    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
-    transition: all 0.4s ease;
-    border: none;
+/* Links */
+.ft-links { list-style: none; padding: 0; margin: 0; }
+.ft-links li { margin-bottom: 8px; }
+.ft-links a {
+  color: rgba(255,255,255,.65);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color .2s ease, transform .2s ease;
+}
+.ft-links a i {
+  font-size: 0.625rem;
+  color: rgba(255,255,255,.30);
+  transition: color .2s ease, transform .2s ease;
+}
+.ft-links a:hover {
+  color: #e6c200;
+  transform: translateX(3px);
+}
+.ft-links a:hover i { color: #e6c200; }
+
+/* Organizers */
+.ft-orgs { list-style: none; padding: 0; margin: 0; }
+.ft-orgs li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,.72);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 5px 0;
+}
+.ft-orgs li i {
+  color: #e6c200;
+  width: 16px;
+  font-size: 0.75rem;
+  text-align: center;
 }
 
-.btn-whatsapp-pro:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 15px 35px rgba(37, 211, 102, 0.5);
-    background: linear-gradient(135deg, #128c7e, #25d366);
-    color: white;
+/* Bottom bar */
+.ft-bottom {
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.ft-bottom__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ft-bottom__copy,
+.ft-bottom__credit {
+  color: rgba(255,255,255,.45);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.ft-bottom__credit i {
+  color: #e6c200;
+  margin-right: 6px;
+}
+.ft-sep {
+  color: rgba(255,255,255,.20);
+  margin: 0 6px;
 }
 
-/* LIENS FOOTER */
-.footer-links a {
-    color: #bbb;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.footer-links a:hover {
-    color: #e6c200;
-    padding-left: 10px;
-}
-
-/* ORGANISATEURS */
-.organizers-list li {
-    margin-bottom: 12px;
-    font-size: 1rem;
-    opacity: 0.9;
-}
-
-/* SÉPARATEUR */
-.footer-divider {
-    border: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, #e6c20044, transparent);
-    margin: 50px 0;
-}
-
-/* RESPONSIVE */
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
 @media (max-width: 768px) {
-    .footer-pro {
-        padding: 60px 0 30px;
-    }
-    .btn-whatsapp-pro {
-        width: 100%;
-        text-align: center;
-    }
+  .ft-footer {
+    padding: 40px 0 80px; /* espace pour le bottom-nav mobile */
+  }
+  .ft-wa {
+    width: 100%;
+    justify-content: center;
+  }
+  .ft-desc {
+    font-size: 0.75rem;
+  }
+  .ft-bottom__row {
+    flex-direction: column;
+    text-align: center;
+  }
 }
 </style>

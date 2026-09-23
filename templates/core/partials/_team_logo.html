@@ -1,0 +1,23 @@
+{% comment %}
+  Partial réutilisable pour afficher un logo d'équipe.
+  Usage : {% include "core/partials/_team_logo.html" with team=team size="md" %}
+  Tailles : xs (20px), sm (28px), md (40px), lg (56px), xl (80px), xxl (120px)
+{% endcomment %}
+
+{% if team and team.abbreviation != 'TBD' %}
+  {% with sz=size|default:"md" %}
+    {% if team.logo %}
+      <img src="{{ team.logo.url }}"
+           alt="{{ team.team_name }}"
+           class="tlogo tlogo--{{ sz }}"
+           loading="lazy">
+    {% else %}
+      <span class="tlogo tlogo--fallback tlogo--{{ sz }}"
+            title="{{ team.team_name }}">
+        {{ team.abbreviation|slice:":3" }}
+      </span>
+    {% endif %}
+  {% endwith %}
+{% else %}
+  <span class="tlogo tlogo--fallback tlogo--{{ size|default:'md' }}" style="opacity:.4;">?</span>
+{% endif %}
