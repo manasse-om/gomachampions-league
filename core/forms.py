@@ -19,8 +19,7 @@ class TeamRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = Team
-        fields = ['player_name', 'team_name', 'abbreviation', 'whatsapp']
-
+        fields = ['player_name', 'team_name', 'abbreviation', 'whatsapp', 'logo', 'payment_proof']
         widgets = {
             'player_name': forms.TextInput(attrs={'class': 'form-control'}),
             'team_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -32,6 +31,16 @@ class TeamRegistrationForm(forms.ModelForm):
             'whatsapp': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': '+243999999999',
+            }),
+
+            'logo': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/png,image/jpeg,image/webp,image/svg+xml',
+            }),
+
+            'payment_proof': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/png,image/jpeg,image/webp',
             }),
         }
 
@@ -113,6 +122,45 @@ class TeamRegistrationForm(forms.ModelForm):
 
         return team
 
+    def clean_logo(self):
+        logo = self.cleaned_data.get('logo')
+
+        # Si pas de logo uploadé → OK (champ optionnel)
+        if not logo:
+            return logo
+
+        # Taille max : 2 Mo
+        if logo.size > 2 * 1024 * 1024:
+            raise ValidationError(_("Le logo ne doit pas dépasser 2 Mo."))
+
+        # Extension
+        ext = logo.name.split('.')[-1].lower()
+        if ext == 'svg':
+            # SVG : pas de validation Pillow, juste la taille
+            return logo
+
+        # Pour les images raster : vérifier ratio carré
+        try:
+            from PIL import Image
+            img = Image.open(logo)
+            w, h = img.size
+            ratio = w / h if h else 0
+
+            if not (0.95 <= ratio <= 1.05):
+                raise ValidationError(_(
+                    "Le logo doit être carré (ratio 1:1). "
+                    "Votre image fait {w}×{h} px."
+                ).format(w=w, h=h))
+
+            # Réinitialiser le curseur (Pillow l'a déplacé)
+            logo.seek(0)
+        except ValidationError:
+            raise
+        except Exception:
+            raise ValidationError(_("Image invalide ou corrompue."))
+
+        return logo
+
 
 # ==========================================
 # FORMULAIRE : RÉSULTAT D'UN MATCH
@@ -178,6 +226,54 @@ class CompetitionForm(forms.ModelForm):
             'start_date',
             'end_date'
         ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Ef-Champions League 2026',
+            }),
+            'format_type': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+            'max_teams': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 12,
+                'max': 36,
+            }),
+            'registration_fee': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'step': 100,
+                'placeholder': 'Ex: 2500',
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+            }),
+            'registration_open': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+            }),
+            'start_date': forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',  # ⬅️ Input HTML5 natif
+                },
+                format='%Y-%m-%d'  # ⬅️ Format ISO attendu par HTML5
+            ),
+            'end_date': forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',
+                },
+                format='%Y-%m-%d'
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Rendre end_date optionnel
+        self.fields['end_date'].required = False
+        # Format ISO pour les dates initiales
+        self.fields['start_date'].input_formats = ['%Y-%m-%d']
+        self.fields['end_date'].input_formats = ['%Y-%m-%d']
 
 
 class SimplePasswordResetForm(forms.Form):

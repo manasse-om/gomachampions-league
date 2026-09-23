@@ -1,151 +1,191 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Valider le paiement - Dashboard Admin{% endblock %}
+{% block title %}Valider paiement — {{ team.team_name }}{% endblock %}
 
 {% block content %}
-<section class="py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card">
-                    <div class="card-header bg-warning text-dark">
-                        <h3 class="mb-0">
-                            <i class="fas fa-check-circle me-2"></i>
-                            VALIDATION DU PAIEMENT
-                        </h3>
-                    </div>
-                    <div class="card-body p-4">
-                        <!-- Informations du joueur -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-user me-2"></i>Informations du joueur</h5>
-                                <table class="table table-bordered">
-                                    <tr>
-                                        <th>Nom complet</th>
-                                        <td>{{ team.player_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>WhatsApp</th>
-                                        <td>
-                                            <a href="https://wa.me/{{ team.whatsapp }}" target="_blank" class="btn btn-sm btn-success">
-                                                <i class="fab fa-whatsapp me-1"></i>{{ team.whatsapp }}
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Date d'inscription</th>
-                                        <td>{{ team.created_at|date:"d/m/Y à H:i" }}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-shield-alt me-2"></i>Informations de l'équipe</h5>
-                                <table class="table table-bordered">
-                                    <tr>
-                                        <th>Nom de l'équipe</th>
-                                        <td>{{ team.team_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Abréviation</th>
-                                        <td><strong>{{ team.abbreviation }}</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Username</th>
-                                        <td><code>{{ team.abbreviation|lower }}</code></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <!-- Logo de l'équipe -->
-                        {% if team.logo %}
-                        <div class="mb-4">
-                            <h5><i class="fas fa-image me-2"></i>Logo de l'équipe</h5>
-                            <img src="{{ team.logo.url }}" alt="Logo" class="img-fluid rounded border" style="max-height: 150px;">
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Preuve de paiement -->
-                        <div class="mb-4">
-                            <h5><i class="fas fa-receipt me-2"></i>Preuve de paiement</h5>
-                            {% if team.payment_proof %}
-                            <div class="text-center">
-                                <a href="{{ team.payment_proof.url }}" target="_blank">
-                                    <img src="{{ team.payment_proof.url }}" alt="Preuve de paiement" class="img-fluid rounded border" style="max-height: 500px; cursor: zoom-in;">
-                                </a>
-                                <p class="text-muted mt-2">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Cliquez sur l'image pour l'agrandir
-                                </p>
-                            </div>
-                            {% else %}
-                            <div class="alert alert-danger">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                Aucune preuve de paiement uploadée !
-                            </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Décision -->
-                        <hr class="my-4">
-                        
-                        <h4 class="mb-3">
-                            <i class="fas fa-gavel me-2"></i>
-                            DÉCISION
-                        </h4>
-                        
-                        <form method="post">
-                            {% csrf_token %}
-                            
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-lg w-100"
-                                            onclick="return confirm('✅ Confirmer la validation du paiement pour {{ team.player_name }} ?\n\nCette action :\n• Activera le compte\n• Permettra au joueur de se connecter\n• L\'ajoutera à la compétition')">
-                                        <i class="fas fa-check-circle me-2"></i>
-                                        ✅ APPROUVER LE PAIEMENT
-                                    </button>
-                                    <small class="text-muted d-block mt-2">
-                                        Le joueur pourra se connecter avec :<br>
-                                        Username : <code>{{ team.abbreviation|lower }}</code>
-                                    </small>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-lg w-100"
-                                            onclick="return confirm('❌ ATTENTION : Refuser le paiement ?\n\nCette action :\n• Supprimera l\'inscription\n• Supprimera le compte utilisateur\n• Est IRRÉVERSIBLE\n\nÊtes-vous sûr ?')">
-                                        <i class="fas fa-times-circle me-2"></i>
-                                        ❌ REFUSER LE PAIEMENT
-                                    </button>
-                                    <small class="text-muted d-block mt-2">
-                                        L'inscription et le compte seront supprimés définitivement.
-                                    </small>
-                                </div>
-                            </div>
-                        </form>
-                        
-                        <div class="alert alert-info mt-4">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            <strong>Conseils :</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Vérifiez que le montant est bien <strong>1 000 CDF</strong></li>
-                                <li>Vérifiez que le destinataire est <strong>+243992848365</strong></li>
-                                <li>Vérifiez la date et l'heure du paiement</li>
-                                <li>En cas de doute, contactez le joueur sur WhatsApp</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="text-center mt-4">
-                            <a href="{% url 'pending_payments' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>
-                                Retour à la liste
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<section class="vp-page py-4">
+  <div class="container" style="max-width: 720px;">
+
+    <h1 class="vp-title">Validation du paiement</h1>
+
+    <div class="vp-card">
+      <div class="vp-team">
+        <div class="vp-team__logo">
+          {% if team.logo %}
+            <img src="{{ team.logo.url }}" alt="{{ team.team_name }}">
+          {% else %}
+            <span class="vp-team__initials">{{ team.abbreviation }}</span>
+          {% endif %}
         </div>
+        <div>
+          <div class="vp-team__name">{{ team.team_name }}</div>
+          <div class="vp-team__meta">
+            {{ team.player_name }} • <strong>{{ team.abbreviation }}</strong>
+          </div>
+          <div class="vp-team__meta">
+            <i class="fab fa-whatsapp"></i> {{ team.whatsapp }}
+          </div>
+        </div>
+      </div>
+
+      <!-- PREUVE DE PAIEMENT -->
+      <div class="vp-proof">
+        <div class="vp-proof__label">
+          <i class="fas fa-receipt"></i> Preuve de paiement
+        </div>
+        {% if team.payment_proof %}
+          <a href="{{ team.payment_proof.url }}" target="_blank" rel="noopener" class="vp-proof__img-link">
+            <img src="{{ team.payment_proof.url }}" alt="Preuve de paiement" class="vp-proof__img">
+          </a>
+          <div class="vp-proof__hint">
+            <i class="fas fa-info-circle"></i> Cliquez sur l'image pour l'agrandir
+          </div>
+        {% else %}
+          <div class="vp-proof__empty">
+            <i class="fas fa-exclamation-triangle"></i>
+            Aucune preuve de paiement n'a été fournie.
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- ACTIONS -->
+      <form method="post" class="vp-actions">
+        {% csrf_token %}
+        <button name="action" value="approve" class="vp-btn vp-btn--approve">
+          <i class="fas fa-check"></i> Approuver l'inscription
+        </button>
+        <button name="action" value="reject" class="vp-btn vp-btn--reject"
+                onclick="return confirm('Refuser cette inscription ? L\'équipe sera supprimée.');">
+          <i class="fas fa-times"></i> Refuser
+        </button>
+      </form>
     </div>
+
+  </div>
 </section>
+
+<style>
+.vp-page {
+  background: linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+}
+.vp-title {
+  font-weight: 800;
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  color: #fff;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+.vp-card {
+  background: rgba(17,28,47,.60);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(14px);
+}
+.vp-team {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 20px;
+}
+.vp-team__logo {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  padding: 6px;
+}
+.vp-team__logo img { width: 100%; height: 100%; object-fit: contain; }
+.vp-team__initials {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+.vp-team__name { color: #fff; font-weight: 800; font-size: 1.125rem; }
+.vp-team__meta { color: rgba(255,255,255,.65); font-size: 0.8125rem; margin-top: 4px; }
+.vp-team__meta i { color: #25d366; margin-right: 4px; }
+
+.vp-proof { margin-bottom: 20px; }
+.vp-proof__label {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+}
+.vp-proof__img-link { display: block; }
+.vp-proof__img {
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.20);
+  transition: transform .2s ease;
+}
+.vp-proof__img:hover { transform: scale(1.01); }
+.vp-proof__hint {
+  margin-top: 8px;
+  color: rgba(255,255,255,.50);
+  font-size: 0.75rem;
+}
+.vp-proof__empty {
+  padding: 24px;
+  text-align: center;
+  background: rgba(220,53,69,.06);
+  border: 1px dashed rgba(220,53,69,.30);
+  border-radius: 10px;
+  color: #ff6b6b;
+  font-size: 0.875rem;
+}
+
+.vp-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 540px) { .vp-actions { grid-template-columns: 1fr; } }
+
+.vp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 800;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s ease;
+}
+.vp-btn--approve {
+  background: linear-gradient(135deg, #128c7e, #25d366);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(37,211,102,.20);
+}
+.vp-btn--approve:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(37,211,102,.35);
+}
+.vp-btn--reject {
+  background: rgba(220,53,69,.12);
+  border: 1px solid rgba(220,53,69,.35);
+  color: #ff6b6b;
+}
+.vp-btn--reject:hover {
+  background: rgba(220,53,69,.20);
+}
+</style>
 {% endblock %}

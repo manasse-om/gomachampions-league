@@ -7,6 +7,8 @@ from datetime import timedelta
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import uuid
+from django.core.validators import FileExtensionValidator
 
 
 # ==========================================
@@ -58,6 +60,12 @@ class Competition(models.Model):
         return self.registered_teams_count * self.registration_fee
 
 
+def team_logo_path(instance, filename):
+    """Génère un chemin unique pour chaque logo : team_logos/{abbr}_{hash}.{ext}"""
+    ext = filename.split('.')[-1].lower()
+    abbr = (instance.abbreviation or 'team').lower()
+    return f'team_logos/{abbr}_{uuid.uuid4().hex[:8]}.{ext}'
+
 # ==========================================
 # MODÈLE : ÉQUIPE/JOUEUR
 # ==========================================
@@ -81,6 +89,26 @@ class Team(models.Model):
 
     # ✅ CORRIGÉ: suppression de unique=True (géré par UniqueConstraint ci-dessous)
     abbreviation = models.CharField(max_length=5, verbose_name=_("Abréviation"))
+    logo = models.ImageField(
+        upload_to=team_logo_path,
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(
+            allowed_extensions=['png', 'jpg', 'jpeg', 'webp', 'svg']
+        )],
+        verbose_name=_("Logo de l'équipe")
+    )
+
+    payment_proof = models.ImageField(
+        upload_to='payment_proofs/',
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(
+            allowed_extensions=['png', 'jpg', 'jpeg', 'webp']
+        )],
+        verbose_name=_("Preuve de paiement")
+    )
+
 
     # Numéro WhatsApp
     phone_regex = RegexValidator(regex=r'^\+?\d{9,15}$', message=_("Format: '+243999999999'"))

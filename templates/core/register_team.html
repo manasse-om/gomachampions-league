@@ -1,267 +1,820 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Inscription - Goma Champions League 2026{% endblock %}
+{% block title %}Inscription — Ef-Champions League{% endblock %}
 
 {% block content %}
-<section class="py-5 register-bg">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-10 col-lg-8">
+<section class="rg-page">
 
-        <div class="registration-card">
+  <div class="rg-hero">
+    <div class="rg-hero__inner">
+      <div class="rg-hero__kicker">
+        <i class="fas fa-shield-alt"></i> SAISON 2026
+      </div>
+      <h1 class="rg-hero__title">Inscription Officielle</h1>
+      <div class="rg-hero__sub">
+        <span class="rg-hero__brand">Ef-Champions League</span>
+        <span class="rg-hero__dot">•</span>
+        <span class="rg-hero__game">eFootball Mobile</span>
+      </div>
+    </div>
+  </div>
 
-          <div class="card-header text-center">
-            <h2>
-              <i class="fas fa-user-plus me-2"></i>
-              INSCRIPTION OFFICIELLE
-            </h2>
-            <p class="text-light mt-2">
-              Goma Champions League 2026
-            </p>
-          </div>
+  <div class="container rg-container">
 
-          {% if competition and competition.registration_open and not competition.is_registration_full %}
-          <div class="card-body p-4">
+    <div class="rg-card">
 
-            <!-- INFORMATIONS -->
-            <div class="alert alert-info mb-4">
-              <strong>Informations importantes :</strong>
-              <ul class="mb-0 mt-2">
-                <li>Équipes inscrites : {{ competition.registered_teams_count }} / {{ competition.max_teams }}</li>
-                <li>Frais d'inscription : {{ competition.registration_fee }} CDF</li>
-                <li>Paiement : Airtel Money</li>
-              </ul>
+      {% if competition and competition.registration_open and not competition.is_registration_full %}
+
+        <!-- STATS -->
+        <div class="rg-stats">
+          <div class="rg-stat">
+            <div class="rg-stat__icon"><i class="fas fa-users"></i></div>
+            <div>
+              <div class="rg-stat__label">Équipes</div>
+              <div class="rg-stat__value">{{ competition.registered_teams_count }}<span class="rg-stat__sep">/</span>{{ competition.max_teams }}</div>
             </div>
-
-            <!-- PROCEDURE DE PAIEMENT -->
-            <div class="payment-box mb-4">
-              <h5><i class="fab fa-whatsapp me-2"></i>Procédure de paiement</h5>
-
-              <ol>
-                <li>Envoyer <strong>{{ competition.registration_fee }} CDF</strong> via Airtel Money au :</li>
-                <li><strong>+243992848365 (Manassé Ombeni)</strong></li>
-                <li>Rejoindre le groupe WhatsApp officiel</li>
-                <li>Envoyer la preuve de paiement dans le groupe</li>
-                <li>Attendre validation par l’administrateur</li>
-              </ol>
-
-              <div class="text-center mt-3">
-                <a href="https://chat.whatsapp.com/ENuuVnYkm2pAwsniuGXoto?mode=gi_t"
-                   target="_blank"
-                   class="btn btn-success btn-lg">
-                  <i class="fab fa-whatsapp me-2"></i>
-                  Rejoindre le groupe WhatsApp
-                </a>
-              </div>
+          </div>
+          <div class="rg-stat">
+            <div class="rg-stat__icon rg-stat__icon--gold"><i class="fas fa-coins"></i></div>
+            <div>
+              <div class="rg-stat__label">Frais</div>
+              <div class="rg-stat__value">{{ competition.registration_fee }} <small>CDF</small></div>
             </div>
-
-            <!-- FORMULAIRE -->
-            <form method="post" class="needs-validation" novalidate>
-              {% csrf_token %}
-
-              <!-- Erreurs générales -->
-              {% if form.non_field_errors %}
-              <div class="alert alert-danger mb-4">
-                {{ form.non_field_errors }}
-              </div>
-              {% endif %}
-
-              <h5 class="mb-3">Informations personnelles</h5>
-
-              <!-- Nom complet -->
-              <div class="mb-3">
-                <label class="form-label">Nom complet *</label>
-                {{ form.player_name }}
-                <div class="help-text">
-                  Exemple : <strong>Manassé Ombeni</strong>
-                </div>
-                {% if form.player_name.errors %}
-                <div class="field-error">
-                  {{ form.player_name.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <!-- WhatsApp -->
-              <div class="mb-3">
-                <label class="form-label">Numéro WhatsApp *</label>
-                {{ form.whatsapp }}
-                <div class="help-text">
-                  Format conseillé : <strong>+243999999999</strong> (sans espaces).
-                </div>
-                {% if form.whatsapp.errors %}
-                <div class="field-error">
-                  {{ form.whatsapp.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <hr class="my-4">
-
-              <h5 class="mb-3">Informations de l'équipe</h5>
-
-              <!-- Nom équipe -->
-              <div class="mb-3">
-                <label class="form-label">Nom de l'équipe *</label>
-                {{ form.team_name }}
-                <div class="help-text">
-                  Exemple : <strong>Flick FC</strong>
-                </div>
-                {% if form.team_name.errors %}
-                <div class="field-error">
-                  {{ form.team_name.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <!-- Abréviation -->
-              <div class="mb-3">
-                <label class="form-label">Abréviation (3 lettres) *</label>
-                {{ form.abbreviation }}
-                <div class="help-text">
-                  3 lettres uniquement. Exemple : <strong>FCK</strong>, <strong>GOM</strong>, <strong>ABC</strong>
-                </div>
-                {% if form.abbreviation.errors %}
-                <div class="field-error">
-                  {{ form.abbreviation.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <hr class="my-4">
-
-              <h5 class="mb-3">Sécurité du compte</h5>
-
-              <!-- Mot de passe -->
-              <div class="mb-4">
-                <label class="form-label">Mot de passe *</label>
-                {{ form.password }}
-                <div class="help-text">
-                  Minimum <strong>6 caractères</strong> (exemple : <strong>gomacl2026</strong>)
-                </div>
-                {% if form.password.errors %}
-                <div class="field-error">
-                  {{ form.password.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="alert alert-warning">
-                Après soumission, votre compte sera activé après vérification du paiement dans le groupe WhatsApp.
-              </div>
-
-              <div class="d-grid">
-                <button type="submit" class="btn btn-register">
-                  <i class="fas fa-paper-plane me-2"></i>
-                  Soumettre mon inscription
-                </button>
-              </div>
-
-            </form>
-
           </div>
-          {% else %}
-          <div class="card-body text-center p-5">
-            <i class="fas fa-lock fa-4x text-danger mb-3"></i>
-            <h3>Inscriptions fermées</h3>
-            <p>
-              {% if competition.is_registration_full %}
-              Le nombre maximum d'équipes a été atteint.
-              {% else %}
-              Les inscriptions ne sont pas ouvertes pour le moment.
-              {% endif %}
-            </p>
+          <div class="rg-stat">
+            <div class="rg-stat__icon rg-stat__icon--green"><i class="fas fa-mobile-alt"></i></div>
+            <div>
+              <div class="rg-stat__label">Paiement</div>
+              <div class="rg-stat__value">Airtel Money</div>
+            </div>
           </div>
-          {% endif %}
-
         </div>
 
-      </div>
+        <!-- PAIEMENT -->
+        <div class="rg-payment">
+          <div class="rg-payment__head">
+            <div class="rg-payment__icon"><i class="fas fa-mobile-alt"></i></div>
+            <div>
+              <div class="rg-payment__title">Procédure de paiement</div>
+              <div class="rg-payment__sub">3 étapes pour valider votre inscription</div>
+            </div>
+          </div>
+
+          <ol class="rg-steps">
+            <li class="rg-step">
+              <div class="rg-step__num">1</div>
+              <div>
+                Envoyez <strong>{{ competition.registration_fee }} CDF</strong> via Airtel Money au
+                <strong>+243 992 848 365</strong>
+                <span class="rg-step__name">(Manassé Ombeni)</span>
+              </div>
+            </li>
+            <li class="rg-step">
+              <div class="rg-step__num">2</div>
+              <div>Prenez une <strong>capture d'écran</strong> de la confirmation de paiement.</div>
+            </li>
+            <li class="rg-step">
+              <div class="rg-step__num">3</div>
+              <div>Remplissez le formulaire ci-dessous en <strong>joignant la capture</strong>.</div>
+            </li>
+          </ol>
+        </div>
+
+        <!-- FORM -->
+        <form method="post" enctype="multipart/form-data" class="rg-form" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="rg-alert rg-alert--danger">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>{{ form.non_field_errors }}</div>
+            </div>
+          {% endif %}
+
+          <!-- SECTION 1 -->
+          <div class="rg-section">
+            <div class="rg-section__head">
+              <div class="rg-section__num">1</div>
+              <div class="rg-section__title">Informations personnelles</div>
+            </div>
+
+            <div class="rg-row">
+              <div class="rg-field">
+                <label class="rg-label" for="{{ form.player_name.id_for_label }}">
+                  Nom complet <span class="rg-required">*</span>
+                </label>
+                {{ form.player_name }}
+                <div class="rg-hint"><i class="fas fa-info-circle"></i> Ex : <strong>Manassé Ombeni</strong></div>
+                {% if form.player_name.errors %}<div class="rg-error">{{ form.player_name.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <div class="rg-field">
+                <label class="rg-label" for="{{ form.whatsapp.id_for_label }}">
+                  WhatsApp <span class="rg-required">*</span>
+                </label>
+                {{ form.whatsapp }}
+                <div class="rg-hint"><i class="fas fa-info-circle"></i> Format : <strong>+243999999999</strong></div>
+                {% if form.whatsapp.errors %}<div class="rg-error">{{ form.whatsapp.errors|join:", " }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2 -->
+          <div class="rg-section">
+            <div class="rg-section__head">
+              <div class="rg-section__num">2</div>
+              <div class="rg-section__title">Informations de l'équipe</div>
+            </div>
+
+            <div class="rg-row">
+              <div class="rg-field">
+                <label class="rg-label" for="{{ form.team_name.id_for_label }}">
+                  Nom de l'équipe <span class="rg-required">*</span>
+                </label>
+                {{ form.team_name }}
+                <div class="rg-hint"><i class="fas fa-info-circle"></i> Ex : <strong>Flick FC</strong></div>
+                {% if form.team_name.errors %}<div class="rg-error">{{ form.team_name.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <div class="rg-field">
+                <label class="rg-label" for="{{ form.abbreviation.id_for_label }}">
+                  Abréviation <span class="rg-required">*</span>
+                </label>
+                {{ form.abbreviation }}
+                <div class="rg-hint"><i class="fas fa-info-circle"></i> 2 à 5 caractères. Ex : <strong>FCK</strong></div>
+                {% if form.abbreviation.errors %}<div class="rg-error">{{ form.abbreviation.errors|join:", " }}</div>{% endif %}
+              </div>
+            </div>
+
+            <!-- LOGO -->
+            <div class="rg-upload-section">
+              <label class="rg-label">
+                Logo de l'équipe <span class="rg-optional">(optionnel)</span>
+              </label>
+              <div class="rg-upload-zone" id="logoZone">
+                <div class="rg-upload-preview" id="logoPreview">
+                  <div class="rg-upload-preview__placeholder">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>Logo</span>
+                  </div>
+                </div>
+                <div class="rg-upload-info">
+                  <div class="rg-upload-btn-wrap">
+                    {{ form.logo }}
+                    <label for="{{ form.logo.id_for_label }}" class="rg-upload-btn">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <span>Choisir</span>
+                    </label>
+                  </div>
+                  <ul class="rg-specs">
+                    <li><i class="fas fa-square"></i> Carré 1:1 — 400×400 px</li>
+                    <li><i class="fas fa-file-image"></i> PNG, JPG, WEBP, SVG</li>
+                    <li><i class="fas fa-weight-hanging"></i> Max 2 Mo</li>
+                  </ul>
+                </div>
+              </div>
+              {% if form.logo.errors %}<div class="rg-error mt-2"><i class="fas fa-exclamation-circle"></i> {{ form.logo.errors|join:", " }}</div>{% endif %}
+            </div>
+          </div>
+
+          <!-- SECTION 3 : PREUVE DE PAIEMENT -->
+          <div class="rg-section">
+            <div class="rg-section__head">
+              <div class="rg-section__num">3</div>
+              <div class="rg-section__title">Preuve de paiement</div>
+            </div>
+
+            <div class="rg-alert rg-alert--warn">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>
+                Joignez une <strong>capture d'écran claire</strong> de la confirmation Airtel Money
+                (montant + numéro destinataire visibles).
+              </div>
+            </div>
+
+            <div class="rg-upload-zone rg-upload-zone--proof" id="proofZone">
+              <div class="rg-upload-preview" id="proofPreview">
+                <div class="rg-upload-preview__placeholder">
+                  <i class="fas fa-receipt"></i>
+                  <span>Preuve</span>
+                </div>
+              </div>
+              <div class="rg-upload-info">
+                <div class="rg-upload-btn-wrap">
+                  {{ form.payment_proof }}
+                  <label for="{{ form.payment_proof.id_for_label }}" class="rg-upload-btn rg-upload-btn--green">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Choisir la capture</span>
+                  </label>
+                </div>
+                <ul class="rg-specs">
+                  <li><i class="fas fa-check"></i> Capture complète et lisible</li>
+                  <li><i class="fas fa-check"></i> PNG, JPG, WEBP</li>
+                  <li><i class="fas fa-check"></i> Max 3 Mo</li>
+                </ul>
+              </div>
+            </div>
+            {% if form.payment_proof.errors %}<div class="rg-error mt-2"><i class="fas fa-exclamation-circle"></i> {{ form.payment_proof.errors|join:", " }}</div>{% endif %}
+          </div>
+
+          <!-- SECTION 4 : MOT DE PASSE -->
+          <div class="rg-section">
+            <div class="rg-section__head">
+              <div class="rg-section__num">4</div>
+              <div class="rg-section__title">Sécurité du compte</div>
+            </div>
+
+            <div class="rg-field">
+              <label class="rg-label" for="{{ form.password.id_for_label }}">
+                Mot de passe <span class="rg-required">*</span>
+              </label>
+              {{ form.password }}
+              <div class="rg-hint"><i class="fas fa-lock"></i> Minimum 6 caractères</div>
+              {% if form.password.errors %}<div class="rg-error">{{ form.password.errors|join:", " }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="rg-alert rg-alert--info">
+            <i class="fas fa-info-circle"></i>
+            <div>
+              Votre compte sera <strong>activé</strong> dès validation de la preuve de paiement
+              par un administrateur.
+            </div>
+          </div>
+
+          <button type="submit" class="rg-submit">
+            <span>Soumettre mon inscription</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+
+        </form>
+
+      {% else %}
+
+        <div class="rg-closed">
+          <div class="rg-closed__icon"><i class="fas fa-lock"></i></div>
+          <h2 class="rg-closed__title">Inscriptions fermées</h2>
+          <p class="rg-closed__text">
+            {% if competition.is_registration_full %}
+              Le nombre maximum d'équipes a été atteint.
+            {% else %}
+              Les inscriptions ne sont pas ouvertes pour le moment.
+            {% endif %}
+          </p>
+          <a href="{% url 'home' %}" class="rg-closed__btn">
+            <i class="fas fa-home"></i>
+            <span>Retour à l'accueil</span>
+          </a>
+        </div>
+
+      {% endif %}
+
     </div>
   </div>
 </section>
 
 <style>
-/* BACKGROUND */
-.register-bg {
-  background: linear-gradient(135deg,#0b1423,#00142d);
-  color:white;
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.rg-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+  padding-bottom: 48px;
 }
+.rg-container { max-width: 760px; }
 
-/* CARD */
-.registration-card {
-  background:#111c2f;
-  border-radius:20px;
-  box-shadow:0 0 30px rgba(0,61,130,0.3);
-  overflow:hidden;
+/* ============================================ */
+/* HERO */
+/* ============================================ */
+.rg-hero {
+  padding: 32px 0 24px;
+  text-align: center;
 }
-
-.registration-card .card-header {
-  background:linear-gradient(135deg,#003d82,#00a7e1);
-  padding:2rem;
-  color:white;
+.rg-hero__inner { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+.rg-hero__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.55);
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-size: 0.6875rem;
+  margin-bottom: 8px;
 }
-
-/* PAYMENT BOX */
-.payment-box {
-  background:#1a2d44;
-  border-radius:15px;
-  padding:20px;
-  border:1px solid #2f4a73;
-}
-
-/* INPUTS */
-.form-control {
-  border-radius:12px;
-  border:1px solid #243552;
-  background:#0f1a2c;
-  color:white;
-}
-
-.form-control:focus {
-  border-color:#00a7e1;
-  box-shadow:0 0 10px rgba(0,167,225,0.4);
-}
-
-/* HELP + ERRORS */
-.help-text {
-  font-size: 0.85rem;
-  opacity: 0.85;
-  margin-top: 6px;
-  color: #cfd8e3;
-}
-
-.field-error {
-  margin-top: 6px;
-  color: #ff6b6b;
-  font-size: 0.9rem;
-}
-
-/* Django errors are often rendered as <ul><li>.. */
-.field-error ul {
+.rg-hero__kicker i { color: #e6c200; }
+.rg-hero__title {
+  font-weight: 800;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  color: #fff;
   margin: 0;
-  padding-left: 18px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
-.field-error li {
-  list-style: disc;
+.rg-hero__sub {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+.rg-hero__brand { color: #e6c200; }
+.rg-hero__dot { color: rgba(255,255,255,.30); }
+.rg-hero__game { color: rgba(255,255,255,.65); }
+
+/* ============================================ */
+/* CARD */
+/* ============================================ */
+.rg-card {
+  background: rgba(17,28,47,.60);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+@media (max-width: 768px) { .rg-card { padding: 16px 12px; border-radius: 12px; } }
+
+/* ============================================ */
+/* STATS */
+/* ============================================ */
+.rg-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (max-width: 640px) { .rg-stats { grid-template-columns: 1fr; } }
+
+.rg-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+}
+.rg-stat__icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,167,225,.12);
+  border: 1px solid rgba(0,167,225,.25);
+  color: #00d4ff;
+  font-size: 0.9375rem;
+  flex-shrink: 0;
+}
+.rg-stat__icon--gold { background: rgba(230,194,0,.12); border-color: rgba(230,194,0,.30); color: #e6c200; }
+.rg-stat__icon--green { background: rgba(40,167,69,.12); border-color: rgba(40,167,69,.30); color: #47d18c; }
+
+.rg-stat__label {
+  color: rgba(255,255,255,.55);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.rg-stat__value {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  margin-top: 1px;
+}
+.rg-stat__value small { opacity: .55; font-weight: 600; font-size: 0.6875rem; }
+.rg-stat__sep { opacity: .4; margin: 0 1px; }
+
+/* ============================================ */
+/* PAIEMENT */
+/* ============================================ */
+.rg-payment {
+  background: rgba(37,211,102,.04);
+  border: 1px solid rgba(37,211,102,.18);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.rg-payment__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.rg-payment__icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(37,211,102,.15);
+  border: 1px solid rgba(37,211,102,.30);
+  color: #47d18c;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.rg-payment__title { color: #fff; font-weight: 800; font-size: 0.9375rem; }
+.rg-payment__sub { color: rgba(255,255,255,.55); font-size: 0.75rem; margin-top: 1px; }
+
+.rg-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rg-step {
+  display: flex;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.02);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: rgba(255,255,255,.85);
+  line-height: 1.5;
+}
+.rg-step__num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #e6c200, #b59a00);
+  color: #0b1423;
+  font-weight: 800;
+  font-size: 0.6875rem;
+  flex-shrink: 0;
+}
+.rg-step strong { color: #fff; }
+.rg-step__name { color: rgba(255,255,255,.55); font-size: 0.75rem; }
+
+/* ============================================ */
+/* FORM */
+/* ============================================ */
+.rg-form { margin-top: 4px; }
+
+.rg-section {
+  padding: 18px 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.rg-section:first-of-type { border-top: none; padding-top: 0; }
+
+.rg-section__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rg-section__num {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #003d82, #00a7e1);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.6875rem;
+  flex-shrink: 0;
+}
+.rg-section__title {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
-/* BUTTON */
-.btn-register {
-  background:linear-gradient(90deg,#003d82,#00a7e1);
-  border:none;
-  padding:12px;
-  border-radius:30px;
-  font-weight:600;
-  transition:0.3s;
-  color:white;
+.rg-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 640px) { .rg-row { grid-template-columns: 1fr; } }
+
+.rg-field { margin-bottom: 4px; }
+.rg-label {
+  display: block;
+  color: rgba(255,255,255,.80);
+  font-weight: 700;
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.rg-required { color: #ff6b6b; }
+.rg-optional {
+  color: rgba(255,255,255,.40);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-.btn-register:hover {
-  transform:scale(1.05);
-  box-shadow:0 0 20px rgba(0,167,225,0.6);
+/* Inputs */
+.rg-form input[type="text"],
+.rg-form input[type="password"],
+.rg-form input[type="email"],
+.rg-form input[type="tel"],
+.rg-form select,
+.rg-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+  color: rgba(255,255,255,.95);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.rg-form input:focus,
+.rg-form select:focus {
+  border-color: rgba(0,167,225,.55);
+  box-shadow: 0 0 0 3px rgba(0,167,225,.10);
+}
+.rg-form input::placeholder { color: rgba(255,255,255,.30); }
+
+.rg-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  color: rgba(255,255,255,.55);
+  font-size: 0.75rem;
+}
+.rg-hint i { color: #00a7e1; font-size: 0.6875rem; }
+.rg-hint strong { color: rgba(255,255,255,.80); }
+
+.rg-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  color: #ff6b6b;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ============================================ */
+/* UPLOAD ZONES */
+/* ============================================ */
+.rg-upload-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255,255,255,.08);
+}
+.rg-upload-zone {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255,255,255,.02);
+  border: 2px dashed rgba(255,255,255,.12);
+  border-radius: 12px;
+  transition: border-color .25s ease;
+  align-items: center;
+}
+.rg-upload-zone:hover,
+.rg-upload-zone.has-file {
+  border-color: rgba(230,194,0,.45);
+  background: rgba(230,194,0,.02);
+}
+.rg-upload-zone--proof:hover,
+.rg-upload-zone--proof.has-file {
+  border-color: rgba(40,167,69,.45);
+  background: rgba(40,167,69,.02);
+}
+
+.rg-upload-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.rg-upload-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+.rg-upload-preview__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255,255,255,.30);
+}
+.rg-upload-preview__placeholder i { font-size: 1.75rem; }
+.rg-upload-preview__placeholder span {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rg-upload-info { flex: 1; min-width: 0; }
+.rg-upload-btn-wrap { position: relative; }
+.rg-upload-btn-wrap input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.rg-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: linear-gradient(135deg, #003d82, #00a7e1);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: 0 4px 12px rgba(0,167,225,.20);
+}
+.rg-upload-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,167,225,.35);
+}
+.rg-upload-btn--green {
+  background: linear-gradient(135deg, #128c7e, #25d366);
+  box-shadow: 0 4px 12px rgba(37,211,102,.20);
+}
+.rg-upload-btn--green:hover {
+  box-shadow: 0 6px 18px rgba(37,211,102,.35);
+}
+
+.rg-specs {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.rg-specs li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.65);
+  font-size: 0.75rem;
+}
+.rg-specs i { color: #00a7e1; font-size: 0.6875rem; width: 12px; }
+
+@media (max-width: 540px) {
+  .rg-upload-zone { flex-direction: column; text-align: center; }
+  .rg-specs { align-items: center; }
+  .rg-specs li { justify-content: center; }
+}
+
+/* ============================================ */
+/* ALERTS */
+/* ============================================ */
+.rg-alert {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  margin: 14px 0;
+  align-items: flex-start;
+}
+.rg-alert i { margin-top: 2px; flex-shrink: 0; }
+.rg-alert--info {
+  background: rgba(0,167,225,.06);
+  border: 1px solid rgba(0,167,225,.25);
+  color: rgba(255,255,255,.88);
+}
+.rg-alert--info i { color: #00d4ff; }
+.rg-alert--warn {
+  background: rgba(255,193,7,.06);
+  border: 1px solid rgba(255,193,7,.28);
+  color: rgba(255,255,255,.90);
+}
+.rg-alert--warn i { color: #ffc107; }
+.rg-alert--danger {
+  background: rgba(220,53,69,.08);
+  border: 1px solid rgba(220,53,69,.30);
+  color: rgba(255,255,255,.90);
+}
+.rg-alert--danger i { color: #ff6b6b; }
+.rg-alert strong { color: #fff; }
+
+/* ============================================ */
+/* SUBMIT */
+/* ============================================ */
+.rg-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  border: none;
+  border-radius: 10px;
+  font-weight: 800;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: 0 6px 18px rgba(230,194,0,.20);
+}
+.rg-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+}
+.rg-submit i { transition: transform .2s ease; }
+.rg-submit:hover i { transform: translateX(3px); }
+
+/* ============================================ */
+/* CLOSED STATE */
+/* ============================================ */
+.rg-closed { text-align: center; padding: 32px 16px; }
+.rg-closed__icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(220,53,69,.10);
+  border: 2px solid rgba(220,53,69,.25);
+  color: #ff6b6b;
+  font-size: 1.5rem;
+}
+.rg-closed__title { color: #fff; font-weight: 800; font-size: 1.125rem; margin-bottom: 8px; }
+.rg-closed__text { color: rgba(255,255,255,.65); font-size: 0.875rem; max-width: 360px; margin: 0 auto 20px; line-height: 1.6; }
+.rg-closed__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 10px;
+  color: rgba(255,255,255,.92);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all .2s ease;
+}
+.rg-closed__btn:hover { background: rgba(255,255,255,.10); color: #fff; transform: translateY(-1px); }
+
+/* ============================================ */
+/* MOBILE
+/* ============================================ */
+@media (max-width: 640px) {
+  .rg-hero { padding: 24px 0 16px; }
+  .rg-card { padding: 16px 12px; }
+  .rg-section { padding: 14px 0; }
+  .rg-payment { padding: 12px; }
+  .rg-submit { padding: 12px 16px; font-size: 0.875rem; }
 }
 </style>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function setupPreview(inputName, previewId, zoneId) {
+    const input = document.querySelector('input[name="' + inputName + '"]');
+    const preview = document.getElementById(previewId);
+    const zone = document.getElementById(zoneId);
+    if (!input || !preview) return;
+
+    input.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (zone) zone.classList.add('has-file');
+
+      if (file.type === 'image/svg+xml') {
+        preview.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#47d18c;"><i class="fas fa-check-circle" style="font-size:1.75rem;"></i><span style="font-size:.625rem;font-weight:800;">SVG</span></div>';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        preview.innerHTML = '<img src="' + ev.target.result + '" alt="">';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  setupPreview('logo', 'logoPreview', 'logoZone');
+  setupPreview('payment_proof', 'proofPreview', 'proofZone');
+});
+</script>
 {% endblock %}
