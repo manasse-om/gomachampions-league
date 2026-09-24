@@ -1,21 +1,243 @@
 {% extends 'core/admin/base_admin.html' %}
+{% load static %}
 
 {% block admin_content %}
-<div class="admin-card">
+<section class="ad-page">
 
-<form method="post">
-{% csrf_token %}
-{{ form.as_p }}
+  <div class="ad-header">
+    <div class="ad-header__kicker">
+      <i class="fas fa-pen-to-square"></i> ADMIN
+    </div>
+    <h1 class="ad-header__title">Modifier une équipe</h1>
+    <p class="ad-header__sub">{{ form.instance.team_name }} — {{ form.instance.abbreviation }}</p>
+  </div>
 
-<button type="submit" class="btn btn-success">
-    Enregistrer
-</button>
+  <div class="ad-card">
+    <form method="post" enctype="multipart/form-data" class="ad-form" novalidate>
+      {% csrf_token %}
 
-<a href="{% url 'team_list' %}" class="btn btn-secondary ms-2">
-    Annuler
-</a>
+      {% if form.non_field_errors %}
+        <div class="ad-alert ad-alert--danger">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>{{ form.non_field_errors }}</div>
+        </div>
+      {% endif %}
 
-</form>
+      {% for field in form %}
+        {% if field.name != 'logo' and field.name != 'payment_proof' %}
+        <div class="ad-field">
+          <label class="ad-label" for="{{ field.id_for_label }}">
+            {{ field.label }}
+            {% if field.field.required %}<span class="ad-req">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.help_text %}<div class="ad-hint">{{ field.help_text }}</div>{% endif %}
+          {% if field.errors %}<div class="ad-error">{{ field.errors|join:", " }}</div>{% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
 
-</div>
+      <!-- LOGO -->
+      <div class="ad-upload-row">
+        <label class="ad-label">Logo actuel</label>
+        <div class="ad-upload-preview">
+          {% if form.instance.logo %}
+            <img src="{{ form.instance.logo.url }}" alt="Logo">
+          {% else %}
+            <span class="ad-upload-empty">Aucun</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="ad-actions">
+        <a href="{% url 'team_list' %}" class="ad-btn ad-btn--ghost">
+          <i class="fas fa-arrow-left"></i> Annuler
+        </a>
+        <button type="submit" class="ad-btn ad-btn--gold">
+          <i class="fas fa-check"></i> Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+.ad-page {
+  padding: 24px;
+  max-width: 780px;
+  margin: 0 auto;
+  color: rgba(255,255,255,.92);
+}
+.ad-header { text-align: center; padding: 12px 0 24px; }
+.ad-header__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: .6875rem;
+  margin-bottom: 8px;
+}
+.ad-header__kicker i { color: #e6c200; }
+.ad-header__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 3vw, 1.625rem);
+  margin: 0;
+}
+.ad-header__sub {
+  color: #e6c200;
+  font-size: .8125rem;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.ad-card {
+  background: rgba(17,28,47,.60);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(14px);
+}
+
+.ad-form { display: block; }
+
+.ad-field { margin-bottom: 16px; }
+.ad-label {
+  display: block;
+  color: rgba(255,255,255,.80);
+  font-weight: 700;
+  font-size: .75rem;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ad-req { color: #ff6b6b; }
+
+.ad-form input[type="text"],
+.ad-form input[type="number"],
+.ad-form input[type="email"],
+.ad-form input[type="tel"],
+.ad-form input[type="password"],
+.ad-form select,
+.ad-form textarea {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.ad-form input:focus,
+.ad-form select:focus,
+.ad-form textarea:focus {
+  border-color: rgba(0,167,225,.55);
+  box-shadow: 0 0 0 3px rgba(0,167,225,.10);
+}
+
+.ad-hint {
+  margin-top: 5px;
+  color: rgba(255,255,255,.50);
+  font-size: .6875rem;
+}
+.ad-error {
+  margin-top: 5px;
+  color: #ff6b6b;
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+.ad-upload-row {
+  margin: 20px 0;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255,255,255,.08);
+}
+.ad-upload-preview {
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 6px;
+}
+.ad-upload-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.ad-upload-empty {
+  color: rgba(255,255,255,.30);
+  font-size: .6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ad-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.ad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.ad-btn--ghost {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+}
+.ad-btn--ghost:hover { background: rgba(255,255,255,.10); color: #fff; }
+.ad-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  flex: 1;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+}
+.ad-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+}
+
+.ad-alert {
+  display: flex;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: .8125rem;
+  margin-bottom: 14px;
+}
+.ad-alert--danger {
+  background: rgba(220,53,69,.08);
+  border: 1px solid rgba(220,53,69,.28);
+  color: rgba(255,255,255,.90);
+}
+.ad-alert--danger i { color: #ff6b6b; }
+</style>
 {% endblock %}

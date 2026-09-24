@@ -1,39 +1,467 @@
 {% extends 'core/admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Générer les matchs de la Ligue — Admin{% endblock %}
 
 {% block admin_content %}
-<div class="admin-card">
 
-  <h3 class="mb-2">Générer Phase League + Matchs</h3>
-  <p class="text-light" style="opacity:.8;">
-    Paires détectées: <strong>{{ pairs_count }}</strong> (attendu: 144).<br>
-    Les matchs seront créés en <strong>match unique</strong> et programmés automatiquement à partir de <strong>00:00</strong> (placeholders).
-    Tu pourras ensuite modifier les heures manuellement.
-  </p>
+<div class="gm-card">
 
-  <hr class="border-secondary my-4">
+  <!-- ============================================ -->
+  <!-- HEAD -->
+  <!-- ============================================ -->
+  <div class="gm-head">
+    <div class="gm-head__icon">
+      <i class="fas fa-futbol"></i>
+    </div>
+    <div>
+      <div class="gm-head__title">Générer la Phase Ligue</div>
+      <div class="gm-head__sub">Création automatique des matchs depuis le tirage</div>
+    </div>
+  </div>
 
-  <form method="post" class="row g-3">
+  <!-- ============================================ -->
+  <!-- STATS PAIRES -->
+  <!-- ============================================ -->
+  <div class="gm-stats">
+    <div class="gm-stat">
+      <div class="gm-stat__icon gm-stat__icon--gold">
+        <i class="fas fa-link"></i>
+      </div>
+      <div>
+        <div class="gm-stat__value">{{ pairs_count }}</div>
+        <div class="gm-stat__label">Paires détectées</div>
+      </div>
+    </div>
+
+    <div class="gm-stat">
+      <div class="gm-stat__icon gm-stat__icon--cyan">
+        <i class="fas fa-bullseye"></i>
+      </div>
+      <div>
+        <div class="gm-stat__value">{{ expected_pairs|default:"—" }}</div>
+        <div class="gm-stat__label">Attendu</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- INFO BOX -->
+  <!-- ============================================ -->
+  <div class="gm-info">
+    <div class="gm-info__head">
+      <i class="fas fa-circle-info"></i>
+      <span>Comment ça marche</span>
+    </div>
+    <ul class="gm-info__list">
+      <li>
+        <i class="fas fa-check"></i>
+        <span>Les matchs seront créés en <strong>match unique</strong>.</span>
+      </li>
+      <li>
+        <i class="fas fa-check"></i>
+        <span>Programmés automatiquement à partir de <strong>00:00</strong> (placeholders).</span>
+      </li>
+      <li>
+        <i class="fas fa-check"></i>
+        <span>Vous pourrez <strong>ajuster les heures</strong> manuellement après génération.</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- FORMULAIRE -->
+  <!-- ============================================ -->
+  <form method="post" class="gm-form" novalidate>
     {% csrf_token %}
 
-    <div class="col-md-6">
-      <label class="form-label text-light">Date de début (jour 1)</label>
-      <input type="date" name="start_date" class="form-control" required>
-      <small class="text-light" style="opacity:.7;">Heure automatiquement fixée à 00:00.</small>
+    <div class="gm-section">
+      <div class="gm-section__head">
+        <div class="gm-section__num">1</div>
+        <div class="gm-section__title">Configuration</div>
+      </div>
+
+      <div class="gm-field">
+        <label class="gm-label" for="start_date">
+          Date de début (Jour 1) <span class="gm-req">*</span>
+        </label>
+        <input type="date"
+               name="start_date"
+               id="start_date"
+               class="gm-input"
+               required>
+        <div class="gm-hint">
+          <i class="fas fa-info-circle"></i>
+          <span>Heure fixée automatiquement à <strong>00:00</strong>.</span>
+        </div>
+      </div>
     </div>
 
-    <div class="col-12 d-flex gap-2 mt-2">
-      <button type="submit" class="btn btn-ucl-gold">
-        Générer maintenant
-      </button>
-      <a href="{% url 'league_draw_live' %}" class="btn btn-outline-light">
-        ← Retour tirage
+    <!-- ACTIONS -->
+    <div class="gm-actions">
+      <a href="{% url 'league_draw_live' %}" class="gm-btn gm-btn--ghost">
+        <i class="fas fa-arrow-left"></i>
+        <span>Retour au tirage</span>
       </a>
+      <button type="submit" class="gm-btn gm-btn--gold">
+        <i class="fas fa-bolt"></i>
+        <span>Générer les matchs</span>
+      </button>
     </div>
+
   </form>
 
-  <div class="alert alert-warning mt-4">
-    <strong>Important :</strong> Après génération, ajuste rapidement les dates/heures pour éviter que certains matchs deviennent “en retard” (forfait 48h).
+  <!-- ============================================ -->
+  <!-- ALERT -->
+  <!-- ============================================ -->
+  <div class="gm-alert gm-alert--warn">
+    <i class="fas fa-triangle-exclamation"></i>
+    <div>
+      <strong>Important :</strong>
+      après génération, ajustez rapidement les dates/heures pour éviter que certains
+      matchs deviennent <strong>en retard</strong> (forfait automatique).
+    </div>
   </div>
 
 </div>
+
+<style>
+/* ============================================ */
+/* CARD */
+/* ============================================ */
+.gm-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 28px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.30);
+}
+@media (max-width: 640px) {
+  .gm-card { padding: 20px 16px; }
+}
+
+/* ============================================ */
+/* HEAD */
+/* ============================================ */
+.gm-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.gm-head__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(230,194,0,.15), rgba(230,194,0,.04));
+  border: 1px solid rgba(230,194,0,.30);
+  color: #e6c200;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.gm-head__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+.gm-head__sub {
+  color: rgba(255,255,255,.50);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ============================================ */
+/* STATS */
+/* ============================================ */
+.gm-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 540px) {
+  .gm-stats { grid-template-columns: 1fr; }
+}
+
+.gm-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.gm-stat:hover {
+  border-color: rgba(230,194,0,.25);
+  transform: translateY(-2px);
+}
+.gm-stat__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.0625rem;
+  flex-shrink: 0;
+}
+.gm-stat__icon--gold {
+  background: rgba(230,194,0,.12);
+  border: 1px solid rgba(230,194,0,.30);
+  color: #e6c200;
+}
+.gm-stat__icon--cyan {
+  background: rgba(0,167,225,.12);
+  border: 1px solid rgba(0,167,225,.30);
+  color: #00d4ff;
+}
+.gm-stat__value {
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.375rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.gm-stat__label {
+  color: rgba(255,255,255,.55);
+  font-size: .6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 4px;
+}
+
+/* ============================================ */
+/* INFO BOX */
+/* ============================================ */
+.gm-info {
+  padding: 16px 18px;
+  background: rgba(0,167,225,.05);
+  border: 1px solid rgba(0,167,225,.20);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.gm-info__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #00d4ff;
+  font-weight: 800;
+  font-size: .8125rem;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.gm-info__head i { font-size: .9375rem; }
+.gm-info__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gm-info__list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: rgba(255,255,255,.80);
+  font-size: .8125rem;
+  line-height: 1.55;
+}
+.gm-info__list li i {
+  color: #00d4ff;
+  font-size: .6875rem;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.gm-info__list strong { color: #fff; }
+
+/* ============================================ */
+/* FORM */
+/* ============================================ */
+.gm-form { display: block; }
+
+.gm-section {
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 20px;
+}
+.gm-section__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.gm-section__num {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #003d82, #00a7e1);
+  color: #fff;
+  font-weight: 800;
+  font-size: .75rem;
+  flex-shrink: 0;
+}
+.gm-section__title {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.gm-field { margin-bottom: 4px; }
+.gm-label {
+  display: block;
+  color: rgba(255,255,255,.80);
+  font-weight: 700;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.gm-req { color: #ff6b6b; }
+
+.gm-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.gm-input:focus {
+  border-color: rgba(230,194,0,.50);
+  background: rgba(230,194,0,.03);
+  box-shadow: 0 0 0 3px rgba(230,194,0,.08);
+}
+.gm-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.55);
+  cursor: pointer;
+}
+
+.gm-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: rgba(255,255,255,.50);
+  font-size: .6875rem;
+}
+.gm-hint i { color: #00a7e1; }
+.gm-hint strong { color: rgba(255,255,255,.80); }
+
+/* ============================================ */
+/* ACTIONS */
+/* ============================================ */
+.gm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+@media (max-width: 540px) {
+  .gm-actions { flex-direction: column-reverse; }
+}
+
+.gm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.gm-btn i { font-size: .75rem; }
+
+.gm-btn--ghost {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+}
+.gm-btn--ghost:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff;
+}
+
+.gm-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+}
+.gm-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+  color: #0b1423;
+}
+
+/* ============================================ */
+/* ALERT */
+/* ============================================ */
+.gm-alert {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: .8125rem;
+  margin-top: 20px;
+  align-items: flex-start;
+  line-height: 1.55;
+}
+.gm-alert i {
+  margin-top: 2px;
+  flex-shrink: 0;
+  font-size: .9375rem;
+}
+.gm-alert--warn {
+  background: rgba(255,193,7,.06);
+  border: 1px solid rgba(255,193,7,.24);
+  color: rgba(255,255,255,.88);
+}
+.gm-alert--warn i { color: #ffc107; }
+.gm-alert--warn strong { color: #ffc107; }
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .gm-head { gap: 12px; padding-bottom: 16px; margin-bottom: 16px; }
+  .gm-head__icon { width: 44px; height: 44px; font-size: 1.0625rem; }
+  .gm-head__title { font-size: .9375rem; }
+  .gm-stat { padding: 14px; }
+  .gm-stat__value { font-size: 1.125rem; }
+  .gm-info { padding: 14px; }
+  .gm-info__head { font-size: .75rem; margin-bottom: 10px; }
+  .gm-info__list li { font-size: .75rem; }
+}
+</style>
+
 {% endblock %}

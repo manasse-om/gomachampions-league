@@ -1,91 +1,584 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Paiements en attente - Dashboard Admin{% endblock %}
+{% block title %}Paiements en attente — Administration{% endblock %}
 
 {% block content %}
-<section class="py-5">
-    <div class="container-fluid">
-        <div class="row mb-4">
-            <div class="col">
-                <h1 class="dashboard-title">
-                    <i class="fas fa-hourglass-half me-2"></i>
-                    PAIEMENTS EN ATTENTE DE VALIDATION
-                </h1>
-            </div>
-            <div class="col-auto">
-                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-arrow-left me-2"></i>Retour au Dashboard
-                </a>
-            </div>
+<section class="pp-page">
+  <div class="container pp-container">
+
+    <!-- ============================================ -->
+    <!-- HEADER -->
+    <!-- ============================================ -->
+    <div class="pp-header">
+      <div class="pp-header__left">
+        <div class="pp-header__kicker">
+          <i class="fas fa-receipt"></i> ADMINISTRATION
         </div>
-        
-        {% if pending_teams %}
-        <div class="alert alert-warning">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong>{{ pending_teams.count }}</strong> inscription(s) en attente de validation.
+        <h1 class="pp-header__title">Validations de paiement</h1>
+        <div class="pp-header__sub">
+          Vérifiez les preuves et validez les inscriptions
         </div>
-        
-        <div class="row g-4">
-            {% for team in pending_teams %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user-circle me-2"></i>
-                            {{ team.player_name }}
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-2">
-                            <strong><i class="fas fa-shield-alt me-2"></i>Équipe :</strong> {{ team.team_name }}
-                        </p>
-                        <p class="mb-2">
-                            <strong><i class="fas fa-tag me-2"></i>Abréviation :</strong> {{ team.abbreviation }}
-                        </p>
-                        <p class="mb-2">
-                            <strong><i class="fab fa-whatsapp me-2"></i>WhatsApp :</strong> {{ team.whatsapp }}
-                        </p>
-                        <p class="mb-2">
-                            <strong><i class="far fa-calendar me-2"></i>Inscrit le :</strong> {{ team.created_at|date:"d/m/Y à H:i" }}
-                        </p>
-                        
-                        <hr>
-                        
-                        <h6><i class="fas fa-receipt me-2"></i>Preuve de paiement :</h6>
-                        {% if team.payment_proof %}
-                        <a href="{{ team.payment_proof.url }}" target="_blank">
-                            <img src="{{ team.payment_proof.url }}" alt="Preuve de paiement" class="img-fluid rounded" style="max-height: 200px; cursor: pointer;">
-                        </a>
-                        {% else %}
-                        <p class="text-danger">Aucune preuve uploadée</p>
-                        {% endif %}
-                    </div>
-                    <div class="card-footer">
-                        <a href="{% url 'validate_payment' team.id %}" class="btn btn-success w-100">
-                            <i class="fas fa-check-circle me-2"></i>
-                            EXAMINER ET DÉCIDER
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-            <h3>Aucun paiement en attente</h3>
-            <p class="text-muted">Tous les paiements ont été traités. 👍</p>
-        </div>
-        {% endif %}
+      </div>
+      <a href="{% url 'dashboard' %}" class="pp-header__back">
+        <i class="fas fa-arrow-left"></i>
+        <span>Dashboard</span>
+      </a>
     </div>
+
+    {% if pending_teams %}
+
+      <!-- ============================================ -->
+      <!-- INFO BANNER -->
+      <!-- ============================================ -->
+      <div class="pp-banner">
+        <div class="pp-banner__icon">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="pp-banner__body">
+          <div class="pp-banner__title">
+            {{ pending_teams.count }} inscription{{ pending_teams.count|pluralize:"s" }} en attente
+          </div>
+          <div class="pp-banner__text">
+            Examinez chaque preuve de paiement puis approuvez ou refusez l'équipe.
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- GRILLE DES INSCRIPTIONS -->
+      <!-- ============================================ -->
+      <div class="pp-grid">
+        {% for team in pending_teams %}
+        <article class="pp-card">
+
+          <!-- HEAD : logo + identité -->
+          <div class="pp-card__head">
+            {% include "core/partials/_team_logo.html" with team=team size="md" %}
+            <div class="pp-card__identity">
+              <div class="pp-card__name">{{ team.team_name }}</div>
+              <div class="pp-card__player">
+                <i class="fas fa-user"></i>
+                {{ team.player_name }}
+              </div>
+            </div>
+            <div class="pp-card__abbr">{{ team.abbreviation }}</div>
+          </div>
+
+          <!-- INFOS -->
+          <div class="pp-card__info">
+            <div class="pp-info-row">
+              <span class="pp-info-row__label">
+                <i class="fab fa-whatsapp"></i>
+                WhatsApp
+              </span>
+              <a href="https://wa.me/{{ team.whatsapp|cut:'+' }}"
+                 target="_blank" rel="noopener"
+                 class="pp-info-row__value pp-info-row__value--link">
+                {{ team.whatsapp }}
+              </a>
+            </div>
+
+            <div class="pp-info-row">
+              <span class="pp-info-row__label">
+                <i class="far fa-calendar"></i>
+                Inscrit le
+              </span>
+              <span class="pp-info-row__value">
+                {{ team.created_at|date:"d/m/Y à H:i" }}
+              </span>
+            </div>
+          </div>
+
+          <!-- PREUVE DE PAIEMENT -->
+          <div class="pp-card__proof">
+            <div class="pp-proof__label">
+              <i class="fas fa-receipt"></i>
+              Preuve de paiement
+            </div>
+
+            {% if team.payment_proof %}
+              <a href="{{ team.payment_proof.url }}"
+                 target="_blank" rel="noopener"
+                 class="pp-proof__link">
+                <img src="{{ team.payment_proof.url }}"
+                     alt="Preuve de paiement — {{ team.team_name }}"
+                     class="pp-proof__img">
+                <div class="pp-proof__overlay">
+                  <i class="fas fa-magnifying-glass-plus"></i>
+                  <span>Agrandir</span>
+                </div>
+              </a>
+            {% else %}
+              <div class="pp-proof__empty">
+                <i class="fas fa-triangle-exclamation"></i>
+                <div>Aucune preuve n'a été fournie</div>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- ACTION -->
+          <div class="pp-card__foot">
+            <a href="{% url 'validate_payment' team.id %}" class="pp-btn pp-btn--primary">
+              <i class="fas fa-clipboard-check"></i>
+              <span>Examiner le dossier</span>
+              <i class="fas fa-arrow-right pp-btn__arrow"></i>
+            </a>
+          </div>
+
+        </article>
+        {% endfor %}
+      </div>
+
+    {% else %}
+
+      <!-- ============================================ -->
+      <!-- EMPTY STATE -->
+      <!-- ============================================ -->
+      <div class="pp-empty">
+        <div class="pp-empty__icon">
+          <i class="fas fa-circle-check"></i>
+        </div>
+        <h2 class="pp-empty__title">Aucun paiement en attente</h2>
+        <p class="pp-empty__text">
+          Tous les paiements ont été traités. Aucune inscription n'attend de validation.
+        </p>
+        <a href="{% url 'dashboard' %}" class="pp-empty__btn">
+          <i class="fas fa-arrow-left"></i>
+          <span>Retour au dashboard</span>
+        </a>
+      </div>
+
+    {% endif %}
+
+  </div>
 </section>
 
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
 <style>
-.dashboard-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-color);
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.pp-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.08), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+  padding: 32px 0 60px;
+}
+.pp-container { max-width: 1200px; }
+
+/* ============================================ */
+/* HEADER */
+/* ============================================ */
+.pp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap;
+}
+.pp-header__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.50);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: .6875rem;
+  margin-bottom: 6px;
+}
+.pp-header__kicker i { color: #e6c200; }
+.pp-header__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.pp-header__sub {
+  color: rgba(255,255,255,.55);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.pp-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  color: rgba(255,255,255,.88) !important;
+  font-weight: 700;
+  font-size: .8125rem;
+  text-decoration: none;
+  transition: all .2s ease;
+}
+.pp-header__back:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff !important;
+  transform: translateX(-2px);
+}
+
+/* ============================================ */
+/* BANNER INFO */
+/* ============================================ */
+.pp-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(255,193,7,.05);
+  border: 1px solid rgba(255,193,7,.24);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(12px);
+}
+.pp-banner__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,193,7,.12);
+  border: 1px solid rgba(255,193,7,.28);
+  color: #ffc107;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+.pp-banner__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: .9375rem;
+}
+.pp-banner__text {
+  color: rgba(255,255,255,.65);
+  font-size: .8125rem;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* ============================================ */
+/* GRILLE */
+/* ============================================ */
+.pp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+@media (max-width: 640px) {
+  .pp-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* ============================================ */
+/* CARTE */
+/* ============================================ */
+.pp-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.pp-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(230,194,0,.25);
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+}
+
+/* HEAD */
+.pp-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(9,13,22,.35);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.pp-card__identity { flex: 1; min-width: 0; }
+.pp-card__name {
+  color: #fff;
+  font-weight: 800;
+  font-size: .9375rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pp-card__player {
+  color: rgba(255,255,255,.55);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+.pp-card__player i {
+  color: rgba(255,255,255,.35);
+  margin-right: 4px;
+  font-size: .6875rem;
+}
+.pp-card__abbr {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .6875rem;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+/* INFO */
+.pp-card__info {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.pp-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: .75rem;
+}
+.pp-info-row__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.50);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: .6875rem;
+}
+.pp-info-row__label i {
+  font-size: .75rem;
+  color: rgba(255,255,255,.40);
+}
+.pp-info-row__label i.fa-whatsapp { color: #25d366; }
+.pp-info-row__value {
+  color: rgba(255,255,255,.88);
+  font-weight: 700;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pp-info-row__value--link {
+  color: #00d4ff !important;
+  text-decoration: none;
+  transition: color .15s ease;
+}
+.pp-info-row__value--link:hover { color: #47d18c !important; }
+
+/* PROOF */
+.pp-card__proof {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.pp-proof__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.55);
+  font-weight: 700;
+  font-size: .6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.pp-proof__label i { color: #e6c200; font-size: .75rem; }
+
+.pp-proof__link {
+  display: block;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.20);
+  transition: border-color .2s ease;
+}
+.pp-proof__link:hover { border-color: rgba(230,194,0,.35); }
+
+.pp-proof__img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+  transition: transform .3s ease;
+}
+.pp-proof__link:hover .pp-proof__img { transform: scale(1.03); }
+
+.pp-proof__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(6,10,18,.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity .25s ease;
+  color: #fff;
+  font-weight: 800;
+  font-size: .75rem;
+  letter-spacing: 0.5px;
+}
+.pp-proof__link:hover .pp-proof__overlay { opacity: 1; }
+.pp-proof__overlay i { font-size: 1.25rem; color: #e6c200; }
+
+.pp-proof__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 16px;
+  border-radius: 10px;
+  background: rgba(220,53,69,.05);
+  border: 1px dashed rgba(220,53,69,.28);
+  color: #ff6b6b;
+  font-size: .75rem;
+  font-weight: 700;
+  text-align: center;
+}
+.pp-proof__empty i { font-size: 1.25rem; }
+
+/* FOOT */
+.pp-card__foot {
+  padding: 14px 16px;
+  margin-top: auto;
+}
+.pp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.pp-btn--primary {
+  background: linear-gradient(135deg, #128c7e, #25d366);
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(37,211,102,.22);
+}
+.pp-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(37,211,102,.38);
+  color: #fff !important;
+}
+.pp-btn__arrow {
+  margin-left: auto;
+  font-size: .75rem;
+  transition: transform .2s ease;
+}
+.pp-btn:hover .pp-btn__arrow { transform: translateX(4px); }
+
+/* ============================================ */
+/* EMPTY */
+/* ============================================ */
+.pp-empty {
+  text-align: center;
+  padding: 60px 24px;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  max-width: 520px;
+  margin: 40px auto;
+}
+.pp-empty__icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40,167,69,.10);
+  border: 2px solid rgba(40,167,69,.30);
+  color: #47d18c;
+  font-size: 2rem;
+}
+.pp-empty__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.25rem;
+  margin: 0 0 10px;
+}
+.pp-empty__text {
+  color: rgba(255,255,255,.60);
+  font-size: .875rem;
+  line-height: 1.6;
+  margin: 0 auto 24px;
+  max-width: 400px;
+}
+.pp-empty__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  color: rgba(255,255,255,.88) !important;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-decoration: none;
+  transition: all .2s ease;
+}
+.pp-empty__btn:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .pp-page { padding: 20px 12px 40px; }
+  .pp-header { padding: 16px; }
+  .pp-header__title { font-size: 1.125rem; }
+  .pp-header__back { padding: 8px 12px; font-size: .75rem; }
+  .pp-header__back span { display: none; }
+
+  .pp-banner { padding: 14px; gap: 12px; }
+  .pp-banner__icon { width: 36px; height: 36px; font-size: 1rem; }
+
+  .pp-card__head { padding: 14px; }
+  .pp-card__name { font-size: .875rem; }
+  .pp-proof__img { height: 150px; }
+  .pp-card__foot { padding: 12px 14px; }
+  .pp-btn { padding: 11px 16px; font-size: .75rem; }
 }
 </style>
 {% endblock %}

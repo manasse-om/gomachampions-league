@@ -109,6 +109,14 @@ class Team(models.Model):
         verbose_name=_("Preuve de paiement")
     )
 
+    terms_accepted = models.BooleanField(
+        default=False,
+        verbose_name=_("Règlement accepté")
+    )
+    terms_accepted_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("Date d'acceptation")
+    )
 
     # Numéro WhatsApp
     phone_regex = RegexValidator(regex=r'^\+?\d{9,15}$', message=_("Format: '+243999999999'"))

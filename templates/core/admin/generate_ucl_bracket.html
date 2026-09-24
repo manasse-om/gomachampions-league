@@ -1,48 +1,455 @@
 {% extends 'core/admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Générer le bracket UCL — Admin{% endblock %}
 
 {% block admin_content %}
-<div class="admin-card">
 
-  <h3 class="mb-2">
-    <i class="fas fa-sitemap me-2 text-warning"></i>Générer Bracket UCL (complet)
-  </h3>
+<div class="gb-card">
 
-  <p class="text-light" style="opacity:.8;">
-    Barrages déterministes (9 vs 24, 10 vs 23, …, 16 vs 17), puis tirage aléatoire des 8es.
-    <br>Les tours suivants seront créés avec <strong>TBD</strong> (à déterminer) jusqu’à ce que les vainqueurs soient connus.
-  </p>
-
-  <div class="alert alert-danger">
-    <strong>Attention :</strong> si tu coches “reset”, les matchs des phases finales existants seront supprimés.
+  <!-- ============================================ -->
+  <!-- HEAD -->
+  <!-- ============================================ -->
+  <div class="gb-head">
+    <div class="gb-head__icon">
+      <i class="fas fa-sitemap"></i>
+    </div>
+    <div>
+      <div class="gb-head__title">Générer le bracket UCL</div>
+      <div class="gb-head__sub">Création automatique de toutes les phases finales</div>
+    </div>
   </div>
 
-  <form method="post">
+  <!-- ============================================ -->
+  <!-- INFO : COMMENT ÇA MARCHE -->
+  <!-- ============================================ -->
+  <div class="gb-info">
+    <div class="gb-info__head">
+      <i class="fas fa-circle-info"></i>
+      <span>Comment ça marche</span>
+    </div>
+    <ul class="gb-info__list">
+      <li>
+        <i class="fas fa-check"></i>
+        <span><strong>Barrages déterministes</strong> : 9 vs 24, 10 vs 23, …, 16 vs 17 (selon effectif).</span>
+      </li>
+      <li>
+        <i class="fas fa-check"></i>
+        <span><strong>Tirage aléatoire</strong> pour les 8<sup>es</sup> de finale.</span>
+      </li>
+      <li>
+        <i class="fas fa-check"></i>
+        <span>Les tours suivants sont créés avec <strong>TBD</strong> (à déterminer), en attendant les vainqueurs.</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- ALERT DANGER -->
+  <!-- ============================================ -->
+  <div class="gb-alert gb-alert--danger">
+    <i class="fas fa-triangle-exclamation"></i>
+    <div>
+      <strong>Attention :</strong> si vous cochez <em>Reset phases finales</em>,
+      tous les matchs des phases finales existants seront <strong>définitivement supprimés</strong>.
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- FORMULAIRE -->
+  <!-- ============================================ -->
+  <form method="post" class="gb-form" novalidate>
     {% csrf_token %}
 
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label text-light">Date de départ (optionnel)</label>
-        <input type="date" name="start_date" class="form-control">
-        <small class="text-light" style="opacity:.7;">Si vide : utilise aujourd’hui (00:00).</small>
+    <!-- SECTION CONFIGURATION -->
+    <div class="gb-section">
+      <div class="gb-section__head">
+        <div class="gb-section__num">1</div>
+        <div class="gb-section__title">Configuration</div>
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label text-light">Options</label>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="1" id="reset" name="reset">
-          <label class="form-check-label text-light" for="reset">
-            Reset phases finales avant génération
+      <div class="gb-row">
+        <!-- DATE -->
+        <div class="gb-field">
+          <label class="gb-label" for="start_date">
+            Date de départ <span class="gb-optional">(optionnel)</span>
+          </label>
+          <input type="date"
+                 name="start_date"
+                 id="start_date"
+                 class="gb-input"
+                 placeholder="AAAA-MM-JJ">
+          <div class="gb-hint">
+            <i class="fas fa-info-circle"></i>
+            <span>Si vide, la date du jour (00:00) sera utilisée.</span>
+          </div>
+        </div>
+
+        <!-- RESET -->
+        <div class="gb-field">
+          <label class="gb-label">
+            Options
+          </label>
+          <label class="gb-check" for="reset">
+            <input type="checkbox"
+                   value="1"
+                   id="reset"
+                   name="reset">
+            <div>
+              <div class="gb-check__title">Reset avant génération</div>
+              <div class="gb-check__text">
+                Supprime les phases finales existantes avant de créer le nouveau bracket.
+              </div>
+            </div>
           </label>
         </div>
       </div>
     </div>
 
-    <div class="d-flex flex-wrap gap-2 mt-4">
-      <button class="btn btn-ucl-gold">Générer</button>
-      <a href="{% url 'knockout_tools' %}" class="btn btn-outline-light">Annuler</a>
+    <!-- ACTIONS -->
+    <div class="gb-actions">
+      <a href="{% url 'knockout_tools' %}" class="gb-btn gb-btn--ghost">
+        <i class="fas fa-arrow-left"></i>
+        <span>Annuler</span>
+      </a>
+      <button type="submit" class="gb-btn gb-btn--gold">
+        <i class="fas fa-bolt"></i>
+        <span>Générer le bracket</span>
+      </button>
     </div>
 
   </form>
 
 </div>
+
+<style>
+/* ============================================ */
+/* CARD */
+/* ============================================ */
+.gb-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 28px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.30);
+}
+@media (max-width: 640px) {
+  .gb-card { padding: 20px 16px; }
+}
+
+/* ============================================ */
+/* HEAD */
+/* ============================================ */
+.gb-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.gb-head__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(230,194,0,.15), rgba(230,194,0,.04));
+  border: 1px solid rgba(230,194,0,.30);
+  color: #e6c200;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.gb-head__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+.gb-head__sub {
+  color: rgba(255,255,255,.50);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ============================================ */
+/* INFO BOX */
+/* ============================================ */
+.gb-info {
+  padding: 16px 18px;
+  background: rgba(0,167,225,.05);
+  border: 1px solid rgba(0,167,225,.20);
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+.gb-info__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #00d4ff;
+  font-weight: 800;
+  font-size: .8125rem;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.gb-info__head i { font-size: .9375rem; }
+.gb-info__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gb-info__list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: rgba(255,255,255,.80);
+  font-size: .8125rem;
+  line-height: 1.55;
+}
+.gb-info__list li i {
+  color: #00d4ff;
+  font-size: .6875rem;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.gb-info__list strong { color: #fff; }
+
+/* ============================================ */
+/* ALERT */
+/* ============================================ */
+.gb-alert {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: .8125rem;
+  margin-bottom: 20px;
+  align-items: flex-start;
+  line-height: 1.55;
+}
+.gb-alert i {
+  margin-top: 2px;
+  flex-shrink: 0;
+  font-size: .9375rem;
+}
+.gb-alert--danger {
+  background: rgba(220,53,69,.06);
+  border: 1px solid rgba(220,53,69,.25);
+  color: rgba(255,255,255,.88);
+}
+.gb-alert--danger i { color: #ff6b6b; }
+.gb-alert--danger strong { color: #ff6b6b; }
+.gb-alert--danger em {
+  color: #fff;
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* ============================================ */
+/* FORM */
+/* ============================================ */
+.gb-form { display: block; }
+
+.gb-section {
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 20px;
+}
+.gb-section__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.gb-section__num {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #003d82, #00a7e1);
+  color: #fff;
+  font-weight: 800;
+  font-size: .75rem;
+  flex-shrink: 0;
+}
+.gb-section__title {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Row */
+.gb-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 640px) {
+  .gb-row { grid-template-columns: 1fr; }
+}
+
+.gb-field { margin-bottom: 4px; }
+.gb-label {
+  display: block;
+  color: rgba(255,255,255,.80);
+  font-weight: 700;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.gb-optional {
+  color: rgba(255,255,255,.40);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.gb-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.gb-input:focus {
+  border-color: rgba(230,194,0,.50);
+  background: rgba(230,194,0,.03);
+  box-shadow: 0 0 0 3px rgba(230,194,0,.08);
+}
+.gb-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.55);
+  cursor: pointer;
+}
+
+.gb-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: rgba(255,255,255,.50);
+  font-size: .6875rem;
+}
+.gb-hint i { color: #00a7e1; }
+
+/* Checkbox */
+.gb-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .2s ease;
+  margin: 0;
+}
+.gb-check:hover {
+  border-color: rgba(220,53,69,.35);
+  background: rgba(220,53,69,.03);
+}
+.gb-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #dc3545;
+  flex-shrink: 0;
+}
+.gb-check__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: .8125rem;
+}
+.gb-check__text {
+  color: rgba(255,255,255,.55);
+  font-size: .6875rem;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+/* ============================================ */
+/* ACTIONS */
+/* ============================================ */
+.gb-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+@media (max-width: 540px) {
+  .gb-actions { flex-direction: column-reverse; }
+}
+
+.gb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.gb-btn i { font-size: .75rem; }
+
+.gb-btn--ghost {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+}
+.gb-btn--ghost:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff;
+}
+
+.gb-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+}
+.gb-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+  color: #0b1423;
+}
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .gb-head { gap: 12px; padding-bottom: 16px; margin-bottom: 16px; }
+  .gb-head__icon { width: 44px; height: 44px; font-size: 1.0625rem; }
+  .gb-head__title { font-size: .9375rem; }
+  .gb-info { padding: 14px; }
+  .gb-info__head { font-size: .75rem; margin-bottom: 10px; }
+  .gb-info__list li { font-size: .75rem; }
+  .gb-alert { padding: 12px 14px; font-size: .75rem; }
+}
+</style>
+
 {% endblock %}

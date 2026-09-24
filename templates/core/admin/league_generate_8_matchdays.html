@@ -1,117 +1,493 @@
-{% extends 'base.html' %}
+{% extends 'core/admin/base_admin.html' %}
+{% load static %}
 
-{% block content %}
-<section class="py-5" style="background: linear-gradient(135deg, #0a0e17, #0f1a2d); min-height: 100vh;">
-  <div class="container" style="max-width: 700px;">
+{% block title %}Générer la Phase Ligue — Admin{% endblock %}
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 style="color:#e6c200; font-weight:900; margin:0;">
-        <i class="fas fa-calendar-days me-2"></i>Générer la Phase Ligue
-      </h2>
-      <a href="{% url 'league_draw_live' %}" class="btn btn-outline-light btn-sm rounded-pill">
-        ← Retour tirage
-      </a>
+{% block admin_content %}
+
+<div class="gl-card">
+
+  <!-- ============================================ -->
+  <!-- HEAD -->
+  <!-- ============================================ -->
+  <div class="gl-head">
+    <div class="gl-head__icon">
+      <i class="fas fa-calendar-plus"></i>
     </div>
-
-    <!-- FORMAT DÉTECTÉ -->
-    {% if fmt %}
-    <div style="background:rgba(230,194,0,.10); border:1px solid rgba(230,194,0,.35); border-radius:16px; padding:20px; margin-bottom:24px;">
-      <h5 style="color:#e6c200; font-weight:900; margin-bottom:16px;">
-        <i class="fas fa-chart-bar me-2"></i>Format détecté automatiquement
-      </h5>
-
-      <!-- Stats rapides -->
-      <div class="row g-3 mb-3">
-        <div class="col-6 col-md-3 text-center">
-          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.n_teams }}</div>
-          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Équipes</div>
-        </div>
-        <div class="col-6 col-md-3 text-center">
-          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.matchdays }}</div>
-          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Journées</div>
-        </div>
-        <div class="col-6 col-md-3 text-center">
-          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.opponents_per_team }}</div>
-          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Adv./équipe</div>
-        </div>
-        <div class="col-6 col-md-3 text-center">
-          <div style="font-size:1.8rem; font-weight:900; color:#fff;">{{ fmt.total_league_matches }}</div>
-          <div style="font-size:.75rem; color:rgba(255,255,255,.60); text-transform:uppercase; letter-spacing:1px;">Total matchs</div>
-        </div>
-      </div>
-
-      <!-- Zones -->
-      <div class="row g-2">
-        <div class="col-md-4">
-          <div style="background:rgba(40,167,69,.12); border:1px solid rgba(40,167,69,.30); border-radius:10px; padding:10px; text-align:center;">
-            <div style="color:#47d18c; font-weight:900;">🟢 Top {{ fmt.direct_qualified }}</div>
-            <div style="font-size:.75rem; color:rgba(255,255,255,.60);">Qualifiés directs</div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div style="background:rgba(255,193,7,.10); border:1px solid rgba(255,193,7,.30); border-radius:10px; padding:10px; text-align:center;">
-            <div style="color:#ffd700; font-weight:900;">🟡 {{ fmt.playoff_ties }} barrages</div>
-            <div style="font-size:.75rem; color:rgba(255,255,255,.60);">
-              Pos. {{ fmt.direct_qualified|add:1 }} → {{ fmt.n_teams }}
-              ({{ fmt.playoff_participants }} équipes)
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div style="background:rgba(40,167,69,.08); border:1px solid rgba(40,167,69,.20); border-radius:10px; padding:10px; text-align:center;">
-            {% if fmt.eliminated_after_league > 0 %}
-              <div style="color:#ff6b6b; font-weight:900;">🔴 {{ fmt.eliminated_after_league }} éliminés</div>
-            {% else %}
-              <div style="color:#47d18c; font-weight:900;">✅ 0 élimination</div>
-            {% endif %}
-            <div style="font-size:.75rem; color:rgba(255,255,255,.60);">Après la ligue</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-3" style="color:rgba(255,255,255,.65); font-size:.85rem;">
-        <i class="fas fa-info-circle me-2" style="color:#e6c200;"></i>
-        {{ fmt.label }}
-        — 2 journées/jour (00:00 & 00:01)
-        — Fenêtre de jeu : 12h00 → 12h59 du lendemain
-      </div>
+    <div>
+      <div class="gl-head__title">Générer la Phase Ligue</div>
+      <div class="gl-head__sub">Création automatique du calendrier de la phase de ligue</div>
     </div>
-    {% endif %}
-
-    <!-- FORMULAIRE -->
-    <div style="background:rgba(17,28,47,.65); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:24px;">
-      <form method="post">
-        {% csrf_token %}
-        <div class="mb-4">
-          <label class="form-label" style="font-weight:900; color:#fff;">
-            <i class="fas fa-calendar me-2" style="color:#e6c200;"></i>
-            Date de début (Journée 1)
-          </label>
-          <input type="date"
-                 name="start_date"
-                 class="form-control"
-                 style="background:rgba(15,26,44,.92); border:1px solid rgba(255,255,255,.14); color:#fff; border-radius:12px;"
-                 required>
-          <div class="mt-2" style="font-size:.80rem; color:rgba(255,255,255,.55);">
-            Jour 1 : J1=00:00 et J2=00:01 •
-            Jour 2 : J3=00:00 et J4=00:01 • ...
-          </div>
-        </div>
-
-        <div class="d-flex gap-3">
-          <button type="submit"
-                  class="btn btn-lg flex-fill"
-                  style="background:linear-gradient(45deg,#e6c200,#ffed4e); color:#0a0e17; font-weight:900; border-radius:999px;">
-            <i class="fas fa-bolt me-2"></i>Générer maintenant
-          </button>
-          <a href="{% url 'dashboard' %}"
-             class="btn btn-outline-light btn-lg rounded-pill px-4">
-            Dashboard
-          </a>
-        </div>
-      </form>
-    </div>
-
   </div>
-</section>
+
+  {% if fmt %}
+  <!-- ============================================ -->
+  <!-- FORMAT DÉTECTÉ -->
+  <!-- ============================================ -->
+  <div class="gl-format">
+    <div class="gl-format__head">
+      <i class="fas fa-chart-simple"></i>
+      <span>Format détecté automatiquement</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="gl-stats">
+      <div class="gl-stat">
+        <div class="gl-stat__value">{{ fmt.n_teams }}</div>
+        <div class="gl-stat__label">Équipes</div>
+      </div>
+      <div class="gl-stat">
+        <div class="gl-stat__value">{{ fmt.matchdays }}</div>
+        <div class="gl-stat__label">Journées</div>
+      </div>
+      <div class="gl-stat">
+        <div class="gl-stat__value">{{ fmt.opponents_per_team }}</div>
+        <div class="gl-stat__label">Adv./équipe</div>
+      </div>
+      <div class="gl-stat">
+        <div class="gl-stat__value">{{ fmt.total_league_matches }}</div>
+        <div class="gl-stat__label">Total matchs</div>
+      </div>
+    </div>
+
+    <!-- Zones -->
+    <div class="gl-zones">
+      <div class="gl-zone gl-zone--success">
+        <div class="gl-zone__title">
+          <i class="fas fa-circle-check"></i>
+          Top {{ fmt.direct_qualified }}
+        </div>
+        <div class="gl-zone__sub">Qualifiés directs</div>
+      </div>
+
+      {% if fmt.playoff_ties > 0 %}
+      <div class="gl-zone gl-zone--warn">
+        <div class="gl-zone__title">
+          <i class="fas fa-shield"></i>
+          {{ fmt.playoff_ties }} barrage{{ fmt.playoff_ties|pluralize:"s" }}
+        </div>
+        <div class="gl-zone__sub">
+          Pos. {{ fmt.direct_qualified|add:1 }} → {{ fmt.n_teams }}
+          ({{ fmt.playoff_participants }} équipes)
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="gl-zone {% if fmt.eliminated_after_league > 0 %}gl-zone--danger{% else %}gl-zone--success{% endif %}">
+        {% if fmt.eliminated_after_league > 0 %}
+          <div class="gl-zone__title">
+            <i class="fas fa-circle-xmark"></i>
+            {{ fmt.eliminated_after_league }} éliminé{{ fmt.eliminated_after_league|pluralize:"s" }}
+          </div>
+        {% else %}
+          <div class="gl-zone__title">
+            <i class="fas fa-circle-check"></i>
+            Zéro élimination
+          </div>
+        {% endif %}
+        <div class="gl-zone__sub">Après la phase de ligue</div>
+      </div>
+    </div>
+
+    <!-- Résumé -->
+    <div class="gl-summary">
+      <i class="fas fa-circle-info"></i>
+      <div>
+        <strong>{{ fmt.label }}</strong>
+        <span class="gl-summary__sep">•</span>
+        2 journées/jour (00:00 &amp; 00:01)
+        <span class="gl-summary__sep">•</span>
+        Fenêtre de jeu : 12h00 → 12h59 le lendemain
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ============================================ -->
+  <!-- FORMULAIRE -->
+  <!-- ============================================ -->
+  <form method="post" class="gl-form" novalidate>
+    {% csrf_token %}
+
+    <div class="gl-section">
+      <div class="gl-section__head">
+        <div class="gl-section__num">1</div>
+        <div class="gl-section__title">Configuration</div>
+      </div>
+
+      <div class="gl-field">
+        <label class="gl-label" for="start_date">
+          Date de début <span class="gl-req">*</span>
+        </label>
+        <input type="date"
+               name="start_date"
+               id="start_date"
+               class="gl-input"
+               required>
+        <div class="gl-hint">
+          <i class="fas fa-info-circle"></i>
+          <span>
+            Jour 1 : <strong>J1=00:00</strong> et <strong>J2=00:01</strong>
+            <span class="gl-hint__sep">•</span>
+            Jour 2 : <strong>J3=00:00</strong> et <strong>J4=00:01</strong>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="gl-actions">
+      <a href="{% url 'dashboard' %}" class="gl-btn gl-btn--ghost">
+        <i class="fas fa-arrow-left"></i>
+        <span>Dashboard</span>
+      </a>
+      <button type="submit" class="gl-btn gl-btn--gold">
+        <i class="fas fa-bolt"></i>
+        <span>Générer maintenant</span>
+      </button>
+    </div>
+
+  </form>
+
+</div>
+
+<style>
+/* ============================================ */
+/* CARD */
+/* ============================================ */
+.gl-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 28px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.30);
+}
+@media (max-width: 640px) {
+  .gl-card { padding: 20px 16px; }
+}
+
+/* ============================================ */
+/* HEAD */
+/* ============================================ */
+.gl-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.gl-head__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(230,194,0,.15), rgba(230,194,0,.04));
+  border: 1px solid rgba(230,194,0,.30);
+  color: #e6c200;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.gl-head__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+.gl-head__sub {
+  color: rgba(255,255,255,.50);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ============================================ */
+/* FORMAT DÉTECTÉ */
+/* ============================================ */
+.gl-format {
+  background: linear-gradient(135deg, rgba(230,194,0,.06), rgba(230,194,0,.02));
+  border: 1px solid rgba(230,194,0,.28);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.gl-format__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+.gl-format__head i { font-size: .9375rem; }
+
+/* Stats */
+.gl-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+@media (max-width: 540px) {
+  .gl-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.gl-stat {
+  text-align: center;
+  padding: 14px 8px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.gl-stat:hover {
+  border-color: rgba(230,194,0,.25);
+  transform: translateY(-2px);
+}
+.gl-stat__value {
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.gl-stat__label {
+  color: rgba(255,255,255,.55);
+  font-size: .6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 6px;
+}
+
+/* Zones */
+.gl-zones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.gl-zone {
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+}
+.gl-zone--success {
+  background: rgba(40,167,69,.08);
+  border: 1px solid rgba(40,167,69,.24);
+}
+.gl-zone--warn {
+  background: rgba(255,193,7,.08);
+  border: 1px solid rgba(255,193,7,.26);
+}
+.gl-zone--danger {
+  background: rgba(220,53,69,.06);
+  border: 1px solid rgba(220,53,69,.24);
+}
+
+.gl-zone__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: .8125rem;
+  letter-spacing: 0.3px;
+}
+.gl-zone--success .gl-zone__title { color: #47d18c; }
+.gl-zone--warn .gl-zone__title { color: #ffc107; }
+.gl-zone--danger .gl-zone__title { color: #ff6b6b; }
+.gl-zone__title i { font-size: .6875rem; }
+
+.gl-zone__sub {
+  color: rgba(255,255,255,.55);
+  font-size: .6875rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Summary */
+.gl-summary {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(0,167,225,.05);
+  border: 1px solid rgba(0,167,225,.18);
+  border-radius: 10px;
+  font-size: .75rem;
+  color: rgba(255,255,255,.75);
+  line-height: 1.55;
+  align-items: flex-start;
+}
+.gl-summary i {
+  color: #00d4ff;
+  margin-top: 2px;
+  flex-shrink: 0;
+  font-size: .875rem;
+}
+.gl-summary strong { color: #fff; }
+.gl-summary__sep {
+  color: rgba(255,255,255,.30);
+  margin: 0 6px;
+}
+
+/* ============================================ */
+/* SECTION FORM */
+/* ============================================ */
+.gl-form { display: block; }
+
+.gl-section {
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 20px;
+}
+.gl-section__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.gl-section__num {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #003d82, #00a7e1);
+  color: #fff;
+  font-weight: 800;
+  font-size: .75rem;
+  flex-shrink: 0;
+}
+.gl-section__title {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Field */
+.gl-field { margin-bottom: 4px; }
+.gl-label {
+  display: block;
+  color: rgba(255,255,255,.80);
+  font-weight: 700;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.gl-req { color: #ff6b6b; }
+
+.gl-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.gl-input:focus {
+  border-color: rgba(230,194,0,.50);
+  background: rgba(230,194,0,.03);
+  box-shadow: 0 0 0 3px rgba(230,194,0,.08);
+}
+.gl-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.55);
+  cursor: pointer;
+}
+
+.gl-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  color: rgba(255,255,255,.50);
+  font-size: .6875rem;
+  line-height: 1.5;
+}
+.gl-hint i { color: #00a7e1; margin-top: 2px; flex-shrink: 0; }
+.gl-hint strong { color: rgba(255,255,255,.80); }
+.gl-hint__sep {
+  color: rgba(255,255,255,.20);
+  margin: 0 4px;
+}
+
+/* ============================================ */
+/* ACTIONS */
+/* ============================================ */
+.gl-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+@media (max-width: 540px) {
+  .gl-actions { flex-direction: column-reverse; }
+}
+
+.gl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.gl-btn i { font-size: .75rem; }
+
+.gl-btn--ghost {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+}
+.gl-btn--ghost:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff;
+}
+
+.gl-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+}
+.gl-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+  color: #0b1423;
+}
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .gl-head { gap: 12px; padding-bottom: 16px; margin-bottom: 16px; }
+  .gl-head__icon { width: 44px; height: 44px; font-size: 1.0625rem; }
+  .gl-head__title { font-size: .9375rem; }
+  .gl-format { padding: 16px; }
+  .gl-stat__value { font-size: 1.25rem; }
+}
+</style>
+
 {% endblock %}

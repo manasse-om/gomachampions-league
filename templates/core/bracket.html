@@ -1,86 +1,96 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load static i18n %}
 
-{% block title %}Bracket - Goma Champions League 2026{% endblock %}
+{% block title %}Phase finale — Ef-Champions League{% endblock %}
 
 {% block content %}
-<section class="bk-page py-4">
-  <div class="container">
+<section class="bk-page">
+  <div class="container bk-container">
 
-    <!-- HEADER -->
+    <!-- ============================================ -->
+    <!-- HERO -->
+    <!-- ============================================ -->
     <div class="bk-hero">
-      <div class="bk-hero__texture"></div>
-      <div class="bk-hero__content text-center">
-        <div class="bk-kicker">ROAD TO</div>
-        <h1 class="bk-title">GOMA CL 2026</h1>
-        <div class="bk-subtitle">BRACKET OFFICIEL</div>
+      <div class="bk-hero__glow"></div>
+      <div class="bk-hero__inner">
+        <div class="bk-hero__kicker">
+          <i class="fas fa-route"></i> ROAD TO
+        </div>
+        <h1 class="bk-hero__title">Ef-Champions League</h1>
+        <div class="bk-hero__sub">BRACKET OFFICIEL</div>
 
         {% if fmt %}
-          <div class="bk-debug mt-2">
-            {{ fmt.label }} •
-            playoff={{ playoff_ties|length }}
-            {% if bracket_type == 'round_16' %}• r16={{ r16_ties|length }}{% endif %}
-            • qf={{ qf_ties|length }} • sf={{ sf_ties|length }}
+          <div class="bk-hero__debug">
+            {{ fmt.label }}
           </div>
 
-          <!-- Légende du format -->
-          <div class="bk-format-legend mt-3">
-            <span class="bk-legend-item bk-legend-item--green">
+          <div class="bk-legend">
+            <div class="bk-legend__item bk-legend__item--green">
+              <span class="bk-legend__dot"></span>
               Top {{ fmt.direct_qualified }} → Qualifiés directs
-            </span>
-            <span class="bk-legend-item bk-legend-item--yellow">
+            </div>
+            {% if fmt.playoff_ties > 0 %}
+            <div class="bk-legend__item bk-legend__item--gold">
+              <span class="bk-legend__dot"></span>
               {{ fmt.playoff_ties }} barrages
-            </span>
-            <span class="bk-legend-item bk-legend-item--red">
+            </div>
+            {% endif %}
+            {% if fmt.eliminated_after_league > 0 %}
+            <div class="bk-legend__item bk-legend__item--red">
+              <span class="bk-legend__dot"></span>
               Reste → Éliminés
-            </span>
+            </div>
+            {% endif %}
           </div>
         {% endif %}
       </div>
     </div>
 
     {% if not competition %}
-      <div class="bk-empty text-center mt-4">Aucune compétition active.</div>
+      <div class="bk-empty">
+        <i class="fas fa-inbox"></i>
+        <div>Aucune compétition active.</div>
+      </div>
 
     {% else %}
 
-      <div class="bk-scrollhint d-md-none">
-        Astuce : fais glisser horizontalement pour voir tout le tableau.
+      <div class="bk-scrollhint">
+        <i class="fas fa-arrows-left-right"></i>
+        <span>Faites glisser horizontalement pour voir tout le tableau.</span>
       </div>
 
       <div class="bk-grid-wrap">
 
         {% if bracket_type == 'round_16' %}
         <!-- ============================
-             FORMAT R16 (24-36 équipes)
-             5 colonnes
+             FORMAT R16 (5 colonnes)
              ============================ -->
         <div class="bk-grid bk-grid--r16">
 
           <!-- COL 1 : BARRAGES -->
           <div class="bk-col">
-            <div class="bk-col__title">BARRAGES</div>
+            <div class="bk-col__title">
+              <i class="fas fa-shield"></i> BARRAGES
+            </div>
             <div class="bk-col__sides">
               <div class="bk-side">
                 {% for t in playoff_ties|slice:":4" %}
                   {% include "core/partials/_bracket_tie.html" with t=t %}
-                {% empty %}
-                  <div class="bk-muted">—</div>
-                {% endfor %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
               </div>
               <div class="bk-side">
                 {% for t in playoff_ties|slice:"4:" %}
                   {% include "core/partials/_bracket_tie.html" with t=t %}
-                {% empty %}
-                  <div class="bk-muted">—</div>
-                {% endfor %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
               </div>
             </div>
           </div>
 
-          <!-- COL 2 : 8es -->
+          <!-- COL 2 : R16 -->
           <div class="bk-col">
-            <div class="bk-col__title">8<sup>e</sup> DE FINALE</div>
+            <div class="bk-col__title">
+              <i class="fas fa-sitemap"></i> 8<sup>es</sup> DE FINALE
+            </div>
             <div class="bk-col__sides">
               <div class="bk-side">
                 {% for t in r16_ties|slice:":4" %}
@@ -97,7 +107,9 @@
 
           <!-- COL 3 : QF -->
           <div class="bk-col">
-            <div class="bk-col__title">QUARTS</div>
+            <div class="bk-col__title">
+              <i class="fas fa-trophy"></i> QUARTS
+            </div>
             <div class="bk-col__sides">
               <div class="bk-side">
                 {% for t in qf_ties|slice:":2" %}
@@ -114,7 +126,9 @@
 
           <!-- COL 4 : SF -->
           <div class="bk-col">
-            <div class="bk-col__title">DEMI-FINALES</div>
+            <div class="bk-col__title">
+              <i class="fas fa-fire"></i> DEMI-FINALES
+            </div>
             <div class="bk-col__sides">
               <div class="bk-side">
                 {% for t in sf_ties|slice:":1" %}
@@ -131,7 +145,9 @@
 
           <!-- COL 5 : FINALE -->
           <div class="bk-col bk-col--final">
-            <div class="bk-col__title">FINALE</div>
+            <div class="bk-col__title bk-col__title--gold">
+              <i class="fas fa-crown"></i> FINALE
+            </div>
             {% include "core/partials/_bracket_final.html" %}
           </div>
 
@@ -139,35 +155,34 @@
 
         {% else %}
         <!-- ============================
-             FORMAT QF (12-23 équipes)
-             4 colonnes (pas de R16)
+             FORMAT QF (4 colonnes)
              ============================ -->
         <div class="bk-grid bk-grid--qf">
 
           <!-- COL 1 : BARRAGES -->
           <div class="bk-col">
-            <div class="bk-col__title">BARRAGES</div>
+            <div class="bk-col__title">
+              <i class="fas fa-shield"></i> BARRAGES
+            </div>
             <div class="bk-col__sides">
               <div class="bk-side">
                 {% for t in playoff_ties|slice:":2" %}
                   {% include "core/partials/_bracket_tie.html" with t=t %}
-                {% empty %}
-                  <div class="bk-muted">—</div>
-                {% endfor %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
               </div>
               <div class="bk-side">
                 {% for t in playoff_ties|slice:"2:" %}
                   {% include "core/partials/_bracket_tie.html" with t=t %}
-                {% empty %}
-                  <div class="bk-muted">—</div>
-                {% endfor %}
+                {% empty %}<div class="bk-muted">—</div>{% endfor %}
               </div>
             </div>
           </div>
 
           <!-- COL 2 : QF -->
           <div class="bk-col">
-            <div class="bk-col__title">QUARTS DE FINALE</div>
+            <div class="bk-col__title">
+              <i class="fas fa-trophy"></i> QUARTS DE FINALE
+            </div>
             <div class="bk-col__sides">
               <div class="bk-side">
                 {% for t in qf_ties|slice:":2" %}
@@ -184,7 +199,9 @@
 
           <!-- COL 3 : SF -->
           <div class="bk-col">
-            <div class="bk-col__title">DEMI-FINALES</div>
+            <div class="bk-col__title">
+              <i class="fas fa-fire"></i> DEMI-FINALES
+            </div>
             <div class="bk-col__sides">
               <div class="bk-side">
                 {% for t in sf_ties|slice:":1" %}
@@ -201,7 +218,9 @@
 
           <!-- COL 4 : FINALE -->
           <div class="bk-col bk-col--final">
-            <div class="bk-col__title">FINALE</div>
+            <div class="bk-col__title bk-col__title--gold">
+              <i class="fas fa-crown"></i> FINALE
+            </div>
             {% include "core/partials/_bracket_final.html" %}
           </div>
 
@@ -214,160 +233,218 @@
   </div>
 </section>
 
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
 <style>
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
 .bk-page {
-  background: radial-gradient(1200px 600px at 50% 10%, rgba(0,167,225,.16), transparent 55%),
-              linear-gradient(135deg, #070b14, #0b1423 40%, #0f1a2d);
+  background:
+    radial-gradient(1200px 600px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
   min-height: 100vh;
   color: rgba(255,255,255,.92);
+  padding: 32px 0 60px;
 }
+.bk-container { max-width: 100%; padding: 0 16px; }
 
+/* ============================================ */
 /* HERO */
+/* ============================================ */
 .bk-hero {
   position: relative;
   border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.08);
   background: rgba(17,28,47,.45);
-  padding: 18px;
-  margin-bottom: 16px;
+  padding: 28px 20px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(12px);
 }
-.bk-hero__texture {
+.bk-hero__glow {
   position: absolute; inset: 0;
   background:
-    radial-gradient(circle at 20% 15%, rgba(230,194,0,.10), transparent 35%),
-    radial-gradient(circle at 80% 10%, rgba(0,167,225,.12), transparent 35%),
-    repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 1px, transparent 1px 10px);
-  opacity: .85;
+    radial-gradient(circle at 20% 20%, rgba(230,194,0,.08), transparent 45%),
+    radial-gradient(circle at 80% 30%, rgba(0,167,225,.10), transparent 45%);
   pointer-events: none;
 }
-.bk-hero__content { position: relative; z-index: 2; }
-.bk-kicker {
-  color: rgba(255,255,255,.72);
+.bk-hero__inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.bk-hero__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.50);
   letter-spacing: 4px;
   font-weight: 800;
-  font-size: .85rem;
+  font-size: .6875rem;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
-.bk-title {
-  margin: 6px 0 0;
-  font-weight: 1000;
-  letter-spacing: 2px;
+.bk-hero__kicker i { color: #e6c200; }
+.bk-hero__title {
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: 0.5px;
   color: #fff;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
 }
-.bk-subtitle {
-  margin-top: 6px;
+.bk-hero__sub {
+  margin-top: 8px;
   color: #e6c200;
   font-weight: 800;
-  letter-spacing: 1px;
-  font-size: .95rem;
+  letter-spacing: 4px;
+  font-size: .8125rem;
+  text-transform: uppercase;
 }
-.bk-debug {
-  color: rgba(255,255,255,.68);
-  font-weight: 800;
-  font-size: .85rem;
+.bk-hero__debug {
+  color: rgba(255,255,255,.55);
+  font-weight: 700;
+  font-size: .75rem;
+  margin-top: 12px;
 }
 
-/* LÉGENDE FORMAT */
-.bk-format-legend {
+/* ============================================ */
+/* LEGEND */
+/* ============================================ */
+.bk-legend {
   display: flex;
   gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 16px;
 }
-.bk-legend-item {
-  padding: 4px 12px;
+.bk-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
   border-radius: 999px;
-  font-weight: 900;
-  font-size: .78rem;
-  border: 1px solid transparent;
-}
-.bk-legend-item--green {
-  background: rgba(40,167,69,.12);
-  border-color: rgba(40,167,69,.35);
-  color: #47d18c;
-}
-.bk-legend-item--yellow {
-  background: rgba(230,194,0,.12);
-  border-color: rgba(230,194,0,.35);
-  color: #e6c200;
-}
-.bk-legend-item--red {
-  background: rgba(220,53,69,.10);
-  border-color: rgba(220,53,69,.30);
-  color: #ff6b6b;
-}
-
-/* HINT SCROLL */
-.bk-scrollhint {
-  margin: 10px 0 12px;
-  padding: 10px 12px;
-  border-radius: 14px;
+  font-weight: 700;
+  font-size: .75rem;
+  background: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.80);
-  font-weight: 750;
+  color: rgba(255,255,255,.70);
+}
+.bk-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.bk-legend__item--green .bk-legend__dot { background: #00d4ff; box-shadow: 0 0 8px #00d4ff; }
+.bk-legend__item--gold .bk-legend__dot { background: #e6c200; box-shadow: 0 0 8px #e6c200; }
+.bk-legend__item--red .bk-legend__dot { background: #ff6b6b; box-shadow: 0 0 8px #ff6b6b; }
+
+/* ============================================ */
+/* SCROLL HINT */
+/* ============================================ */
+.bk-scrollhint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,167,225,.18);
+  background: rgba(0,167,225,.05);
+  color: rgba(255,255,255,.70);
+  font-weight: 600;
+  font-size: .8125rem;
+}
+.bk-scrollhint i { color: #00d4ff; }
+@media (min-width: 992px) {
+  .bk-scrollhint { display: none; }
 }
 
+/* ============================================ */
 /* GRID */
+/* ============================================ */
 .bk-grid-wrap {
   overflow-x: auto;
   padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.bk-grid-wrap::-webkit-scrollbar {
+  height: 8px;
+}
+.bk-grid-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.15);
+  border-radius: 4px;
 }
 
-/* R16 = 5 colonnes */
 .bk-grid--r16 {
   display: grid;
   grid-template-columns: repeat(5, 300px);
   gap: 14px;
-  min-width: 1100px;
+  min-width: 1580px;
 }
-
-/* QF = 4 colonnes */
 .bk-grid--qf {
   display: grid;
   grid-template-columns: repeat(4, 300px);
   gap: 14px;
-  min-width: 900px;
+  min-width: 1270px;
 }
 
-/* Responsive desktop */
-@media (min-width: 992px) {
+@media (min-width: 1400px) {
   .bk-grid--r16 {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     min-width: 0;
   }
   .bk-grid--qf {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     min-width: 0;
   }
 }
 
+/* ============================================ */
 /* COLONNES */
+/* ============================================ */
 .bk-col {
   background: rgba(17,28,47,.55);
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
   padding: 12px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
 }
 .bk-col--final {
   border-color: rgba(230,194,0,.28);
-  box-shadow: inset 0 0 0 1px rgba(230,194,0,.18);
+  background: linear-gradient(135deg, rgba(230,194,0,.04), rgba(17,28,47,.55));
 }
 .bk-col__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-align: center;
-  font-weight: 1000;
+  font-weight: 800;
   letter-spacing: 1px;
-  color: #e6c200;
+  color: #fff;
   padding: 8px 10px;
-  border-radius: 999px;
+  border-radius: 10px;
   background: rgba(0,61,130,.35);
   border: 1px solid rgba(255,255,255,.10);
-  margin-bottom: 10px;
-  font-size: .88rem;
+  margin-bottom: 12px;
+  font-size: .8125rem;
+  text-transform: uppercase;
 }
+.bk-col__title i { color: #00d4ff; font-size: .75rem; }
+.bk-col__title--gold {
+  color: #e6c200;
+  border-color: rgba(230,194,0,.30);
+  background: rgba(230,194,0,.08);
+}
+.bk-col__title--gold i { color: #e6c200; }
 
+/* ============================================ */
 /* SIDES */
+/* ============================================ */
 .bk-col__sides {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -376,20 +453,68 @@
 @media (max-width: 576px) {
   .bk-col__sides { grid-template-columns: 1fr; }
 }
-
 .bk-side {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+/* ============================================ */
+/* MUTED */
+/* ============================================ */
 .bk-muted {
   text-align: center;
   padding: 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.70);
+  border-radius: 12px;
+  border: 1px dashed rgba(255,255,255,.10);
+  background: rgba(255,255,255,.02);
+  color: rgba(255,255,255,.40);
+  font-size: .8125rem;
+  font-weight: 700;
+}
+
+/* ============================================ */
+/* EMPTY */
+/* ============================================ */
+.bk-empty {
+  text-align: center;
+  padding: 60px 20px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.03);
+  border: 1px dashed rgba(255,255,255,.10);
+  color: rgba(255,255,255,.50);
+  font-size: .9375rem;
+}
+.bk-empty i {
+  display: block;
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+  opacity: .4;
+}
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .bk-page { padding: 20px 0 40px; }
+  .bk-hero { padding: 20px 14px; border-radius: 14px; }
+  .bk-hero__title { font-size: 1.375rem; }
+  .bk-hero__sub { font-size: .6875rem; letter-spacing: 3px; }
+
+  .bk-grid--r16 {
+    grid-template-columns: repeat(5, 260px);
+    min-width: 1370px;
+    gap: 10px;
+  }
+  .bk-grid--qf {
+    grid-template-columns: repeat(4, 260px);
+    min-width: 1100px;
+    gap: 10px;
+  }
+  .bk-col { padding: 10px; border-radius: 14px; }
+  .bk-col__title { font-size: .75rem; padding: 6px 8px; }
+
+  .bk-scrollhint { font-size: .75rem; padding: 8px 12px; }
 }
 </style>
 {% endblock %}

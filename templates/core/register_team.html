@@ -787,34 +787,6 @@
 }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  function setupPreview(inputName, previewId, zoneId) {
-    const input = document.querySelector('input[name="' + inputName + '"]');
-    const preview = document.getElementById(previewId);
-    const zone = document.getElementById(zoneId);
-    if (!input || !preview) return;
-
-    input.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (zone) zone.classList.add('has-file');
-
-      if (file.type === 'image/svg+xml') {
-        preview.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#47d18c;"><i class="fas fa-check-circle" style="font-size:1.75rem;"></i><span style="font-size:.625rem;font-weight:800;">SVG</span></div>';
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function (ev) {
-        preview.innerHTML = '<img src="' + ev.target.result + '" alt="">';
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  setupPreview('logo', 'logoPreview', 'logoZone');
-  setupPreview('payment_proof', 'proofPreview', 'proofZone');
-});
-</script>
+<!-- Modal de recadrage -->
+{% include "core/partials/_image_cropper.html" %}
 {% endblock %}

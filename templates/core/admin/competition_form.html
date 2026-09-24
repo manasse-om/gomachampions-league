@@ -1,21 +1,441 @@
 {% extends 'core/admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Compétition" }} — Admin{% endblock %}
 
 {% block admin_content %}
-<div class="admin-card">
 
-<form method="post">
-{% csrf_token %}
-{{ form.as_p }}
+<div class="cf-card">
 
-<button type="submit" class="btn btn-success">
-    Enregistrer
-</button>
+  <div class="cf-head">
+    <div class="cf-head__icon">
+      <i class="fas fa-trophy"></i>
+    </div>
+    <div>
+      <div class="cf-head__title">
+        {% if form.instance.pk %}Modifier la compétition{% else %}Nouvelle compétition{% endif %}
+      </div>
+      <div class="cf-head__sub">
+        {% if form.instance.pk %}
+          {{ form.instance.name }}
+        {% else %}
+          Configurez une nouvelle édition de l'Ef-Champions League
+        {% endif %}
+      </div>
+    </div>
+  </div>
 
-<a href="{% url 'competition_list' %}" class="btn btn-secondary ms-2">
-    Annuler
-</a>
+  <form method="post" class="cf-form" novalidate>
+    {% csrf_token %}
 
-</form>
+    {% if form.non_field_errors %}
+      <div class="cf-alert cf-alert--danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>{{ form.non_field_errors }}</div>
+      </div>
+    {% endif %}
 
+    <!-- SECTION 1 : IDENTITÉ -->
+    <div class="cf-section">
+      <div class="cf-section__head">
+        <div class="cf-section__num">1</div>
+        <div class="cf-section__title">Identité</div>
+      </div>
+
+      <div class="cf-field">
+        <label class="cf-label" for="{{ form.name.id_for_label }}">
+          Nom de la compétition <span class="cf-req">*</span>
+        </label>
+        {{ form.name }}
+        <div class="cf-hint">
+          <i class="fas fa-info-circle"></i>
+          Ex : <strong>Ef-Champions League 2026</strong>
+        </div>
+        {% if form.name.errors %}<div class="cf-error">{{ form.name.errors|join:", " }}</div>{% endif %}
+      </div>
+
+      <div class="cf-row">
+        <div class="cf-field">
+          <label class="cf-label" for="{{ form.format_type.id_for_label }}">
+            Format <span class="cf-req">*</span>
+          </label>
+          {{ form.format_type }}
+          {% if form.format_type.errors %}<div class="cf-error">{{ form.format_type.errors|join:", " }}</div>{% endif %}
+        </div>
+
+        <div class="cf-field">
+          <label class="cf-label" for="{{ form.max_teams.id_for_label }}">
+            Nombre max d'équipes <span class="cf-req">*</span>
+          </label>
+          {{ form.max_teams }}
+          <div class="cf-hint">
+            <i class="fas fa-info-circle"></i>
+            Entre <strong>12</strong> et <strong>36</strong>
+          </div>
+          {% if form.max_teams.errors %}<div class="cf-error">{{ form.max_teams.errors|join:", " }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2 : INSCRIPTION -->
+    <div class="cf-section">
+      <div class="cf-section__head">
+        <div class="cf-section__num">2</div>
+        <div class="cf-section__title">Inscription</div>
+      </div>
+
+      <div class="cf-field">
+        <label class="cf-label" for="{{ form.registration_fee.id_for_label }}">
+          Frais d'inscription (FC) <span class="cf-req">*</span>
+        </label>
+        {{ form.registration_fee }}
+        <div class="cf-hint">
+          <i class="fas fa-info-circle"></i>
+          Montant à payer par équipe
+        </div>
+        {% if form.registration_fee.errors %}<div class="cf-error">{{ form.registration_fee.errors|join:", " }}</div>{% endif %}
+      </div>
+
+      <div class="cf-row cf-row--checks">
+        <label class="cf-check" for="{{ form.is_active.id_for_label }}">
+          {{ form.is_active }}
+          <div>
+            <div class="cf-check__title">Compétition active</div>
+            <div class="cf-check__text">Rend cette compétition visible publiquement</div>
+          </div>
+        </label>
+
+        <label class="cf-check" for="{{ form.registration_open.id_for_label }}">
+          {{ form.registration_open }}
+          <div>
+            <div class="cf-check__title">Inscriptions ouvertes</div>
+            <div class="cf-check__text">Permet aux joueurs de s'inscrire</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- SECTION 3 : DATES -->
+    <div class="cf-section">
+      <div class="cf-section__head">
+        <div class="cf-section__num">3</div>
+        <div class="cf-section__title">Dates</div>
+      </div>
+
+      <div class="cf-row">
+        <div class="cf-field">
+          <label class="cf-label" for="{{ form.start_date.id_for_label }}">
+            Date de début <span class="cf-req">*</span>
+          </label>
+          {{ form.start_date }}
+          {% if form.start_date.errors %}<div class="cf-error">{{ form.start_date.errors|join:", " }}</div>{% endif %}
+        </div>
+
+        <div class="cf-field">
+          <label class="cf-label" for="{{ form.end_date.id_for_label }}">
+            Date de fin <span class="cf-optional">(optionnel)</span>
+          </label>
+          {{ form.end_date }}
+          {% if form.end_date.errors %}<div class="cf-error">{{ form.end_date.errors|join:", " }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="cf-actions">
+      <a href="{% url 'competition_list' %}" class="cf-btn cf-btn--ghost">
+        <i class="fas fa-arrow-left"></i>
+        <span>Annuler</span>
+      </a>
+      <button type="submit" class="cf-btn cf-btn--gold">
+        <i class="fas fa-check"></i>
+        <span>{% if form.instance.pk %}Enregistrer les modifications{% else %}Créer la compétition{% endif %}</span>
+      </button>
+    </div>
+
+  </form>
 </div>
+
+<style>
+/* ============================================ */
+/* CARD */
+/* ============================================ */
+.cf-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 28px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.30);
+}
+@media (max-width: 640px) {
+  .cf-card { padding: 20px 16px; }
+}
+
+.cf-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.cf-head__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(230,194,0,.15), rgba(230,194,0,.04));
+  border: 1px solid rgba(230,194,0,.30);
+  color: #e6c200;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.cf-head__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+.cf-head__sub {
+  color: rgba(255,255,255,.50);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ============================================ */
+/* SECTION */
+/* ============================================ */
+.cf-section {
+  padding: 20px 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.cf-section:first-of-type { border-top: none; padding-top: 0; }
+
+.cf-section__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.cf-section__num {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #003d82, #00a7e1);
+  color: #fff;
+  font-weight: 800;
+  font-size: .75rem;
+  flex-shrink: 0;
+}
+.cf-section__title {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ============================================ */
+/* ROW + FIELD */
+/* ============================================ */
+.cf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.cf-row--checks { grid-template-columns: 1fr 1fr; }
+@media (max-width: 640px) {
+  .cf-row, .cf-row--checks { grid-template-columns: 1fr; }
+}
+
+.cf-field { margin-bottom: 14px; }
+.cf-label {
+  display: block;
+  color: rgba(255,255,255,.80);
+  font-weight: 700;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.cf-req { color: #ff6b6b; }
+.cf-optional {
+  color: rgba(255,255,255,.40);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.cf-form input[type="text"],
+.cf-form input[type="number"],
+.cf-form input[type="date"],
+.cf-form select,
+.cf-form textarea {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.cf-form input:focus,
+.cf-form select:focus {
+  border-color: rgba(230,194,0,.50);
+  background: rgba(230,194,0,.03);
+  box-shadow: 0 0 0 3px rgba(230,194,0,.08);
+}
+.cf-form select option {
+  background: #0b1423;
+  color: #fff;
+}
+
+/* Date input calendar icon (WebKit) */
+.cf-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.6);
+  cursor: pointer;
+}
+
+.cf-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  color: rgba(255,255,255,.50);
+  font-size: .6875rem;
+}
+.cf-hint i { color: #00a7e1; }
+.cf-hint strong { color: rgba(255,255,255,.80); }
+
+.cf-error {
+  margin-top: 6px;
+  color: #ff6b6b;
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+/* ============================================ */
+/* CHECKBOXES */
+/* ============================================ */
+.cf-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.cf-check:hover {
+  border-color: rgba(230,194,0,.25);
+  background: rgba(230,194,0,.02);
+}
+.cf-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #e6c200;
+  flex-shrink: 0;
+}
+.cf-check__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: .8125rem;
+}
+.cf-check__text {
+  color: rgba(255,255,255,.55);
+  font-size: .6875rem;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+/* ============================================ */
+/* ALERTS */
+/* ============================================ */
+.cf-alert {
+  display: flex;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: .8125rem;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.cf-alert i { margin-top: 2px; flex-shrink: 0; }
+.cf-alert--danger {
+  background: rgba(220,53,69,.08);
+  border: 1px solid rgba(220,53,69,.28);
+  color: rgba(255,255,255,.90);
+}
+.cf-alert--danger i { color: #ff6b6b; }
+
+/* ============================================ */
+/* ACTIONS */
+/* ============================================ */
+.cf-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+@media (max-width: 540px) {
+  .cf-actions { flex-direction: column-reverse; }
+}
+
+.cf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.cf-btn i { font-size: .75rem; }
+
+.cf-btn--ghost {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+}
+.cf-btn--ghost:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff;
+}
+
+.cf-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  flex: 1;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+}
+.cf-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+  color: #0b1423;
+}
+</style>
 {% endblock %}

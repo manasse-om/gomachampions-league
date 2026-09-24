@@ -1,109 +1,676 @@
 {% extends 'base.html' %}
-{% load roles %}
+{% load static roles i18n %}
+
+{% block title %}Gestion des équipes — Administration{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<section class="tl-page">
+  <div class="container-fluid tl-container">
 
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div>
-      <h2 class="mb-1">Gestion des Équipes</h2>
-      <div class="text-muted small">
-        Astuce : <strong>Rôle</strong> sert à promouvoir un joueur en admin (organisateur / match / paiement) ou le remettre en <strong>Joueur</strong>.
+    <!-- ============================================ -->
+    <!-- TOPBAR -->
+    <!-- ============================================ -->
+    <div class="tl-topbar">
+      <div class="tl-topbar__left">
+        <div class="tl-topbar__kicker">
+          <i class="fas fa-shield-halved"></i> ADMINISTRATION
+        </div>
+        <h1 class="tl-topbar__title">Gestion des équipes</h1>
+        <div class="tl-topbar__sub">
+          <strong>{{ teams|length }}</strong> équipe{{ teams|length|pluralize }}
+          — modifiez, supprimez ou gérez les rôles des comptes
+        </div>
+      </div>
+      <a href="{% url 'dashboard' %}" class="tl-topbar__back">
+        <i class="fas fa-arrow-left"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- RECHERCHE + INFO -->
+    <!-- ============================================ -->
+    <div class="tl-toolbar">
+      <div class="tl-search">
+        <i class="fas fa-search tl-search__icon"></i>
+        <input type="search"
+               id="searchTeams"
+               class="tl-search__input"
+               placeholder="Rechercher une équipe, un joueur, une abréviation…"
+               autocomplete="off">
+        <div class="tl-search__count">
+          <span id="teamsVisible">{{ teams|length }}</span> / {{ teams|length }}
+        </div>
+      </div>
+
+      <div class="tl-hint">
+        <i class="fas fa-info-circle"></i>
+        <span>
+          Le <strong>Rôle</strong> permet de promouvoir un joueur en admin
+          (organisateur / match / paiement) ou de le repasser en <strong>Joueur</strong>.
+        </span>
       </div>
     </div>
-    <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-sm">← Retour dashboard</a>
+
+    <!-- ============================================ -->
+    <!-- TABLEAU -->
+    <!-- ============================================ -->
+    <div class="tl-card">
+      <div class="tl-tablewrap">
+        <table class="tl-table" id="teamsTable">
+          <thead>
+            <tr>
+              <th class="tl-th-team">Équipe</th>
+              <th class="tl-th-abbr">Abrév.</th>
+              <th class="tl-th-status">Paiement</th>
+              <th class="tl-th-account">Compte</th>
+              <th class="tl-th-role">Rôle</th>
+              <th class="tl-th-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in teams %}
+            <tr class="tl-row team-row"
+                data-name="{{ team.team_name|lower }} {{ team.player_name|lower }} {{ team.abbreviation|lower }} {{ team.user.username|default:''|lower }}">
+
+              <!-- ÉQUIPE -->
+              <td class="tl-td-team">
+                <div class="tl-team">
+                  {% include "core/partials/_team_logo.html" with team=team size="sm" %}
+                  <div class="tl-team__info">
+                    <div class="tl-team__name">{{ team.team_name }}</div>
+                    <div class="tl-team__player">
+                      <i class="fas fa-user"></i> {{ team.player_name }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- ABRÉVIATION -->
+              <td class="tl-td-abbr">
+                <span class="tl-abbr">{{ team.abbreviation }}</span>
+              </td>
+
+              <!-- PAIEMENT -->
+              <td class="tl-td-status">
+                {% if team.payment_validated %}
+                  <span class="tl-badge tl-badge--success">
+                    <i class="fas fa-circle-check"></i> Validé
+                  </span>
+                {% else %}
+                  <span class="tl-badge tl-badge--warn">
+                    <i class="fas fa-clock"></i> En attente
+                  </span>
+                {% endif %}
+              </td>
+
+              <!-- COMPTE -->
+              <td class="tl-td-account">
+                {% if team.user %}
+                  <span class="tl-account">
+                    <i class="fas fa-at"></i> {{ team.user.username }}
+                  </span>
+                {% else %}
+                  <span class="tl-muted">—</span>
+                {% endif %}
+              </td>
+
+              <!-- RÔLE -->
+              <td class="tl-td-role">
+                {% if team.user and team.user.userprofile %}
+                  {% if team.user.userprofile.role == "player" %}
+                    <span class="tl-role tl-role--player">Joueur</span>
+                  {% elif team.user.userprofile.role == "organisateur" %}
+                    <span class="tl-role tl-role--org">Organisateur</span>
+                  {% elif team.user.userprofile.role == "match" %}
+                    <span class="tl-role tl-role--match">Gestionnaire Matchs</span>
+                  {% elif team.user.userprofile.role == "paiement" %}
+                    <span class="tl-role tl-role--pay">Modérateur Paiements</span>
+                  {% elif team.user.userprofile.role == "superadmin" %}
+                    <span class="tl-role tl-role--super">Super Admin</span>
+                  {% else %}
+                    <span class="tl-role">{{ team.user.userprofile.get_role_display }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="tl-muted">—</span>
+                {% endif %}
+              </td>
+
+              <!-- ACTIONS -->
+              <td class="tl-td-actions">
+                <div class="tl-actions">
+                  <a href="{% url 'edit_team' team.pk %}" class="tl-act tl-act--edit" title="Modifier">
+                    <i class="fas fa-pen"></i>
+                    <span>Modifier</span>
+                  </a>
+
+                  <a href="{% url 'team_delete' team.pk %}"
+                     class="tl-act tl-act--danger"
+                     title="Supprimer"
+                     onclick="return confirm('Supprimer l\'équipe {{ team.team_name }} ? Cette action est irréversible.');">
+                    <i class="fas fa-trash"></i>
+                    <span>Supprimer</span>
+                  </a>
+
+                  {% if team.user %}
+                    <a href="{% url 'edit_user_role' team.user.id %}" class="tl-act tl-act--role" title="Modifier le rôle">
+                      <i class="fas fa-user-shield"></i>
+                      <span>Rôle</span>
+                    </a>
+
+                    <a href="{% url 'reset_team_user_password' team.id %}" class="tl-act tl-act--pwd" title="Réinitialiser le mot de passe">
+                      <i class="fas fa-key"></i>
+                      <span>Mot de passe</span>
+                    </a>
+                  {% else %}
+                    <span class="tl-muted tl-muted--sm">Aucun compte lié</span>
+                  {% endif %}
+                </div>
+              </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="tl-empty">
+                <i class="fas fa-inbox"></i>
+                <div>Aucune équipe enregistrée.</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Message si aucun résultat -->
+      <div id="noResults" class="tl-no-results" style="display:none;">
+        <i class="fas fa-search"></i>
+        <div>Aucune équipe ne correspond à votre recherche.</div>
+      </div>
+    </div>
+
   </div>
+</section>
 
-  <div class="table-responsive">
-    <table class="table table-dark table-striped align-middle">
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Abréviation</th>
-          <th>Validé</th>
-          <th>Compte</th>
-          <th>Rôle</th>
-          <th style="min-width: 360px;">Actions</th>
-        </tr>
-      </thead>
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
+<style>
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.tl-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.08), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+  padding: 24px 16px 60px;
+}
+.tl-container { max-width: 1300px; margin: 0 auto; }
 
-      <tbody>
-      {% for team in teams %}
-        <tr>
-          <td>{{ team.team_name }}</td>
+/* ============================================ */
+/* TOPBAR */
+/* ============================================ */
+.tl-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap;
+}
+.tl-topbar__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.50);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: .6875rem;
+  margin-bottom: 6px;
+}
+.tl-topbar__kicker i { color: #e6c200; }
+.tl-topbar__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.tl-topbar__sub {
+  color: rgba(255,255,255,.55);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.tl-topbar__sub strong { color: #e6c200; }
+.tl-topbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  color: rgba(255,255,255,.88) !important;
+  font-weight: 700;
+  font-size: .8125rem;
+  text-decoration: none;
+  transition: all .2s ease;
+}
+.tl-topbar__back:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff !important;
+  transform: translateX(-2px);
+}
 
-          <td><strong>{{ team.abbreviation }}</strong></td>
+/* ============================================ */
+/* TOOLBAR (recherche + hint) */
+/* ============================================ */
+.tl-toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.tl-search {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+  max-width: 480px;
+}
+.tl-search__icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,.35);
+  font-size: .875rem;
+  pointer-events: none;
+}
+.tl-search__input {
+  width: 100%;
+  padding: 12px 100px 12px 44px;
+  background: rgba(17,28,47,.60);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.tl-search__input:focus {
+  border-color: rgba(230,194,0,.45);
+  box-shadow: 0 0 0 4px rgba(230,194,0,.08);
+}
+.tl-search__input::placeholder { color: rgba(255,255,255,.30); }
+.tl-search__count {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,.45);
+  font-size: .6875rem;
+  font-weight: 700;
+}
 
-          <td>
-            {% if team.payment_validated %}
-              <span class="badge bg-success">Oui</span>
-            {% else %}
-              <span class="badge bg-warning text-dark">Non</span>
-            {% endif %}
-          </td>
+.tl-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(0,167,225,.05);
+  border: 1px solid rgba(0,167,225,.18);
+  border-radius: 10px;
+  color: rgba(255,255,255,.65);
+  font-size: .75rem;
+  flex: 1;
+  min-width: 280px;
+}
+.tl-hint i { color: #00d4ff; flex-shrink: 0; }
+.tl-hint strong { color: #fff; }
 
-          <td>
-            {% if team.user %}
-              <span class="badge bg-info text-dark">{{ team.user.username }}</span>
-            {% else %}
-              <span class="text-muted">Aucun</span>
-            {% endif %}
-          </td>
+/* ============================================ */
+/* CARD + TABLE */
+/* ============================================ */
+.tl-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.30);
+}
+.tl-tablewrap { overflow-x: auto; }
 
-          <td>
-            {% if team.user and team.user.userprofile %}
-              {% if team.user.userprofile.role == "player" %}
-                <span class="badge bg-secondary">Joueur</span>
-              {% elif team.user.userprofile.role == "organisateur" %}
-                <span class="badge bg-warning text-dark">Organisateur</span>
-              {% elif team.user.userprofile.role == "match" %}
-                <span class="badge bg-primary">Gestionnaire Matchs</span>
-              {% elif team.user.userprofile.role == "paiement" %}
-                <span class="badge bg-success">Modérateur Paiements</span>
-              {% elif team.user.userprofile.role == "superadmin" %}
-                <span class="badge bg-danger">Super Admin</span>
-              {% else %}
-                <span class="badge bg-light text-dark">{{ team.user.userprofile.get_role_display }}</span>
-              {% endif %}
-            {% else %}
-              <span class="text-muted">—</span>
-            {% endif %}
-          </td>
+.tl-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .875rem;
+}
 
-          <td class="d-flex flex-wrap gap-2">
-            <a href="{% url 'edit_team' team.pk %}" class="btn btn-warning btn-sm">Modifier</a>
-            <a href="{% url 'team_delete' team.pk %}" class="btn btn-danger btn-sm"
-               onclick="return confirm('Supprimer l’équipe {{ team.team_name }} ?');">
-              Supprimer
-            </a>
+/* Header */
+.tl-table thead th {
+  background: rgba(9,13,22,.85);
+  color: rgba(255,255,255,.55);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: .6875rem;
+  font-weight: 800;
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  white-space: nowrap;
+  text-align: left;
+}
+.tl-th-status,
+.tl-th-role { text-align: center; }
+.tl-th-actions { text-align: right; min-width: 380px; }
 
-            {% if team.user %}
-              <a href="{% url 'edit_user_role' team.user.id %}" class="btn btn-secondary btn-sm">
-                Rôle
-              </a>
+/* Rows */
+.tl-row { transition: background .15s ease; }
+.tl-row:hover { background: rgba(255,255,255,.03); }
 
-              <a href="{% url 'reset_team_user_password' team.id %}" class="btn btn-info btn-sm">
-                Mot de passe
-              </a>
+.tl-table tbody td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  color: rgba(255,255,255,.88);
+  vertical-align: middle;
+}
+.tl-table tbody tr:last-child td { border-bottom: none; }
 
-              {% if not team.payment_validated %}
-                <span class="badge bg-warning text-dark align-self-center">Paiement en attente</span>
-              {% endif %}
-            {% else %}
-              <span class="text-muted align-self-center">Aucun compte lié</span>
-            {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="6" class="text-center text-muted py-4">
-            Aucune équipe trouvée.
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
+/* Team cell */
+.tl-td-team { min-width: 220px; }
+.tl-team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tl-team__info { min-width: 0; }
+.tl-team__name {
+  color: #fff;
+  font-weight: 800;
+  font-size: .875rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-team__player {
+  color: rgba(255,255,255,.55);
+  font-size: .6875rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+.tl-team__player i {
+  color: rgba(255,255,255,.35);
+  font-size: .625rem;
+  margin-right: 3px;
+}
 
-</div>
+/* Abréviation */
+.tl-abbr {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  background: rgba(230,194,0,.08);
+  border: 1px solid rgba(230,194,0,.22);
+  border-radius: 8px;
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .75rem;
+  letter-spacing: 0.5px;
+}
+
+/* Statut */
+.tl-td-status { text-align: center; }
+.tl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: .6875rem;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tl-badge i { font-size: .625rem; }
+.tl-badge--success {
+  background: rgba(40,167,69,.12);
+  border: 1px solid rgba(40,167,69,.30);
+  color: #47d18c;
+}
+.tl-badge--warn {
+  background: rgba(255,193,7,.12);
+  border: 1px solid rgba(255,193,7,.30);
+  color: #ffc107;
+}
+
+/* Compte */
+.tl-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #00d4ff;
+  font-weight: 700;
+  font-size: .75rem;
+}
+.tl-account i { font-size: .625rem; opacity: .7; }
+
+/* Rôle */
+.tl-td-role { text-align: center; }
+.tl-role {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: .6875rem;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.tl-role--player {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.75);
+}
+.tl-role--org {
+  background: rgba(255,193,7,.10);
+  border-color: rgba(255,193,7,.28);
+  color: #ffc107;
+}
+.tl-role--match {
+  background: rgba(0,167,225,.10);
+  border-color: rgba(0,167,225,.28);
+  color: #00d4ff;
+}
+.tl-role--pay {
+  background: rgba(40,167,69,.10);
+  border-color: rgba(40,167,69,.28);
+  color: #47d18c;
+}
+.tl-role--super {
+  background: rgba(220,53,69,.10);
+  border-color: rgba(220,53,69,.30);
+  color: #ff6b6b;
+}
+
+/* Actions */
+.tl-td-actions { text-align: right; }
+.tl-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.tl-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: .6875rem;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.82);
+  transition: all .18s ease;
+  white-space: nowrap;
+}
+.tl-act i { font-size: .625rem; }
+.tl-act:hover {
+  transform: translateY(-1px);
+  color: #fff;
+  background: rgba(255,255,255,.08);
+}
+
+.tl-act--edit {
+  background: rgba(255,193,7,.08);
+  border-color: rgba(255,193,7,.25);
+  color: #ffc107;
+}
+.tl-act--edit:hover {
+  background: rgba(255,193,7,.16);
+  color: #ffc107;
+}
+
+.tl-act--danger {
+  background: rgba(220,53,69,.08);
+  border-color: rgba(220,53,69,.28);
+  color: #ff6b6b;
+}
+.tl-act--danger:hover {
+  background: rgba(220,53,69,.16);
+  color: #ff6b6b;
+}
+
+.tl-act--role {
+  background: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.75);
+}
+.tl-act--role:hover { color: #fff; }
+
+.tl-act--pwd {
+  background: rgba(0,167,225,.06);
+  border-color: rgba(0,167,225,.22);
+  color: #00d4ff;
+}
+.tl-act--pwd:hover {
+  background: rgba(0,167,225,.14);
+  color: #00d4ff;
+}
+
+/* Muted */
+.tl-muted {
+  color: rgba(255,255,255,.35);
+  font-size: .8125rem;
+}
+.tl-muted--sm {
+  font-size: .6875rem;
+  font-style: italic;
+}
+
+/* Empty */
+.tl-empty {
+  padding: 60px 20px !important;
+  color: rgba(255,255,255,.45);
+  font-size: .875rem;
+  text-align: center;
+}
+.tl-empty i {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  opacity: .4;
+}
+.tl-no-results {
+  padding: 48px 20px;
+  text-align: center;
+  color: rgba(255,255,255,.45);
+  font-size: .875rem;
+}
+.tl-no-results i {
+  display: block;
+  font-size: 1.75rem;
+  margin-bottom: 10px;
+  opacity: .4;
+}
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 900px) {
+  .tl-th-actions { min-width: auto; }
+  .tl-act span { display: none; }
+  .tl-act { padding: 7px 9px; }
+}
+
+@media (max-width: 768px) {
+  .tl-page { padding: 16px 12px 40px; }
+  .tl-topbar { padding: 16px; }
+  .tl-topbar__title { font-size: 1.0625rem; }
+  .tl-topbar__back { padding: 8px 12px; font-size: .75rem; }
+  .tl-topbar__back span { display: none; }
+
+  .tl-toolbar { gap: 10px; }
+  .tl-search { min-width: 100%; max-width: 100%; }
+  .tl-hint { min-width: 100%; font-size: .6875rem; }
+
+  .tl-table thead th,
+  .tl-table tbody td { padding: 10px 8px; }
+  .tl-td-team { min-width: 160px; }
+  .tl-team__name { font-size: .8125rem; }
+  .tl-team__player { display: none; }
+
+  .tl-th-status, .tl-td-status { display: none; }
+  .tl-th-account, .tl-td-account { display: none; }
+
+  .tl-th-actions, .tl-td-actions { text-align: center; }
+  .tl-actions { justify-content: center; }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("searchTeams");
+  const table = document.getElementById("teamsTable");
+  const counter = document.getElementById("teamsVisible");
+  const noResults = document.getElementById("noResults");
+  if (!input || !table) return;
+
+  const rows = table.querySelectorAll("tbody .team-row");
+
+  input.addEventListener("input", function () {
+    const q = this.value.toLowerCase().trim();
+    let visible = 0;
+
+    rows.forEach(function (row) {
+      const text = row.getAttribute("data-name") || row.textContent.toLowerCase();
+      if (!q || text.includes(q)) {
+        row.style.display = "";
+        visible++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    if (counter) counter.textContent = visible;
+    if (noResults) noResults.style.display = (visible === 0) ? "block" : "none";
+  });
+});
+</script>
 {% endblock %}

@@ -36,6 +36,8 @@ class TeamRegistrationForm(forms.ModelForm):
             'logo': forms.ClearableFileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/png,image/jpeg,image/webp,image/svg+xml',
+                'data-cropper': 'true',
+                'data-cropper-preview': '#logoPreview',
             }),
 
             'payment_proof': forms.ClearableFileInput(attrs={

@@ -1,59 +1,320 @@
 {% extends 'core/admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Outils Phase Finale — Admin{% endblock %}
 
 {% block admin_content %}
-<div class="admin-card">
 
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div>
-      <h3 class="mb-1">Outils — Phase Finale (Bracket UCL)</h3>
-      <div class="text-light" style="opacity:.75;">
-        Génération du tableau complet + synchronisation des <strong>TBD</strong> après les matchs retour.
+<div class="kt-grid">
+
+  <!-- ============================================ -->
+  <!-- CARTE 1 : GÉNÉRER -->
+  <!-- ============================================ -->
+  <div class="kt-card">
+    <div class="kt-card__head">
+      <div class="kt-card__icon kt-card__icon--gold">
+        <i class="fas fa-sitemap"></i>
+      </div>
+      <div>
+        <div class="kt-card__title">Générer le bracket complet</div>
+        <div class="kt-card__sub">Barrages + 8es + Quarts + Demis + Finale</div>
       </div>
     </div>
 
-    <a href="{% url 'dashboard' %}" class="btn btn-outline-light">← Dashboard</a>
-  </div>
-
-  <hr class="border-secondary my-4">
-
-  <div class="row g-3">
-    <div class="col-lg-6">
-      <div class="p-3 rounded" style="background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);">
-        <h5 class="mb-2"><i class="fas fa-sitemap me-2 text-warning"></i>Générer le bracket complet</h5>
-        <div class="text-light" style="opacity:.75;">
-          Crée : <strong>Barrages</strong> (aller/retour) + <strong>8e</strong> + <strong>Quarts</strong> + <strong>Demi</strong> + <strong>Finale</strong>.
-        </div>
-
-        <a href="{% url 'generate_ucl_bracket_view' %}" class="btn btn-ucl-gold mt-3 w-100">
-          Générer bracket UCL
-        </a>
-        <a href="{% url 'set_playoff_dates_view' %}" class="btn btn-outline-light w-100 mt-2">
-          Fixer dates des barrages
-        </a>
-      </div>
+    <div class="kt-card__body">
+      <p class="kt-card__text">
+        Crée automatiquement toutes les phases de la compétition :
+        <strong>Barrages</strong> (aller/retour),
+        <strong>8<sup>es</sup></strong>,
+        <strong>Quarts</strong>,
+        <strong>Demi-finales</strong> et
+        <strong>Finale</strong>.
+      </p>
+      <p class="kt-card__text">
+        Le placement des équipes se fait selon le classement final de la phase de ligue.
+      </p>
     </div>
 
-    <div class="col-lg-6">
-      <div class="p-3 rounded" style="background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);">
-        <h5 class="mb-2"><i class="fas fa-rotate me-2 text-info"></i>Synchroniser le bracket</h5>
-        <div class="text-light" style="opacity:.75;">
-          À utiliser après avoir encodé des matchs retour : remplace les <strong>TBD</strong> par les <strong>vainqueurs</strong>.
-        </div>
-
-        <form method="post" action="{% url 'sync_knockout_bracket_view' %}" class="mt-3">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-info w-100">
-            Synchroniser maintenant
-          </button>
-        </form>
-      </div>
+    <div class="kt-card__actions">
+      <a href="{% url 'generate_ucl_bracket_view' %}" class="kt-btn kt-btn--gold">
+        <i class="fas fa-bolt"></i>
+        <span>Générer le bracket UCL</span>
+      </a>
+      <a href="{% url 'set_playoff_dates_view' %}" class="kt-btn kt-btn--ghost">
+        <i class="fas fa-calendar-day"></i>
+        <span>Fixer les dates des barrages</span>
+      </a>
     </div>
   </div>
 
-  <div class="alert alert-warning mt-4">
-    <strong>Conseil :</strong> encode toujours les matchs <strong>retour</strong> des barrages/8e/quarts/demis, puis clique sur
-    <strong>Synchroniser</strong>.
+  <!-- ============================================ -->
+  <!-- CARTE 2 : SYNCHRONISER -->
+  <!-- ============================================ -->
+  <div class="kt-card">
+    <div class="kt-card__head">
+      <div class="kt-card__icon kt-card__icon--cyan">
+        <i class="fas fa-arrows-rotate"></i>
+      </div>
+      <div>
+        <div class="kt-card__title">Synchroniser le bracket</div>
+        <div class="kt-card__sub">Remplacer les TBD par les vainqueurs</div>
+      </div>
+    </div>
+
+    <div class="kt-card__body">
+      <p class="kt-card__text">
+        À utiliser <strong>après</strong> avoir encodé les matchs retour d'une phase.
+        Le système remplace les <strong>TBD</strong> par les <strong>vainqueurs réels</strong>
+        dans le tour suivant.
+      </p>
+      <div class="kt-info">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          Cette opération est <strong>automatique</strong> à chaque sauvegarde de résultat.
+          Utilisez ce bouton en cas de blocage manuel.
+        </div>
+      </div>
+    </div>
+
+    <div class="kt-card__actions">
+      <form method="post" action="{% url 'sync_knockout_bracket_view' %}">
+        {% csrf_token %}
+        <button type="submit" class="kt-btn kt-btn--cyan">
+          <i class="fas fa-sync"></i>
+          <span>Synchroniser maintenant</span>
+        </button>
+      </form>
+    </div>
   </div>
 
 </div>
+
+<!-- ============================================ -->
+<!-- CONSEIL -->
+<!-- ============================================ -->
+<div class="kt-tip">
+  <div class="kt-tip__icon"><i class="fas fa-lightbulb"></i></div>
+  <div>
+    <div class="kt-tip__title">Conseil d'organisation</div>
+    <div class="kt-tip__text">
+      Encode toujours les matchs <strong>retour</strong> des barrages, 8<sup>es</sup>, quarts et demies.
+      Ensuite, clique sur <strong>Synchroniser</strong> pour valider la progression vers le tour suivant.
+    </div>
+  </div>
+</div>
+
+<style>
+/* ============================================ */
+/* GRID */
+/* ============================================ */
+.kt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+@media (max-width: 768px) {
+  .kt-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================ */
+/* CARD */
+/* ============================================ */
+.kt-card {
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 22px;
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.kt-card:hover {
+  border-color: rgba(230,194,0,.22);
+  transform: translateY(-2px);
+}
+
+.kt-card__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.kt-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+.kt-card__icon--gold {
+  background: linear-gradient(135deg, rgba(230,194,0,.15), rgba(230,194,0,.04));
+  border: 1px solid rgba(230,194,0,.30);
+  color: #e6c200;
+}
+.kt-card__icon--cyan {
+  background: linear-gradient(135deg, rgba(0,167,225,.15), rgba(0,167,225,.04));
+  border: 1px solid rgba(0,167,225,.30);
+  color: #00d4ff;
+}
+
+.kt-card__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: .9375rem;
+  letter-spacing: -0.01em;
+}
+.kt-card__sub {
+  color: rgba(255,255,255,.50);
+  font-size: .75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.kt-card__body {
+  flex: 1;
+  margin-bottom: 18px;
+}
+.kt-card__text {
+  color: rgba(255,255,255,.75);
+  font-size: .8125rem;
+  line-height: 1.65;
+  margin-bottom: 10px;
+}
+.kt-card__text strong { color: #fff; }
+
+.kt-info {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: rgba(0,167,225,.05);
+  border: 1px solid rgba(0,167,225,.18);
+  font-size: .75rem;
+  color: rgba(255,255,255,.80);
+  line-height: 1.55;
+}
+.kt-info i {
+  color: #00d4ff;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.kt-info strong { color: #fff; }
+
+.kt-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kt-card__actions form { margin: 0; }
+
+/* ============================================ */
+/* BOUTONS */
+/* ============================================ */
+.kt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+  width: 100%;
+}
+.kt-btn i { font-size: .75rem; }
+
+.kt-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423 !important;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+}
+.kt-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+  color: #0b1423 !important;
+}
+
+.kt-btn--cyan {
+  background: rgba(0,167,225,.12);
+  border: 1px solid rgba(0,167,225,.35);
+  color: #00d4ff;
+}
+.kt-btn--cyan:hover {
+  background: rgba(0,167,225,.20);
+  border-color: rgba(0,167,225,.55);
+  color: #00d4ff;
+  transform: translateY(-2px);
+}
+
+.kt-btn--ghost {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+}
+.kt-btn--ghost:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff;
+}
+
+/* ============================================ */
+/* TIP */
+/* ============================================ */
+.kt-tip {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,193,7,.06), rgba(255,193,7,.02));
+  border: 1px solid rgba(255,193,7,.22);
+  align-items: flex-start;
+}
+.kt-tip__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,193,7,.12);
+  border: 1px solid rgba(255,193,7,.28);
+  color: #ffc107;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.kt-tip__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: .875rem;
+  margin-bottom: 4px;
+}
+.kt-tip__text {
+  color: rgba(255,255,255,.75);
+  font-size: .8125rem;
+  line-height: 1.6;
+}
+.kt-tip__text strong { color: #ffc107; }
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .kt-card { padding: 18px; }
+  .kt-card__icon { width: 42px; height: 42px; font-size: 1rem; }
+  .kt-tip { padding: 14px; gap: 12px; }
+  .kt-tip__icon { width: 36px; height: 36px; font-size: .875rem; }
+}
+</style>
 {% endblock %}

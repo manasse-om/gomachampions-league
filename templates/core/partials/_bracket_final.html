@@ -2,98 +2,246 @@
 
 {% if final_match %}
   <div class="bk-final">
-    <div class="bk-final__teams">
+
+    <!-- ============================================ -->
+    <!-- ÉQUIPE A -->
+    <!-- ============================================ -->
+    <div class="bk-final__row {% if final_match.winner.id == final_match.home_team.id %}bk-final__row--win{% endif %}">
       <div class="bk-final__team">
-        {% if final_match.home_team.abbreviation == 'TBD' %}
-          <span style="opacity:.5;">À déterminer</span>
-        {% else %}
-          {{ final_match.home_team.team_name }}
-        {% endif %}
+        {% include "core/partials/_team_logo.html" with team=final_match.home_team size="sm" %}
+        <div class="bk-final__name">
+          {% if final_match.home_team.abbreviation == 'TBD' %}
+            <span class="bk-final__tbd">À déterminer</span>
+          {% else %}
+            {{ final_match.home_team.team_name }}
+          {% endif %}
+        </div>
       </div>
       <div class="bk-final__score">
         {% if final_match.is_played %}
-          {{ final_match.home_score }} - {{ final_match.away_score }}
-          {% if final_match.winner %}
-            <div style="margin-top:8px; font-size:.78rem; color:#47d18c;">
-              🏆 {{ final_match.winner.team_name }}
-            </div>
-          {% endif %}
+          {{ final_match.home_score|default:"0" }}
         {% else %}
-          VS
-        {% endif %}
-      </div>
-      <div class="bk-final__team text-end">
-        {% if final_match.away_team.abbreviation == 'TBD' %}
-          <span style="opacity:.5;">À déterminer</span>
-        {% else %}
-          {{ final_match.away_team.team_name }}
+          —
         {% endif %}
       </div>
     </div>
+
+    <!-- ============================================ -->
+    <!-- ÉQUIPE B -->
+    <!-- ============================================ -->
+    <div class="bk-final__row {% if final_match.winner.id == final_match.away_team.id %}bk-final__row--win{% endif %}">
+      <div class="bk-final__team">
+        {% include "core/partials/_team_logo.html" with team=final_match.away_team size="sm" %}
+        <div class="bk-final__name">
+          {% if final_match.away_team.abbreviation == 'TBD' %}
+            <span class="bk-final__tbd">À déterminer</span>
+          {% else %}
+            {{ final_match.away_team.team_name }}
+          {% endif %}
+        </div>
+      </div>
+      <div class="bk-final__score">
+        {% if final_match.is_played %}
+          {{ final_match.away_score|default:"0" }}
+        {% else %}
+          —
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- WINNER BANNER -->
+    <!-- ============================================ -->
+    {% if final_match.is_played and final_match.winner %}
+      <div class="bk-final__winner">
+        <i class="fas fa-trophy"></i>
+        <span>{{ final_match.winner.team_name }}</span>
+      </div>
+    {% endif %}
+
+    <!-- ============================================ -->
+    <!-- META -->
+    <!-- ============================================ -->
     <div class="bk-final__meta">
-      {% language 'fr' %}
-        <i class="far fa-calendar me-1"></i>{{ final_match.scheduled_date|date:"d/m/Y" }}
-      {% endlanguage %}
+      <span class="bk-final__date">
+        <i class="far fa-calendar"></i>
+        {% language 'fr' %}{{ final_match.scheduled_date|date:"d/m/Y" }}{% endlanguage %}
+      </span>
       {% if final_match.is_played %}
         <span class="bk-badge bk-badge--success">Terminé</span>
       {% else %}
         <span class="bk-badge">Match unique</span>
       {% endif %}
     </div>
+
   </div>
 {% else %}
-  <div class="bk-muted">Finale non encore générée.</div>
+  <div class="bk-final bk-final--empty">
+    <i class="fas fa-hourglass-half"></i>
+    <div>Finale non encore générée.</div>
+  </div>
 {% endif %}
 
 <style>
+/* ============================================ */
+/* FINAL */
+/* ============================================ */
 .bk-final {
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid rgba(230,194,0,.28);
-  background: rgba(255,255,255,.04);
+  background: linear-gradient(135deg, rgba(230,194,0,.06), rgba(17,28,47,.55));
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
-.bk-final__teams {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
-  gap: 10px;
+.bk-final:hover {
+  border-color: rgba(230,194,0,.42);
+  box-shadow: 0 8px 24px rgba(230,194,0,.10);
+}
+
+/* ============================================ */
+/* ROWS */
+/* ============================================ */
+.bk-final__row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  transition: background .15s ease;
 }
+.bk-final__row--win {
+  background: rgba(230,194,0,.10);
+  border: 1px solid rgba(230,194,0,.28);
+}
+
 .bk-final__team {
-  font-weight: 950;
-  word-break: break-word;
-  line-height: 1.15;
-  color: rgba(255,255,255,.90);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
 }
-.bk-final__score {
-  font-weight: 1000;
-  color: #e6c200;
-  white-space: nowrap;
-  text-align: center;
-  font-size: 1.1rem;
-}
-.bk-final__meta {
-  margin-top: 10px;
-  text-align: center;
-  color: rgba(255,255,255,.72);
+
+.bk-final__name {
   font-weight: 800;
-  font-size: .9rem;
+  font-size: .875rem;
+  color: rgba(255,255,255,.92);
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bk-final__row--win .bk-final__name {
+  color: #e6c200;
+}
+.bk-final__tbd {
+  opacity: .45;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.bk-final__score {
+  font-weight: 900;
+  font-size: 1.125rem;
+  color: #e6c200;
+  min-width: 24px;
+  text-align: center;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+/* ============================================ */
+/* WINNER BANNER */
+/* ============================================ */
+.bk-final__winner {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-top: 4px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(230,194,0,.16), rgba(230,194,0,.06));
+  border: 1px solid rgba(230,194,0,.32);
+  border-radius: 10px;
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .8125rem;
+  letter-spacing: 0.3px;
+  animation: bkWinPulse 2.5s ease-in-out infinite;
 }
+.bk-final__winner i {
+  font-size: 1rem;
+}
+@keyframes bkWinPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230,194,0,.20); }
+  50%      { box-shadow: 0 0 0 6px rgba(230,194,0,0); }
+}
+
+/* ============================================ */
+/* META */
+/* ============================================ */
+.bk-final__meta {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: .6875rem;
+  color: rgba(255,255,255,.50);
+  font-weight: 700;
+}
+.bk-final__date i {
+  margin-right: 4px;
+  font-size: .625rem;
+  opacity: .75;
+}
+
+/* ============================================ */
+/* BADGES */
+/* ============================================ */
 .bk-badge {
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-weight: 900;
-  font-size: .68rem;
-  background: rgba(255,255,255,.08);
+  font-weight: 800;
+  font-size: .625rem;
+  background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.12);
-  color: rgba(255,255,255,.80);
+  color: rgba(255,255,255,.75);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 .bk-badge--success {
-  background: rgba(40,167,69,.15);
+  background: rgba(40,167,69,.12);
   border-color: rgba(40,167,69,.30);
   color: #47d18c;
+}
+
+/* ============================================ */
+/* EMPTY STATE */
+/* ============================================ */
+.bk-final--empty {
+  text-align: center;
+  padding: 24px 16px;
+  border-style: dashed;
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.02);
+  color: rgba(255,255,255,.45);
+  font-size: .8125rem;
+}
+.bk-final--empty i {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  opacity: .5;
+  color: #e6c200;
 }
 </style>

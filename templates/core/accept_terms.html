@@ -1,0 +1,476 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}Accepter le règlement — Ef-Champions League{% endblock %}
+
+{% block content %}
+<section class="at-page">
+
+  <!-- ============================================ -->
+  <!-- HERO -->
+  <!-- ============================================ -->
+  <div class="at-hero">
+    <div class="at-hero__inner">
+      <div class="at-hero__kicker">
+        <i class="fas fa-file-signature"></i> DERNIÈRE ÉTAPE
+      </div>
+      <h1 class="at-hero__title">Accepter le règlement</h1>
+      <div class="at-hero__sub">
+        Bienvenue <strong>{{ team.team_name }}</strong>
+        <span class="at-hero__sep">•</span>
+        Lisez et acceptez pour continuer
+      </div>
+    </div>
+  </div>
+
+  <div class="container at-container">
+
+    <!-- ============================================ -->
+    <!-- NOTICE -->
+    <!-- ============================================ -->
+    <div class="at-notice">
+      <div class="at-notice__icon">
+        <i class="fas fa-circle-info"></i>
+      </div>
+      <div>
+        <div class="at-notice__title">Avant d'accéder à votre espace</div>
+        <div class="at-notice__text">
+          Prenez connaissance du règlement officiel ci-dessous.
+          Toute inscription vaut acceptation pleine et entière de ces règles.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- RÈGLEMENT (résumé condensé)
+    <!-- ============================================ -->
+    <div class="at-rules">
+
+      <article class="at-rule">
+        <div class="at-rule__num">1</div>
+        <div class="at-rule__body">
+          <div class="at-rule__title">Format de la compétition</div>
+          <p>
+            Format adaptatif de <strong>12 à 36 équipes</strong>, inspiré de l'UEFA Champions League.
+            Phase de ligue + barrages + phase finale (aller-retour sur une même journée).
+            Finale en match unique.
+          </p>
+        </div>
+      </article>
+
+      <article class="at-rule">
+        <div class="at-rule__num">2</div>
+        <div class="at-rule__body">
+          <div class="at-rule__title">Fenêtre de jeu (25 heures)</div>
+          <p>
+            Chaque journée ouvre à <strong>12h00</strong> et ferme le lendemain à <strong>12h59</strong>.
+            Les matchs aller ET retour se jouent le même jour.
+            Tout match non joué dans la fenêtre = <strong>forfait 0-3</strong>.
+          </p>
+        </div>
+      </article>
+
+      <article class="at-rule">
+        <div class="at-rule__num">3</div>
+        <div class="at-rule__body">
+          <div class="at-rule__title">Déconnexions</div>
+          <p>
+            Maximum <strong>2 déconnexions</strong> par match. À la 3ᵉ, forfait 0-3.
+            Toute réclamation doit être accompagnée d'une <strong>preuve</strong> (capture/vidéo)
+            dans les 5 minutes.
+          </p>
+        </div>
+      </article>
+
+      <article class="at-rule">
+        <div class="at-rule__num">4</div>
+        <div class="at-rule__body">
+          <div class="at-rule__title">Fair-play & sanctions</div>
+          <p>
+            Toute falsification ou triche entraîne une <strong>exclusion définitive</strong>.
+            Les décisions de l'organisation sont <strong>finales et souveraines</strong>.
+          </p>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- ============================================ -->
+    <!-- FORM ACCEPTATION
+    <!-- ============================================ -->
+    <form method="post" class="at-form" id="acceptForm">
+      {% csrf_token %}
+
+      <div class="at-alert">
+        <i class="fas fa-file-contract"></i>
+        <div>
+          <strong>Règlement complet disponible ici :</strong>
+          <a href="{% url 'rules' %}" target="_blank" class="at-alert__link">
+            Consulter le règlement officiel
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+      </div>
+
+      <label class="at-check" for="accept_terms">
+        <input type="checkbox"
+               name="accept_terms"
+               id="accept_terms"
+               required>
+        <div class="at-check__box">
+          <i class="fas fa-check"></i>
+        </div>
+        <div class="at-check__text">
+          J'ai lu et j'accepte le <strong>règlement officiel</strong> de l'Ef-Champions League 2026.
+        </div>
+      </label>
+
+      <button type="submit"
+              class="at-submit"
+              id="submitBtn"
+              disabled>
+        <i class="fas fa-check-circle"></i>
+        <span>Accepter et continuer</span>
+        <i class="fas fa-arrow-right at-submit__arrow"></i>
+      </button>
+
+    </form>
+
+    <!-- ============================================ -->
+    <!-- FOOTER NOTE
+    <!-- ============================================ -->
+    <div class="at-foot">
+      <i class="fas fa-shield-halved"></i>
+      <span>Cette acceptation est enregistrée dans les logs d'administration.</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
+<style>
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.at-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+  padding-bottom: 60px;
+}
+.at-container { max-width: 780px; }
+
+/* ============================================ */
+/* HERO */
+/* ============================================ */
+.at-hero {
+  text-align: center;
+  padding: 40px 16px 28px;
+}
+.at-hero__inner { max-width: 620px; margin: 0 auto; }
+.at-hero__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: .6875rem;
+  margin-bottom: 12px;
+}
+.at-hero__kicker i { color: #e6c200; }
+.at-hero__title {
+  color: #fff;
+  font-weight: 900;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.at-hero__sub {
+  color: rgba(255,255,255,.65);
+  font-size: .875rem;
+  margin-top: 10px;
+  font-weight: 500;
+}
+.at-hero__sub strong { color: #e6c200; font-weight: 800; }
+.at-hero__sep { color: rgba(255,255,255,.25); margin: 0 8px; }
+
+/* ============================================ */
+/* NOTICE */
+/* ============================================ */
+.at-notice {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(0,167,225,.06);
+  border: 1px solid rgba(0,167,225,.22);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+.at-notice__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,167,225,.12);
+  border: 1px solid rgba(0,167,225,.28);
+  color: #00d4ff;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+.at-notice__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: .9375rem;
+  margin-bottom: 4px;
+}
+.at-notice__text {
+  color: rgba(255,255,255,.72);
+  font-size: .8125rem;
+  line-height: 1.55;
+}
+
+/* ============================================ */
+/* RULES SUMMARY */
+/* ============================================ */
+.at-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.at-rule {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  transition: border-color .2s ease;
+}
+.at-rule:hover { border-color: rgba(230,194,0,.20); }
+
+.at-rule__num {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #003d82, #00a7e1);
+  color: #fff;
+  font-weight: 800;
+  font-size: .875rem;
+  flex-shrink: 0;
+}
+.at-rule__body { flex: 1; min-width: 0; }
+.at-rule__title {
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.at-rule p {
+  color: rgba(255,255,255,.78);
+  font-size: .8125rem;
+  line-height: 1.65;
+  margin: 0;
+}
+.at-rule p strong { color: #fff; font-weight: 700; }
+
+/* ============================================ */
+/* FORM */
+/* ============================================ */
+.at-form { display: block; }
+
+.at-alert {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(230,194,0,.05);
+  border: 1px solid rgba(230,194,0,.22);
+  border-radius: 12px;
+  margin-bottom: 18px;
+  align-items: flex-start;
+}
+.at-alert i {
+  color: #e6c200;
+  font-size: 1rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.at-alert > div {
+  color: rgba(255,255,255,.75);
+  font-size: .8125rem;
+  line-height: 1.55;
+}
+.at-alert strong { color: #fff; display: block; margin-bottom: 4px; }
+.at-alert__link {
+  color: #00d4ff !important;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color .15s ease;
+}
+.at-alert__link:hover { color: #47d18c !important; }
+.at-alert__link i { font-size: .75rem; color: inherit; }
+
+/* CHECKBOX */
+.at-check {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 18px;
+  background: rgba(255,255,255,.03);
+  border: 2px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all .2s ease;
+  margin-bottom: 16px;
+  user-select: none;
+}
+.at-check:hover {
+  border-color: rgba(230,194,0,.35);
+  background: rgba(230,194,0,.03);
+}
+.at-check input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.at-check__box {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .2s ease;
+  margin-top: 1px;
+}
+.at-check__box i {
+  color: transparent;
+  font-size: .75rem;
+  transition: color .2s ease;
+}
+
+.at-check input:checked ~ .at-check__box {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  border-color: #e6c200;
+  box-shadow: 0 4px 12px rgba(230,194,0,.28);
+}
+.at-check input:checked ~ .at-check__box i {
+  color: #0b1423;
+}
+
+.at-check__text {
+  color: rgba(255,255,255,.88);
+  font-size: .875rem;
+  line-height: 1.55;
+  font-weight: 500;
+}
+.at-check__text strong { color: #fff; font-weight: 800; }
+
+/* SUBMIT */
+.at-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: .9375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: all .2s ease;
+  box-shadow: 0 8px 24px rgba(230,194,0,.25);
+}
+.at-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(230,194,0,.40);
+}
+.at-submit:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  transform: none;
+  box-shadow: none;
+}
+.at-submit i { font-size: .875rem; }
+.at-submit__arrow { margin-left: auto; transition: transform .2s ease; }
+.at-submit:hover:not(:disabled) .at-submit__arrow { transform: translateX(4px); }
+
+/* ============================================ */
+/* FOOT */
+/* ============================================ */
+.at-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: rgba(255,255,255,.40);
+  font-size: .6875rem;
+  font-weight: 600;
+}
+.at-foot i { color: rgba(255,255,255,.30); }
+
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .at-hero { padding: 28px 12px 20px; }
+  .at-hero__title { font-size: 1.375rem; }
+  .at-container { padding: 0 12px; }
+
+  .at-notice { padding: 14px; gap: 12px; }
+  .at-notice__icon { width: 36px; height: 36px; font-size: 1rem; }
+
+  .at-rule { padding: 14px; gap: 12px; }
+  .at-rule__num { width: 28px; height: 28px; font-size: .8125rem; }
+
+  .at-check { padding: 16px; gap: 12px; }
+  .at-submit { padding: 14px 20px; font-size: .875rem; }
+}
+</style>
+
+<!-- ============================================ -->
+<!-- SCRIPT : Activer le bouton quand coché
+<!-- ============================================ -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var checkbox = document.getElementById("accept_terms");
+  var submitBtn = document.getElementById("submitBtn");
+  if (!checkbox || !submitBtn) return;
+
+  function toggle() {
+    submitBtn.disabled = !checkbox.checked;
+  }
+  checkbox.addEventListener("change", toggle);
+  toggle();
+});
+</script>
+{% endblock %}

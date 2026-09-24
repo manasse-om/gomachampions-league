@@ -1,59 +1,225 @@
 {% extends 'core/admin/base_admin.html' %}
+{% load static %}
 
 {% block admin_content %}
+<section class="au-page">
 
-<div class="admin-card">
+  <div class="au-header">
+    <div class="au-header__kicker">
+      <i class="fas fa-user-cog"></i> ADMIN
+    </div>
+    <h1 class="au-header__title">Modifier le rôle</h1>
+    <p class="au-header__sub">{{ user_obj.username }}</p>
+  </div>
 
-<h4 class="mb-4">Modifier utilisateur</h4>
+  <div class="au-card">
 
-<div class="mb-3">
-    <strong>Username :</strong> {{ user_obj.username }}
-</div>
-
-<div class="mb-3">
-    <strong>Email :</strong> {{ user_obj.email }}
-</div>
-
-<form method="post">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        <label class="form-label">Rôle :</label>
-        <select name="role" class="form-select">
-
-            <option value="superadmin"
-            {% if profile.role == "superadmin" %}selected{% endif %}>
-                Super Admin
-            </option>
-
-            <option value="organisateur"
-            {% if profile.role == "organisateur" %}selected{% endif %}>
-                Organisateur
-            </option>
-
-            <option value="paiement"
-            {% if profile.role == "paiement" %}selected{% endif %}>
-                Modérateur Paiements
-            </option>
-
-            <option value="match"
-            {% if profile.role == "match" %}selected{% endif %}>
-                Gestionnaire Matchs
-            </option>
-
-        </select>
+    <!-- INFO UTILISATEUR -->
+    <div class="au-info">
+      <div class="au-info__row">
+        <span class="au-info__label">Nom d'utilisateur</span>
+        <span class="au-info__value">{{ user_obj.username }}</span>
+      </div>
+      <div class="au-info__row">
+        <span class="au-info__label">Email</span>
+        <span class="au-info__value">{{ user_obj.email|default:"—" }}</span>
+      </div>
+      <div class="au-info__row">
+        <span class="au-info__label">Compte créé le</span>
+        <span class="au-info__value">{{ user_obj.date_joined|date:"d/m/Y" }}</span>
+      </div>
     </div>
 
-    <button type="submit" class="btn btn-success">
-        Enregistrer
-    </button>
+    <form method="post" class="au-form">
+      {% csrf_token %}
 
-    <a href="{% url 'manage_users' %}" class="btn btn-secondary ms-2">
-        Annuler
-    </a>
+      <div class="au-field">
+        <label class="au-label" for="role">Rôle assigné</label>
+        <select name="role" id="role" class="au-select">
+          <option value="superadmin" {% if profile.role == "superadmin" %}selected{% endif %}>
+            Super Admin — Accès total
+          </option>
+          <option value="organisateur" {% if profile.role == "organisateur" %}selected{% endif %}>
+            Organisateur — Gestion compétition
+          </option>
+          <option value="paiement" {% if profile.role == "paiement" %}selected{% endif %}>
+            Modérateur Paiements — Validation des inscriptions
+          </option>
+          <option value="match" {% if profile.role == "match" %}selected{% endif %}>
+            Gestionnaire Matchs — Encodage des résultats
+          </option>
+          <option value="player" {% if profile.role == "player" %}selected{% endif %}>
+            Joueur — Accès joueur standard
+          </option>
+        </select>
+        <div class="au-hint">
+          <i class="fas fa-info-circle"></i>
+          Le rôle détermine les permissions dans le dashboard admin.
+        </div>
+      </div>
 
-</form>
+      <div class="au-actions">
+        <a href="{% url 'manage_users' %}" class="au-btn au-btn--ghost">
+          <i class="fas fa-arrow-left"></i> Annuler
+        </a>
+        <button type="submit" class="au-btn au-btn--gold">
+          <i class="fas fa-check"></i> Enregistrer le rôle
+        </button>
+      </div>
 
-</div>
+    </form>
+  </div>
+</section>
 
+<style>
+.au-page {
+  padding: 24px;
+  max-width: 680px;
+  margin: 0 auto;
+  color: rgba(255,255,255,.92);
+}
+.au-header { text-align: center; padding: 12px 0 24px; }
+.au-header__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: .6875rem;
+  margin-bottom: 8px;
+}
+.au-header__kicker i { color: #e6c200; }
+.au-header__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 3vw, 1.625rem);
+  margin: 0;
+}
+.au-header__sub {
+  color: #e6c200;
+  font-size: .875rem;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.au-card {
+  background: rgba(17,28,47,.60);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(14px);
+}
+
+.au-info {
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 20px;
+}
+.au-info__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: .8125rem;
+}
+.au-info__label {
+  color: rgba(255,255,255,.55);
+  font-weight: 600;
+}
+.au-info__value {
+  color: #fff;
+  font-weight: 700;
+}
+
+.au-form { display: block; }
+.au-field { margin-bottom: 16px; }
+.au-label {
+  display: block;
+  color: rgba(255,255,255,.80);
+  font-weight: 700;
+  font-size: .75rem;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.au-select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.au-select:focus {
+  border-color: rgba(0,167,225,.55);
+  box-shadow: 0 0 0 3px rgba(0,167,225,.10);
+}
+.au-select option {
+  background: #0b1423;
+  color: #fff;
+}
+
+.au-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: rgba(255,255,255,.50);
+  font-size: .75rem;
+}
+.au-hint i { color: #00a7e1; }
+
+.au-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.au-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.au-btn--ghost {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+}
+.au-btn--ghost:hover { background: rgba(255,255,255,.10); color: #fff; }
+.au-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  flex: 1;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+}
+.au-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+}
+
+@media (max-width: 540px) {
+  .au-actions { flex-direction: column-reverse; }
+}
+</style>
 {% endblock %}

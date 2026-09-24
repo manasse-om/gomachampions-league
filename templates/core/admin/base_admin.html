@@ -1,35 +1,388 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<section class="py-5 admin-bg">
-<div class="container">
+<section class="ad-bg">
+  <div class="container ad-container">
 
-<h2 class="admin-title mb-4">
-    {{ title }}
-</h2>
+    <!-- HEADER ADMIN -->
+    <div class="ad-topbar">
+      <div class="ad-topbar__left">
+        <div class="ad-topbar__kicker">
+          <i class="fas fa-shield-halved"></i> ADMINISTRATION
+        </div>
+        <h1 class="ad-topbar__title">{{ title|default:"Dashboard" }}</h1>
+      </div>
+      <a href="{% url 'dashboard' %}" class="ad-topbar__back">
+        <i class="fas fa-arrow-left"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
 
-{% block admin_content %}{% endblock %}
+    <!-- CONTENU -->
+    <div class="ad-content">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="ad-alert ad-alert--{{ message.tags|default:'info' }}">
+            <i class="fas fa-info-circle"></i>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
 
-</div>
+      {% block admin_content %}{% endblock %}
+    </div>
+
+  </div>
 </section>
 
 <style>
-.admin-bg {
-    background: linear-gradient(135deg,#0b1423,#00142d);
-    color:#e6edf7;
-    min-height:100vh;
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.ad-bg {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.08), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
+  min-height: 100vh;
+  color: rgba(255,255,255,.92);
+  padding: 24px 0 60px;
+}
+.ad-container { max-width: 1100px; }
+
+/* ============================================ */
+/* TOPBAR */
+/* ============================================ */
+.ad-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap;
+}
+.ad-topbar__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.50);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: .6875rem;
+  margin-bottom: 6px;
+}
+.ad-topbar__kicker i { color: #e6c200; }
+.ad-topbar__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.ad-topbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  color: rgba(255,255,255,.88) !important;
+  font-weight: 700;
+  font-size: .8125rem;
+  text-decoration: none;
+  transition: all .2s ease;
+}
+.ad-topbar__back:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff !important;
+  transform: translateX(-2px);
 }
 
-.admin-title {
-    color:#ffd700;
-    font-weight:700;
-}
+/* ============================================ */
+/* CONTENT */
+/* ============================================ */
+.ad-content { display: block; }
 
+/* ============================================ */
+/* ADMIN CARD (utilisable partout) */
+/* ============================================ */
 .admin-card {
-    background:#111c2f;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 0 25px rgba(0,61,130,0.25);
+  background: rgba(17,28,47,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.30);
+}
+@media (max-width: 640px) {
+  .admin-card { padding: 18px 14px; border-radius: 12px; }
+}
+
+.admin-card h3,
+.admin-card h4,
+.admin-card h5 {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.admin-card h3 { font-size: 1.125rem; }
+.admin-card h4 { font-size: 1rem; }
+.admin-card h5 { font-size: .9375rem; }
+
+/* ============================================ */
+/* ALERTS */
+/* ============================================ */
+.ad-alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: .8125rem;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.ad-alert i { margin-top: 2px; flex-shrink: 0; }
+.ad-alert--info, .ad-alert--success {
+  background: rgba(0,167,225,.06);
+  border: 1px solid rgba(0,167,225,.22);
+  color: rgba(255,255,255,.88);
+}
+.ad-alert--info i, .ad-alert--success i { color: #00d4ff; }
+.ad-alert--warning {
+  background: rgba(255,193,7,.06);
+  border: 1px solid rgba(255,193,7,.24);
+  color: rgba(255,255,255,.90);
+}
+.ad-alert--warning i { color: #ffc107; }
+.ad-alert--danger, .ad-alert--error {
+  background: rgba(220,53,69,.08);
+  border: 1px solid rgba(220,53,69,.28);
+  color: rgba(255,255,255,.90);
+}
+.ad-alert--danger i, .ad-alert--error i { color: #ff6b6b; }
+
+/* ============================================ */
+/* BOUTONS ADMIN */
+/* ============================================ */
+.btn-ucl-gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423 !important;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 800;
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 18px rgba(230,194,0,.22);
+  transition: all .2s ease;
+}
+.btn-ucl-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(230,194,0,.35);
+  color: #0b1423 !important;
+}
+
+.btn-outline-light {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.16);
+  color: rgba(255,255,255,.88) !important;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-weight: 700;
+  font-size: .8125rem;
+  transition: all .2s ease;
+}
+.btn-outline-light:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff !important;
+  border-color: rgba(255,255,255,.24);
+}
+
+.btn-outline-info {
+  background: rgba(0,167,225,.06);
+  border: 1px solid rgba(0,167,225,.30);
+  color: #00d4ff !important;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-weight: 700;
+  font-size: .8125rem;
+  transition: all .2s ease;
+}
+.btn-outline-info:hover {
+  background: rgba(0,167,225,.14);
+  border-color: rgba(0,167,225,.50);
+  color: #00d4ff !important;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #128c7e, #25d366);
+  border: none;
+  border-radius: 10px;
+  padding: 11px 20px;
+  font-weight: 800;
+  font-size: .8125rem;
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(37,211,102,.20);
+  transition: all .2s ease;
+}
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(37,211,102,.35);
+  color: #fff !important;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88) !important;
+  border-radius: 10px;
+  padding: 11px 20px;
+  font-weight: 700;
+  font-size: .8125rem;
+  transition: all .2s ease;
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,.10);
+  color: #fff !important;
+}
+
+/* ============================================ */
+/* FORMULAIRES ADMIN */
+/* ============================================ */
+.admin-card form p {
+  margin-bottom: 16px;
+}
+.admin-card form label {
+  display: block;
+  color: rgba(255,255,255,.75);
+  font-weight: 700;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.admin-card form input[type="text"],
+.admin-card form input[type="number"],
+.admin-card form input[type="email"],
+.admin-card form input[type="password"],
+.admin-card form input[type="tel"],
+.admin-card form input[type="date"],
+.admin-card form select,
+.admin-card form textarea {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+  color: rgba(255,255,255,.95);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all .2s ease;
+}
+.admin-card form input:focus,
+.admin-card form select:focus,
+.admin-card form textarea:focus {
+  border-color: rgba(0,167,225,.55);
+  background: rgba(0,167,225,.04);
+  box-shadow: 0 0 0 3px rgba(0,167,225,.10);
+}
+.admin-card form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #e6c200;
+}
+.admin-card form select option {
+  background: #0b1423;
+  color: #fff;
+}
+
+/* Help text */
+.admin-card form .helptext {
+  display: block;
+  margin-top: 5px;
+  color: rgba(255,255,255,.50);
+  font-size: .6875rem;
+}
+
+/* Erreurs */
+.admin-card form .errorlist {
+  list-style: none;
+  padding: 8px 12px;
+  margin: 6px 0 0;
+  background: rgba(220,53,69,.08);
+  border: 1px solid rgba(220,53,69,.28);
+  border-radius: 8px;
+  color: #ff6b6b;
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+/* ============================================ */
+/* TABLEAUX ADMIN */
+/* ============================================ */
+.admin-card .table {
+  color: rgba(255,255,255,.88);
+  margin-bottom: 0;
+}
+.admin-card .table thead th {
+  background: rgba(9,13,22,.75);
+  color: rgba(255,255,255,.55);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: .6875rem;
+  font-weight: 800;
+  padding: 12px 14px;
+  border-color: rgba(255,255,255,.08);
+}
+.admin-card .table tbody td {
+  padding: 12px 14px;
+  border-color: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.85);
+  vertical-align: middle;
+}
+.admin-card .table tbody tr:hover {
+  background: rgba(255,255,255,.03);
+}
+.admin-card .table-striped tbody tr:nth-of-type(odd) {
+  background: rgba(255,255,255,.02);
+}
+.admin-card .table-dark {
+  --bs-table-bg: transparent;
+  --bs-table-color: rgba(255,255,255,.88);
+  --bs-table-border-color: rgba(255,255,255,.06);
+}
+
+/* ============================================ */
+/* TYPO HELPERS */
+/* ============================================ */
+.admin-card .text-light { color: rgba(255,255,255,.65) !important; }
+.admin-card .text-gold { color: #e6c200 !important; }
+.admin-card .text-warning { color: #ffc107 !important; }
+.admin-card .text-info { color: #00d4ff !important; }
+.admin-card .text-danger { color: #ff6b6b !important; }
+.admin-card .text-success { color: #47d18c !important; }
+.admin-card hr.border-secondary {
+  border-color: rgba(255,255,255,.08) !important;
+}
+
+/* ============================================ */
+/* RESPONSIVE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .ad-topbar { padding: 14px 16px; gap: 12px; }
+  .ad-topbar__title { font-size: 1rem; }
+  .ad-topbar__back { padding: 7px 12px; font-size: .75rem; }
+  .admin-card { padding: 16px 14px; }
 }
 </style>
 {% endblock %}

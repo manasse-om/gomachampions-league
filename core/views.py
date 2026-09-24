@@ -188,9 +188,9 @@ def register_team(request):
 
             messages.success(
                 request,
-                "✅ Inscription réussie ! Rejoignez le groupe WhatsApp et envoyez la preuve de paiement pour validation."
+                "Inscription réussie. Veuillez maintenant lire et accepter le règlement."
             )
-            return redirect('home')
+            return redirect('accept_terms')
 
         else:
             messages.error(request, _("Inscription refusée : corrige les champs en rouge puis réessaie."))
@@ -205,6 +205,54 @@ def register_team(request):
         'remaining_slots': competition.max_teams - competition.registered_teams_count if competition else 0,
     }
     return render(request, 'core/register_team.html', context)
+
+@login_required
+def accept_terms(request):
+    """
+    Page d'acceptation du règlement — étape obligatoire après inscription.
+    """
+    competition = Competition.objects.filter(is_active=True).first()
+
+    team = Team.objects.filter(
+        user=request.user,
+        competition=competition
+    ).order_by('-created_at').first()
+
+    if not team:
+        messages.error(request, _("Aucune équipe associée à votre compte."))
+        return redirect('home')
+
+    # Déjà accepté → redirection directe
+    if team.terms_accepted:
+        return redirect('my_matches')
+
+    if request.method == 'POST':
+        if request.POST.get('accept_terms') == 'on':
+            team.terms_accepted = True
+            team.terms_accepted_at = timezone.now()
+            team.save(update_fields=['terms_accepted', 'terms_accepted_at'])
+
+            AdminLog.objects.create(
+                user=request.user,
+                action=f"Règlement accepté par {team.team_name} ({team.abbreviation})"
+            )
+
+            messages.success(
+                request,
+                _("Merci ! Votre inscription est complète. Bienvenue dans la compétition.")
+            )
+            return redirect('my_matches')
+        else:
+            messages.error(
+                request,
+                _("Vous devez accepter le règlement pour continuer.")
+            )
+
+    return render(request, 'core/accept_terms.html', {
+        'team': team,
+        'competition': competition,
+    })
+
 # ==========================================
 # LISTE DES ÉQUIPES
 # ==========================================
@@ -786,9 +834,13 @@ def my_matches(request):
             user=request.user, competition=competition
         ).order_by('-created_at').first()
     
-    # Vérifier si le paiement est validé
-    if not team.payment_validated:
-        messages.warning(request, _("Votre inscription est en attente de validation du paiement."))
+    # Blocage tant que le règlement n'est pas accepté
+    if not team.terms_accepted:
+        messages.warning(
+            request,
+            _("Veuillez accepter le règlement pour accéder à vos matchs.")
+        )
+        return redirect('accept_terms')
     
     # Récupérer tous les matchs de cette équipe
     upcoming_matches = Match.objects.filter(
@@ -1610,34 +1662,44 @@ def team_delete(request, pk):
 
 @login_required
 def edit_my_team(request):
-    # ✅ Patch #2
+    # ✅ Patch #2 : filtrer par compétition active
     competition = Competition.objects.filter(is_active=True).first()
+
     team = Team.objects.filter(
-        user=request.user, competition=competition
+        user=request.user,
+        competition=competition
     ).order_by('-created_at').first()
-    
-    if not team:
-        messages.error(request, _("Vous n'avez pas d'équipe associée."))
-        return redirect('home')
-    
-    form = TeamRegistrationForm(request.POST or None, instance=team, competition=competition)
-    if form.is_valid():
-        form.save()
-        return redirect('my_matches')
-    return render(request, 'core/edit_my_team.html', {'form': form})
+
+    if not team.terms_accepted:
+        return redirect('accept_terms')
+
+    form = TeamRegistrationForm(
+        request.POST or None,
+        request.FILES or None,   # ⬅️ LE FIX EST ICI
+        instance=team,
+        competition=competition
+    )
 
     if form.is_valid():
         form.save()
+        messages.success(request, _("Équipe mise à jour avec succès."))
         return redirect('my_matches')
 
     return render(request, 'core/edit_my_team.html', {
-        'form': form
+        'form': form,
     })
 
 @role_required(['superadmin', 'organisateur'])
 def edit_team(request, pk):
     team = get_object_or_404(Team, pk=pk)
-    form = TeamRegistrationForm(request.POST or None, instance=team)
+    competition = team.competition
+
+    form = TeamRegistrationForm(
+        request.POST or None,
+        request.FILES or None,   # ⬅️ LE FIX EST ICI
+        instance=team,
+        competition=competition
+    )
     if form.is_valid():
         form.save()
         messages.success(request, "Équipe modifiée avec succès !")

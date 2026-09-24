@@ -1,244 +1,457 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
 
-{% block title %}Résultats - Goma Champions League 2026{% endblock %}
+{% block title %}Résultats — Ef-Champions League{% endblock %}
 
 {% block content %}
-<section class="rs2-page py-4">
-  <div class="container">
+<section class="rs-page">
+  <div class="container rs-container">
 
-    <!-- HEADER -->
-    <div class="text-center mb-3">
-      <h1 class="rs2-title mb-1">
-        <i class="fas fa-list-check me-2"></i>Résultats
-      </h1>
-      <p class="rs2-subtitle mb-0">Matchs joués • Mise à jour automatique</p>
+    <!-- ============================================ -->
+    <!-- HERO -->
+    <!-- ============================================ -->
+    <div class="rs-hero">
+      <div class="rs-hero__kicker">
+        <i class="fas fa-list-check"></i> SAISON 2026
+      </div>
+      <h1 class="rs-hero__title">Résultats</h1>
+      <div class="rs-hero__sub">
+        Matchs joués <span class="rs-hero__dot">•</span> Mise à jour automatique
+      </div>
     </div>
 
     {% if matches %}
-      <div class="rs2-wrap">
 
+      <div class="rs-list">
         {% for match in matches %}
-          <div class="rs2-item">
+        <article class="rs-item">
 
-            <!-- META LINE -->
-            <div class="rs2-meta">
-              <div class="rs2-phase">
+          <!-- ============================================ -->
+          <!-- META -->
+          <!-- ============================================ -->
+          <div class="rs-item__meta">
+            <div class="rs-item__phase">
+              <span class="rs-item__phase-badge">
                 {{ match.phase.get_name_display }}
-                {% if match.match_leg != 'unique' %} • {{ match.get_match_leg_display }}{% endif %}
-              </div>
-
-              <div class="rs2-date">
-                {% language 'fr' %}
-                  {{ match.played_date|date:"d/m/Y" }} • {{ match.played_date|date:"H:i" }}
-                {% endlanguage %}
-              </div>
+              </span>
+              {% if match.match_leg != 'unique' %}
+                <span class="rs-item__leg">{{ match.get_match_leg_display }}</span>
+              {% endif %}
             </div>
 
-            <!-- MAIN MATCH LINE -->
-            <div class="rs2-main">
-              <div class="rs2-team rs2-team--home" title="{{ match.home_team.team_name }}">
-                {{ match.home_team.team_name }}
+            <div class="rs-item__date">
+              <i class="far fa-calendar"></i>
+              {% language 'fr' %}
+                {{ match.played_date|date:"d/m/Y" }}
+              {% endlanguage %}
+              <span class="rs-item__sep">•</span>
+              {% language 'fr' %}
+                {{ match.played_date|date:"H:i" }}
+              {% endlanguage %}
+            </div>
+          </div>
+
+          <!-- ============================================ -->
+          <!-- MATCH LINE -->
+          <!-- ============================================ -->
+          <div class="rs-item__body">
+
+            <!-- HOME -->
+            <div class="rs-team rs-team--home">
+              {% include "core/partials/_team_logo.html" with team=match.home_team size="sm" %}
+              <div class="rs-team__name">{{ match.home_team.team_name }}</div>
+            </div>
+
+            <!-- CENTER : SCORE -->
+            <div class="rs-score">
+              <div class="rs-score__main">
+                <span class="rs-score__num {% if match.home_score > match.away_score %}is-win{% endif %}">
+                  {{ match.home_score }}
+                </span>
+                <span class="rs-score__sep">–</span>
+                <span class="rs-score__num {% if match.away_score > match.home_score %}is-win{% endif %}">
+                  {{ match.away_score }}
+                </span>
               </div>
 
-              <div class="rs2-scorebox">
-                <div class="rs2-score">
-                  <span class="{% if match.home_score > match.away_score %}is-win{% endif %}">{{ match.home_score }}</span>
-                  <span class="rs2-sep">-</span>
-                  <span class="{% if match.away_score > match.home_score %}is-win{% endif %}">{{ match.away_score }}</span>
-                </div>
-
-                <div class="rs2-status">
-                  {% if match.is_forfeit %}
-                    <span class="rs2-badge rs2-badge--danger">FORFAIT</span>
-                  {% else %}
-                    <span class="rs2-badge rs2-badge--success">FT</span>
-                  {% endif %}
-                </div>
-
-                {% if match.home_penalties is not None and match.away_penalties is not None %}
-                  <div class="rs2-subscore">
-                    TAB {{ match.home_penalties }}-{{ match.away_penalties }}
-                  </div>
+              <div class="rs-score__status">
+                {% if match.is_forfeit %}
+                  <span class="rs-badge rs-badge--danger">Forfait</span>
+                {% else %}
+                  <span class="rs-badge rs-badge--success">Terminé</span>
                 {% endif %}
               </div>
 
-              <div class="rs2-team rs2-team--away text-end" title="{{ match.away_team.team_name }}">
-                {{ match.away_team.team_name }}
-              </div>
+              {% if match.home_penalties is not None and match.away_penalties is not None %}
+                <div class="rs-score__sub">
+                  <i class="fas fa-crosshairs"></i>
+                  TAB {{ match.home_penalties }}–{{ match.away_penalties }}
+                </div>
+              {% elif match.home_extra_time is not None and match.away_extra_time is not None %}
+                <div class="rs-score__sub">
+                  <i class="fas fa-stopwatch"></i>
+                  ap {{ match.home_extra_time }}–{{ match.away_extra_time }}
+                </div>
+              {% endif %}
             </div>
 
-            {% if match.notes %}
-              <div class="rs2-notes">
-                <i class="fas fa-comment me-2"></i>{{ match.notes }}
-              </div>
-            {% endif %}
+            <!-- AWAY -->
+            <div class="rs-team rs-team--away">
+              <div class="rs-team__name">{{ match.away_team.team_name }}</div>
+              {% include "core/partials/_team_logo.html" with team=match.away_team size="sm" %}
+            </div>
 
           </div>
-        {% endfor %}
 
+          <!-- ============================================ -->
+          <!-- NOTES -->
+          <!-- ============================================ -->
+          {% if match.notes %}
+            <div class="rs-item__notes">
+              <i class="fas fa-comment-dots"></i>
+              <span>{{ match.notes }}</span>
+            </div>
+          {% endif %}
+
+        </article>
+        {% endfor %}
       </div>
 
     {% else %}
-      <div class="rs2-empty text-center py-5">
-        <i class="fas fa-info-circle me-2"></i>
-        Aucun résultat disponible pour le moment.
+
+      <!-- ============================================ -->
+      <!-- EMPTY -->
+      <!-- ============================================ -->
+      <div class="rs-empty">
+        <div class="rs-empty__icon">
+          <i class="fas fa-inbox"></i>
+        </div>
+        <div class="rs-empty__title">Aucun résultat disponible</div>
+        <div class="rs-empty__text">
+          Les résultats apparaîtront ici dès que les premiers matchs seront joués.
+        </div>
       </div>
+
     {% endif %}
 
   </div>
 </section>
 
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
 <style>
-/* PAGE BG */
-.rs2-page{
-  background: linear-gradient(135deg, #0a0e17 0%, #0f1a2d 100%);
+/* ============================================ */
+/* PAGE */
+/* ============================================ */
+.rs-page {
+  background:
+    radial-gradient(1000px 500px at 50% 0%, rgba(0,167,225,.10), transparent 60%),
+    linear-gradient(135deg, #060a12 0%, #0b1423 50%, #0e1a2e 100%);
   min-height: 100vh;
   color: rgba(255,255,255,.92);
+  padding: 32px 0 60px;
 }
+.rs-container { max-width: 900px; }
 
-.rs2-title{
-  font-weight: 1000;
-  color: #fff;
-  letter-spacing: .4px;
-  margin: 0;
+/* ============================================ */
+/* HERO */
+/* ============================================ */
+.rs-hero {
+  text-align: center;
+  padding: 12px 0 28px;
 }
-.rs2-subtitle{
-  color: #e6c200;
-  font-weight: 750;
-  opacity: .95;
-}
-
-/* WRAP (table-like list, not cards) */
-.rs2-wrap{
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(17,28,47,.45);
-  box-shadow: 0 18px 50px rgba(0,0,0,.22);
-  backdrop-filter: blur(10px);
-}
-
-.rs2-item{
-  padding: 12px 12px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-.rs2-item:last-child{ border-bottom: none; }
-
-/* META */
-.rs2-meta{
-  display:flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: baseline;
+.rs-hero__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.50);
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-size: .6875rem;
   margin-bottom: 10px;
 }
-.rs2-phase{
-  font-weight: 900;
-  color: rgba(255,255,255,.88);
-  font-size: .92rem;
+.rs-hero__kicker i { color: #e6c200; }
+.rs-hero__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin: 0;
+  letter-spacing: -0.02em;
 }
-.rs2-date{
-  font-weight: 850;
-  color: rgba(255,255,255,.70);
-  font-size: .86rem;
-  white-space: nowrap;
+.rs-hero__sub {
+  color: #e6c200;
+  font-weight: 700;
+  font-size: .8125rem;
+  margin-top: 8px;
+}
+.rs-hero__dot {
+  color: rgba(255,255,255,.30);
+  margin: 0 6px;
 }
 
-/* MAIN LINE */
-.rs2-main{
-  display:grid;
+/* ============================================ */
+/* LIST */
+/* ============================================ */
+.rs-list {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(17,28,47,.55);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.25);
+}
+
+.rs-item {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  transition: background .15s ease;
+}
+.rs-item:last-child { border-bottom: none; }
+.rs-item:hover { background: rgba(255,255,255,.02); }
+
+/* ============================================ */
+/* META */
+/* ============================================ */
+.rs-item__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.rs-item__phase {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.rs-item__phase-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(230,194,0,.10);
+  border: 1px solid rgba(230,194,0,.24);
+  color: #e6c200;
+  font-weight: 800;
+  font-size: .6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.rs-item__leg {
+  color: rgba(255,255,255,.55);
+  font-size: .75rem;
+  font-weight: 700;
+}
+.rs-item__date {
+  color: rgba(255,255,255,.55);
+  font-size: .75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.rs-item__date i { font-size: .625rem; opacity: .7; }
+.rs-item__sep { color: rgba(255,255,255,.25); margin: 0 3px; }
+
+/* ============================================ */
+/* MATCH BODY */
+/* ============================================ */
+.rs-item__body {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: 10px;
   align-items: center;
 }
 
-/* TEAM NAMES: wrap allowed */
-.rs2-team{
-  font-weight: 950;
-  color: rgba(255,255,255,.92);
-  line-height: 1.15;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: unset;
-  word-break: break-word;
-  hyphens: auto;
+/* TEAMS */
+.rs-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
+.rs-team--home { justify-content: flex-start; }
+.rs-team--away { justify-content: flex-end; text-align: right; }
 
-/* SCORE BOX */
-.rs2-scorebox{
-  text-align:center;
-  min-width: 86px;
-}
-.rs2-score{
-  font-weight: 1000;
-  color: #e6c200;
-  font-size: 1.35rem;
-  line-height: 1.05;
-  white-space: nowrap;
-}
-.rs2-sep{ margin: 0 6px; opacity: .85; }
-.rs2-score .is-win{ color: #47d18c; }
-
-.rs2-status{ margin-top: 6px; }
-
-.rs2-badge{
-  display:inline-flex;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 1000;
-  font-size: .78rem;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
-}
-.rs2-badge--success{ border-color: rgba(40,167,69,.35); background: rgba(40,167,69,.12); }
-.rs2-badge--danger{ border-color: rgba(220,53,69,.35); background: rgba(220,53,69,.12); }
-
-.rs2-subscore{
-  margin-top: 6px;
-  font-size: .78rem;
-  color: rgba(255,255,255,.75);
-  font-weight: 850;
-}
-
-/* NOTES */
-.rs2-notes{
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.82);
+.rs-team__name {
+  color: #fff;
   font-weight: 700;
-  font-size: .92rem;
+  font-size: .9375rem;
+  line-height: 1.2;
   word-break: break-word;
+  min-width: 0;
 }
 
+/* SCORE */
+.rs-score {
+  text-align: center;
+  min-width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+}
+.rs-score__main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 900;
+  font-size: 1.375rem;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.rs-score__num {
+  min-width: 16px;
+  text-align: center;
+  color: rgba(255,255,255,.75);
+  transition: color .15s ease;
+}
+.rs-score__num.is-win {
+  color: #47d18c;
+  text-shadow: 0 0 12px rgba(71,209,140,.30);
+}
+.rs-score__sep {
+  color: rgba(255,255,255,.35);
+  font-size: .9375rem;
+  font-weight: 700;
+}
+
+.rs-score__status { margin-top: 2px; }
+
+.rs-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: .625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.75);
+}
+.rs-badge--success {
+  background: rgba(40,167,69,.10);
+  border-color: rgba(40,167,69,.28);
+  color: #47d18c;
+}
+.rs-badge--danger {
+  background: rgba(220,53,69,.10);
+  border-color: rgba(220,53,69,.28);
+  color: #ff6b6b;
+}
+
+.rs-score__sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .6875rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.55);
+}
+.rs-score__sub i {
+  font-size: .625rem;
+  opacity: .7;
+}
+
+/* ============================================ */
+/* NOTES */
+/* ============================================ */
+.rs-item__notes {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  color: rgba(255,255,255,.72);
+  font-size: .75rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.rs-item__notes i {
+  color: rgba(255,255,255,.40);
+  margin-top: 2px;
+  flex-shrink: 0;
+  font-size: .75rem;
+}
+
+/* ============================================ */
 /* EMPTY */
-.rs2-empty{
-  padding: 16px;
+/* ============================================ */
+.rs-empty {
+  text-align: center;
+  padding: 60px 24px;
+  background: rgba(17,28,47,.55);
+  border: 1px dashed rgba(255,255,255,.10);
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.78);
+  backdrop-filter: blur(12px);
+}
+.rs-empty__icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,167,225,.06);
+  border: 2px solid rgba(0,167,225,.20);
+  color: #00d4ff;
+  font-size: 1.75rem;
+}
+.rs-empty__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  margin-bottom: 8px;
+}
+.rs-empty__text {
+  color: rgba(255,255,255,.55);
+  font-size: .8125rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-/* MOBILE tuning */
-@media (max-width: 576px){
-  .rs2-item{ padding: 12px 10px; }
-  .rs2-meta{ margin-bottom: 8px; }
-  .rs2-date{ font-size: .82rem; }
-  .rs2-phase{ font-size: .88rem; }
+/* ============================================ */
+/* MOBILE */
+/* ============================================ */
+@media (max-width: 640px) {
+  .rs-page { padding: 20px 0 40px; }
+  .rs-hero { padding: 8px 0 20px; }
 
-  .rs2-score{ font-size: 1.25rem; }
-  .rs2-scorebox{ min-width: 78px; }
+  .rs-item { padding: 12px 10px; }
+  .rs-item__meta { margin-bottom: 12px; }
+  .rs-item__phase-badge { font-size: .625rem; padding: 3px 8px; }
+  .rs-item__leg { font-size: .6875rem; }
+  .rs-item__date { font-size: .6875rem; }
 
-  /* Important: allow more room to teams */
-  .rs2-main{
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 8px;
+  .rs-item__body {
+    grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr);
+    gap: 6px;
   }
+  .rs-team { gap: 8px; }
+  .rs-team__name { font-size: .8125rem; }
+  .rs-score { min-width: 76px; padding: 0 4px; }
+  .rs-score__main { font-size: 1.125rem; gap: 4px; }
+  .rs-score__sep { font-size: .8125rem; }
+
+  .rs-item__notes { font-size: .6875rem; padding: 8px 10px; }
+}
+
+@media (max-width: 380px) {
+  .rs-team__name { font-size: .75rem; }
+  .rs-score__main { font-size: 1rem; }
+  .rs-badge { font-size: .5625rem; padding: 2px 7px; }
 }
 </style>
 {% endblock %}

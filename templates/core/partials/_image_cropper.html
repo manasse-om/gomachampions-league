@@ -1,0 +1,365 @@
+{% comment %}
+  Modal de recadrage d'image (1:1 obligatoire).
+  Usage : inclure une fois par page qui a des uploads.
+  Convention :
+    - <input type="file" data-cropper data-cropper-preview="#previewId">
+    - <div id="previewId"></div>
+  Le JS remplace le fichier uploadé par la version recadrée.
+{% endcomment %}
+
+<div class="cr-modal" id="crModal" aria-hidden="true">
+  <div class="cr-modal__backdrop" data-cr-close></div>
+
+  <div class="cr-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="crTitle">
+    <div class="cr-modal__head">
+      <div>
+        <div class="cr-modal__title" id="crTitle">Recadrer l'image</div>
+        <div class="cr-modal__sub">Format carré 1:1 — ajustez votre logo</div>
+      </div>
+      <button type="button" class="cr-modal__close" data-cr-close aria-label="Fermer">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="cr-modal__body">
+      <div class="cr-modal__stage">
+        <img id="crImage" alt="Image à recadrer">
+      </div>
+    </div>
+
+    <div class="cr-modal__foot">
+      <div class="cr-hint">
+        <i class="fas fa-info-circle"></i>
+        <span>Déplacez et zoomez pour bien cadrer votre logo.</span>
+      </div>
+      <div class="cr-modal__actions">
+        <button type="button" class="cr-btn cr-btn--ghost" data-cr-close>
+          Annuler
+        </button>
+        <button type="button" class="cr-btn cr-btn--gold" id="crValidate">
+          <i class="fas fa-check"></i>
+          <span>Valider le recadrage</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.cr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.cr-modal.is-open { display: flex; }
+
+.cr-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: crFade .2s ease;
+}
+@keyframes crFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cr-modal__dialog {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  background: #0b1423;
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .50);
+  animation: crSlideUp .28s cubic-bezier(.4, 0, .2, 1);
+}
+@keyframes crSlideUp {
+  from { opacity: 0; transform: translateY(16px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cr-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.cr-modal__title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.cr-modal__sub {
+  color: rgba(255, 255, 255, .55);
+  font-size: .75rem;
+  margin-top: 3px;
+}
+.cr-modal__close {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, .05);
+  color: rgba(255, 255, 255, .70);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s ease;
+  flex-shrink: 0;
+}
+.cr-modal__close:hover {
+  background: rgba(255, 255, 255, .10);
+  color: #fff;
+}
+
+.cr-modal__body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #060a12;
+  overflow: hidden;
+}
+
+.cr-modal__stage {
+  width: 100%;
+  max-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cr-modal__stage img {
+  display: block;
+  max-width: 100%;
+  max-height: 380px;
+}
+
+/* Override Cropper look */
+.cropper-view-box,
+.cropper-face {
+  border-radius: 0;
+}
+.cropper-line, .cropper-point {
+  background-color: #e6c200 !important;
+}
+.cropper-view-box {
+  outline: 2px solid #e6c200;
+  outline-color: rgba(230, 194, 0, .9);
+}
+.cropper-modal {
+  background-color: rgba(6, 10, 18, .70);
+}
+
+.cr-modal__foot {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cr-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, .55);
+  font-size: .75rem;
+}
+.cr-hint i { color: #00a7e1; }
+
+.cr-modal__actions {
+  display: flex;
+  gap: 8px;
+}
+.cr-modal__actions .cr-btn { flex: 1; }
+
+.cr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: .8125rem;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.cr-btn--ghost {
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .14);
+  color: rgba(255, 255, 255, .90);
+}
+.cr-btn--ghost:hover {
+  background: rgba(255, 255, 255, .10);
+  color: #fff;
+}
+.cr-btn--gold {
+  background: linear-gradient(135deg, #e6c200, #ffd633);
+  color: #0b1423;
+  box-shadow: 0 6px 18px rgba(230, 194, 0, .22);
+}
+.cr-btn--gold:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(230, 194, 0, .35);
+}
+
+@media (max-width: 520px) {
+  .cr-modal { padding: 8px; }
+  .cr-modal__stage { max-height: 300px; }
+  .cr-modal__stage img { max-height: 300px; }
+  .cr-modal__body { padding: 12px; }
+  .cr-modal__head { padding: 14px 16px; }
+  .cr-modal__foot { padding: 12px 16px; }
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  var modal = document.getElementById("crModal");
+  var img = document.getElementById("crImage");
+  var btnValidate = document.getElementById("crValidate");
+  if (!modal || !img) return;
+
+  var cropper = null;
+  var currentInput = null;
+
+  function openModal(input) {
+    currentInput = input;
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    if (cropper) { cropper.destroy(); cropper = null; }
+    img.removeAttribute("src");
+    currentInput = null;
+  }
+
+  // Event listeners for all elements with data-cr-close
+  modal.querySelectorAll("[data-cr-close]").forEach(function (el) {
+    el.addEventListener("click", closeModal);
+  });
+
+  // ESC key
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+  });
+
+  // Attach change handler on all [data-cropper] inputs
+  function attachCropper(input) {
+    input.addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      // SVG: skip cropper
+      if (file.type === "image/svg+xml") return;
+
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        img.src = ev.target.result;
+        openModal(input);
+
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(img, {
+          aspectRatio: 1,
+          viewMode: 1,
+          dragMode: "move",
+          autoCropArea: 1,
+          background: false,
+          guides: true,
+          center: true,
+          highlight: false,
+          cropBoxMovable: true,
+          cropBoxResizable: true,
+          toggleDragModeOnDblclick: false,
+          responsive: true,
+          checkOrientation: true,
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Validate button
+  if (btnValidate) {
+    btnValidate.addEventListener("click", function () {
+      if (!cropper || !currentInput) return;
+
+      var canvas = cropper.getCroppedCanvas({
+        width: 400,
+        height: 400,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: "high",
+      });
+
+      canvas.toBlob(function (blob) {
+        var croppedFile = new File([blob], "cropped.jpg", {
+          type: "image/jpeg",
+          lastModified: Date.now(),
+        });
+
+        // Replace input files
+        try {
+          var dt = new DataTransfer();
+          dt.items.add(croppedFile);
+          currentInput.files = dt.files;
+        } catch (err) {
+          // Fallback: some old browsers don't support DataTransfer
+          console.warn("DataTransfer not supported", err);
+        }
+
+        // Update preview if selector provided
+        var previewSelector = currentInput.getAttribute("data-cropper-preview");
+        if (previewSelector) {
+          var preview = document.querySelector(previewSelector);
+          if (preview) {
+            var dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+            preview.innerHTML = '<img src="' + dataUrl + '" alt="">';
+          }
+        }
+
+        // Dispatch custom event
+        currentInput.dispatchEvent(new CustomEvent("cropper:done", {
+          detail: { file: croppedFile, blob: blob },
+        }));
+
+        closeModal();
+      }, "image/jpeg", 0.92);
+    });
+  }
+
+  // Init on load
+  document.querySelectorAll("[data-cropper]").forEach(attachCropper);
+
+  // Expose for dynamic elements (if needed)
+  window.initCropper = function () {
+    document.querySelectorAll("[data-cropper]").forEach(attachCropper);
+  };
+})();
+</script>

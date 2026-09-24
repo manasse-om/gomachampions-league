@@ -81,6 +81,7 @@ urlpatterns = [
     # Historique des saisons
     path('saisons/', views.season_history, name='season_history'),
     path('saisons/<int:pk>/', views.season_detail, name='season_detail'),path('dashboard/restore/', views.restore_database, name='restore_database'),
+    path('register/accept-terms/', views.accept_terms, name='accept_terms'),
 
     
 
