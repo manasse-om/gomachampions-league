@@ -1,119 +1,118 @@
 {% load static roles i18n %}
 
 {% with scheduled=match.scheduled_date %}
-<div class="fx-item {% if match.is_late and not match.is_played and not match.is_forfeit %}is-late{% endif %}"
+<div class="fxm-item {% if match.is_late and not match.is_played and not match.is_forfeit %}is-late{% endif %}"
      data-match-id="{{ match.id }}"
      data-match-date="{{ scheduled|date:'Y-m-d' }}"
      data-is-played="{{ match.is_played|yesno:'true,false' }}">
 
   <!-- ============================================ -->
-  <!-- COUNTDOWN -->
+  <!-- TOP : COUNTDOWN + DATE -->
   <!-- ============================================ -->
-  {% if not match.is_played %}
-    <div class="fx-countdown-wrap">
-      <div class="fx-countdown" id="cd-{{ match.id }}">
-        <span class="cd-spinner">
-          <i class="fas fa-circle-notch fa-spin"></i>
-        </span>
+  <div class="fxm-top">
+    {% if not match.is_played %}
+      <div class="fxm-cd" id="cd-{{ match.id }}">
+        <i class="fas fa-circle-notch fa-spin"></i>
       </div>
-    </div>
-  {% endif %}
-
-  <!-- ============================================ -->
-  <!-- LIGNE MATCH : ÉQUIPE | SCORE/DATE | ÉQUIPE -->
-  <!-- ============================================ -->
-  <div class="fx-main">
-
-    <!-- DOMICILE : logo + nom + WhatsApp -->
-    <div class="fx-team fx-team--home">
-      {% include "core/partials/_team_logo.html" with team=match.home_team size="sm" %}
-      <div class="fx-team__block">
-        <div class="fx-team__name" title="{{ match.home_team.team_name }}">
-          {{ match.home_team.team_name }}
-        </div>
-        {% if match.home_team.whatsapp and not match.is_played %}
-          <a class="fx-wa"
-             href="https://wa.me/{{ match.home_team.whatsapp|cut:'+' }}"
-             target="_blank" rel="noopener"
-             title="WhatsApp {{ match.home_team.whatsapp }}">
-            <i class="fab fa-whatsapp"></i>
-            <span class="fx-wa__text">Contacter</span>
-          </a>
+    {% else %}
+      <div class="fxm-done">
+        {% if match.is_forfeit %}
+          <i class="fas fa-ban"></i> Forfait
+        {% else %}
+          <i class="fas fa-circle-check"></i> Terminé
         {% endif %}
       </div>
+    {% endif %}
+
+    <div class="fxm-date">
+      <i class="far fa-calendar"></i>
+      {% language 'fr' %}{{ scheduled|date:"d/m" }}{% endlanguage %}
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- MATCH LINE -->
+  <!-- ============================================ -->
+  <div class="fxm-main">
+
+    <!-- HOME -->
+    <div class="fxm-side">
+      {% include "core/partials/_team_logo.html" with team=match.home_team size="sm" %}
+      <div class="fxm-side__name">{{ match.home_team.team_name }}</div>
     </div>
 
-    <!-- CENTRE : SCORE ou DATE + STATUT -->
-    <div class="fx-mid">
+    <!-- CENTER -->
+    <div class="fxm-center">
       {% if match.is_played %}
         {% if match.is_forfeit %}
-          <div class="fx-mid__ff">Forfait</div>
+          <div class="fxm-score fxm-score--ff">FF</div>
         {% else %}
-          <div class="fx-mid__score">
-            <span class="fx-mid__num {% if match.home_score > match.away_score %}is-win{% endif %}">
-              {{ match.home_score }}
-            </span>
-            <span class="fx-mid__sep">–</span>
-            <span class="fx-mid__num {% if match.away_score > match.home_score %}is-win{% endif %}">
-              {{ match.away_score }}
-            </span>
+          <div class="fxm-score">
+            <span class="{% if match.home_score > match.away_score %}is-win{% endif %}">{{ match.home_score }}</span>
+            <span class="fxm-score__sep">-</span>
+            <span class="{% if match.away_score > match.home_score %}is-win{% endif %}">{{ match.away_score }}</span>
           </div>
         {% endif %}
-        <div class="fx-mid__tag fx-mid__tag--done">
-          <i class="fas fa-check"></i> Terminé
-        </div>
       {% else %}
-        <div class="fx-mid__date">
-          {% language 'fr' %}{{ scheduled|date:"d/m" }}{% endlanguage %}
-        </div>
-        <div class="fx-mid__tag
-          {% if match.is_late %}fx-mid__tag--danger
-          {% elif match.reported %}fx-mid__tag--warn
-          {% else %}fx-mid__tag--info{% endif %}">
-          {% if match.is_late %}Retard
-          {% elif match.reported %}Signalé
-          {% else %}À jouer{% endif %}
-        </div>
+        <div class="fxm-vs">VS</div>
+        {% if match.is_late %}
+          <div class="fxm-status fxm-status--danger">Retard</div>
+        {% elif match.reported %}
+          <div class="fxm-status fxm-status--warn">Signalé</div>
+        {% else %}
+          <div class="fxm-status fxm-status--info">À jouer</div>
+        {% endif %}
       {% endif %}
     </div>
 
-    <!-- EXTÉRIEUR : logo + nom + WhatsApp -->
-    <div class="fx-team fx-team--away">
+    <!-- AWAY -->
+    <div class="fxm-side fxm-side--right">
+      <div class="fxm-side__name">{{ match.away_team.team_name }}</div>
       {% include "core/partials/_team_logo.html" with team=match.away_team size="sm" %}
-      <div class="fx-team__block">
-        <div class="fx-team__name" title="{{ match.away_team.team_name }}">
-          {{ match.away_team.team_name }}
-        </div>
-        {% if match.away_team.whatsapp and not match.is_played %}
-          <a class="fx-wa fx-wa--right"
-             href="https://wa.me/{{ match.away_team.whatsapp|cut:'+' }}"
-             target="_blank" rel="noopener"
-             title="WhatsApp {{ match.away_team.whatsapp }}">
-            <i class="fab fa-whatsapp"></i>
-            <span class="fx-wa__text">Contacter</span>
-          </a>
-        {% endif %}
-      </div>
     </div>
 
   </div>
 
   <!-- ============================================ -->
-  <!-- BOUTONS ADMIN -->
+  <!-- WHATSAPP BUTTONS -->
+  <!-- ============================================ -->
+  {% if not match.is_played %}
+    <div class="fxm-wa-row">
+      {% if match.home_team.whatsapp %}
+        <a class="fxm-wa"
+           href="https://wa.me/{{ match.home_team.whatsapp|cut:'+' }}"
+           target="_blank" rel="noopener">
+          <i class="fab fa-whatsapp"></i>
+          <span>Contacter {{ match.home_team.abbreviation }}</span>
+        </a>
+      {% endif %}
+      {% if match.away_team.whatsapp %}
+        <a class="fxm-wa fxm-wa--away"
+           href="https://wa.me/{{ match.away_team.whatsapp|cut:'+' }}"
+           target="_blank" rel="noopener">
+          <i class="fab fa-whatsapp"></i>
+          <span>Contacter {{ match.away_team.abbreviation }}</span>
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- ============================================ -->
+  <!-- ADMIN BUTTONS -->
   <!-- ============================================ -->
   {% if user|has_role:"superadmin,organisateur,match" %}
-    <div class="fx-admin">
-      <a href="{% url 'encode_result' match.id %}" class="fx-admin__btn fx-admin__btn--gold">
+    <div class="fxm-admin">
+      <a href="{% url 'encode_result' match.id %}" class="fxm-btn fxm-btn--gold">
         <i class="fas {% if match.is_played %}fa-pen{% else %}fa-keyboard{% endif %}"></i>
         <span>{% if match.is_played %}Modifier{% else %}Encoder{% endif %}</span>
       </a>
       {% if match.is_played %}
-        <a href="{% url 'cancel_result' match.id %}" class="fx-admin__btn fx-admin__btn--danger">
+        <a href="{% url 'cancel_result' match.id %}" class="fxm-btn fxm-btn--danger">
           <i class="fas fa-rotate-left"></i>
           <span>Annuler</span>
         </a>
       {% else %}
-        <a href="{% url 'reschedule_match' match.id %}" class="fx-admin__btn fx-admin__btn--light">
+        <a href="{% url 'reschedule_match' match.id %}" class="fxm-btn fxm-btn--light">
           <i class="fas fa-calendar-plus"></i>
           <span>Reporter</span>
         </a>
@@ -124,307 +123,300 @@
 </div>
 {% endwith %}
 
-<!-- ============================================ -->
-<!-- STYLES -->
-<!-- ============================================ -->
 <style>
 /* ============================================ */
 /* ITEM */
 /* ============================================ */
-.fx-item {
+.fxm-item {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
   background: rgba(255,255,255,.03);
   transition: border-color .15s ease, background .15s ease;
 }
-.fx-item:hover {
-  border-color: rgba(230,194,0,.20);
-  background: rgba(255,255,255,.05);
+.fxm-item:hover {
+  border-color: rgba(230,194,0,.22);
+  background: rgba(255,255,255,.045);
 }
-.fx-item.is-late {
+.fxm-item.is-late {
   border-left: 3px solid #dc3545;
   background: rgba(220,53,69,.03);
 }
 
 /* ============================================ */
-/* COUNTDOWN */
+/* TOP : countdown + date */
 /* ============================================ */
-.fx-countdown-wrap {
+.fxm-top {
   display: flex;
-  justify-content: center;
-}
-.fx-countdown {
-  display: inline-flex;
+  justify-content: space-between;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px;
+}
+
+.fxm-cd {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
   border-radius: 999px;
+  font-size: .6875rem;
   font-weight: 800;
-  font-size: .75rem;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.85);
+  background: rgba(0,167,225,.08);
+  border: 1px solid rgba(0,167,225,.28);
+  color: #00d4ff;
+  letter-spacing: 0.3px;
 }
-.fx-countdown.is-waiting {
-  border-color: rgba(0,167,225,.32);
-  background: rgba(0,167,225,.06);
-}
-.fx-countdown.is-open.is-normal {
-  border-color: rgba(40,167,69,.35);
+.fxm-cd.is-open.is-normal {
   background: rgba(40,167,69,.08);
+  border-color: rgba(40,167,69,.30);
   color: #47d18c;
 }
-.fx-countdown.is-open.is-warning {
-  border-color: rgba(255,165,0,.45);
+.fxm-cd.is-open.is-warning {
   background: rgba(255,165,0,.10);
+  border-color: rgba(255,165,0,.35);
   color: #ffaa00;
 }
-.fx-countdown.is-open.is-urgent {
-  border-color: rgba(220,53,69,.50);
-  background: rgba(220,53,69,.12);
+.fxm-cd.is-open.is-urgent {
+  background: rgba(220,53,69,.10);
+  border-color: rgba(220,53,69,.35);
   color: #ff6b6b;
-  animation: fxPulse 1s ease-in-out infinite;
+  animation: fxmPulse 1s ease-in-out infinite;
 }
-.fx-countdown.is-expired {
-  border-color: rgba(255,255,255,.12);
+.fxm-cd.is-expired {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.10);
   color: rgba(255,255,255,.40);
 }
-@keyframes fxPulse {
+@keyframes fxmPulse {
   0%,100% { opacity: 1; }
   50%     { opacity: .6; }
 }
 
+.fxm-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: .6875rem;
+  font-weight: 800;
+  background: rgba(40,167,69,.08);
+  border: 1px solid rgba(40,167,69,.28);
+  color: #47d18c;
+  letter-spacing: 0.3px;
+}
+
+.fxm-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: .6875rem;
+  font-weight: 800;
+  background: rgba(230,194,0,.08);
+  border: 1px solid rgba(230,194,0,.25);
+  color: #e6c200;
+}
+.fxm-date i { font-size: .625rem; opacity: .8; }
+
 /* ============================================ */
-/* LIGNE PRINCIPALE : ÉQUIPE | SCORE | ÉQUIPE */
+/* MATCH LINE */
 /* ============================================ */
-.fx-main {
+.fxm-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: 8px;
   align-items: center;
+  padding: 4px 0;
 }
 
-/* ============================================ */
-/* ÉQUIPES */
-/* ============================================ */
-.fx-team {
+.fxm-side {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
-.fx-team--home { justify-content: flex-start; }
-.fx-team--away { justify-content: flex-end; }
-
-.fx-team__block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  flex: 1;
-}
-.fx-team--away .fx-team__block {
-  align-items: flex-end;
-}
-
-.fx-team__name {
-  font-weight: 700;
-  color: rgba(255,255,255,.94);
-  font-size: .8125rem;
-  line-height: 1.15;
-  /* FIX : ne pas briser les caractères */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-.fx-team--away .fx-team__name {
+.fxm-side--right {
+  justify-content: flex-end;
   text-align: right;
 }
 
-/* WhatsApp button */
-.fx-wa {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: .625rem;
-  font-weight: 800;
-  text-decoration: none;
-  border: 1px solid rgba(37,211,102,.30);
-  background: rgba(37,211,102,.08);
-  color: #25d366;
-  transition: all .15s ease;
-  width: fit-content;
-  letter-spacing: 0.3px;
-}
-.fx-wa:hover {
-  background: rgba(37,211,102,.18);
+.fxm-side__name {
+  font-weight: 700;
   color: #fff;
+  font-size: .8125rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
-.fx-wa i { font-size: .6875rem; }
-.fx-wa__text { display: none; }
 
-@media (min-width: 500px) {
-  .fx-wa__text { display: inline; }
-  .fx-wa { padding: 4px 10px; font-size: .6875rem; }
-}
-
-/* ============================================ */
-/* CENTRE */
-/* ============================================ */
-.fx-mid {
+/* CENTER */
+.fxm-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  text-align: center;
+  gap: 4px;
+  min-width: 60px;
+  padding: 0 4px;
 }
 
-.fx-mid__score {
+.fxm-score {
   display: flex;
   align-items: center;
   gap: 3px;
   font-weight: 900;
-  font-size: 1.125rem;
-  color: #fff;
+  font-size: 1rem;
+  color: rgba(255,255,255,.75);
   line-height: 1;
-  letter-spacing: -0.02em;
 }
-.fx-mid__num {
-  min-width: 14px;
-  text-align: center;
-  color: rgba(255,255,255,.70);
-}
-.fx-mid__num.is-win {
+.fxm-score span.is-win {
   color: #47d18c;
-  text-shadow: 0 0 10px rgba(71,209,140,.30);
+  text-shadow: 0 0 8px rgba(71,209,140,.30);
 }
-.fx-mid__sep {
-  color: rgba(255,255,255,.30);
-  font-size: .8125rem;
-  font-weight: 700;
-}
-
-.fx-mid__ff {
-  font-weight: 800;
+.fxm-score__sep {
+  color: rgba(255,255,255,.25);
   font-size: .75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+}
+.fxm-score--ff {
+  font-size: .6875rem;
   color: #ffc107;
+  text-transform: uppercase;
 }
 
-.fx-mid__date {
+.fxm-vs {
   font-weight: 900;
-  color: #e6c200;
-  font-size: .875rem;
-  letter-spacing: 0.3px;
+  font-size: .75rem;
+  color: rgba(255,255,255,.40);
+  letter-spacing: 1px;
 }
 
-.fx-mid__tag {
+.fxm-status {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 3px 8px;
+  padding: 2px 8px;
   border-radius: 999px;
+  font-size: .5625rem;
   font-weight: 800;
-  font-size: .625rem;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.05);
-  color: rgba(255,255,255,.75);
+  letter-spacing: 0.4px;
   white-space: nowrap;
 }
-.fx-mid__tag i { font-size: .5625rem; }
-.fx-mid__tag--done {
-  background: rgba(40,167,69,.10);
-  border-color: rgba(40,167,69,.28);
-  color: #47d18c;
-}
-.fx-mid__tag--info {
+.fxm-status--info {
   background: rgba(0,167,225,.10);
-  border-color: rgba(0,167,225,.28);
+  border: 1px solid rgba(0,167,225,.28);
   color: #00d4ff;
 }
-.fx-mid__tag--warn {
+.fxm-status--warn {
   background: rgba(255,193,7,.10);
-  border-color: rgba(255,193,7,.30);
+  border: 1px solid rgba(255,193,7,.30);
   color: #ffc107;
 }
-.fx-mid__tag--danger {
+.fxm-status--danger {
   background: rgba(220,53,69,.10);
-  border-color: rgba(220,53,69,.30);
+  border: 1px solid rgba(220,53,69,.30);
   color: #ff6b6b;
+}
+
+/* ============================================ */
+/* WHATSAPP ROW */
+/* ============================================ */
+.fxm-wa-row {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.fxm-wa {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(37,211,102,.08);
+  border: 1px solid rgba(37,211,102,.28);
+  color: #25d366;
+  font-size: .6875rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all .15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.fxm-wa:hover {
+  background: rgba(37,211,102,.16);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.fxm-wa i { font-size: .75rem; flex-shrink: 0; }
+.fxm-wa span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ============================================ */
 /* ADMIN BUTTONS */
 /* ============================================ */
-.fx-admin {
+.fxm-admin {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,.05);
+  gap: 6px;
 }
-
-.fx-admin__btn {
+.fxm-btn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 5px;
+  padding: 8px 10px;
   border-radius: 10px;
-  font-weight: 800;
   font-size: .6875rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   text-decoration: none;
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.10);
   color: rgba(255,255,255,.92);
   background: rgba(255,255,255,.05);
   transition: all .18s ease;
   white-space: nowrap;
-  flex: 1;
-  max-width: 140px;
 }
-.fx-admin__btn i { font-size: .6875rem; }
+.fxm-btn i { font-size: .6875rem; }
+.fxm-btn:hover { transform: translateY(-1px); }
 
-.fx-admin__btn--gold {
+.fxm-btn--gold {
   border: none;
   background: linear-gradient(135deg, #e6c200, #ffd633);
   color: #0b1423;
-  box-shadow: 0 4px 12px rgba(230,194,0,.22);
+  box-shadow: 0 4px 12px rgba(230,194,0,.20);
 }
-.fx-admin__btn--gold:hover {
-  transform: translateY(-1px);
+.fxm-btn--gold:hover {
   box-shadow: 0 8px 18px rgba(230,194,0,.35);
   color: #0b1423;
 }
 
-.fx-admin__btn--danger {
-  border-color: rgba(220,53,69,.30);
+.fxm-btn--danger {
+  border-color: rgba(220,53,69,.28);
   background: rgba(220,53,69,.08);
   color: #ff6b6b;
 }
-.fx-admin__btn--danger:hover {
+.fxm-btn--danger:hover {
   background: rgba(220,53,69,.16);
   color: #ff6b6b;
 }
 
-.fx-admin__btn--light {
+.fxm-btn--light {
   border-color: rgba(255,255,255,.14);
   background: rgba(255,255,255,.04);
   color: rgba(255,255,255,.80);
 }
-.fx-admin__btn--light:hover {
+.fxm-btn--light:hover {
   background: rgba(255,255,255,.10);
   color: #fff;
 }
@@ -433,24 +425,18 @@
 /* MOBILE */
 /* ============================================ */
 @media (max-width: 480px) {
-  .fx-item { padding: 12px; gap: 10px; }
-  .fx-main { grid-template-columns: minmax(0, 1fr) 68px minmax(0, 1fr); gap: 6px; }
-  .fx-team__name { font-size: .75rem; }
-  .fx-mid__score { font-size: 1rem; }
-  .fx-mid__date { font-size: .8125rem; }
-  .fx-admin__btn { padding: 7px 10px; font-size: .625rem; }
-  .fx-admin__btn span { display: none; }  /* Icône seule sur très petit */
-  .fx-admin__btn i { font-size: .75rem; }
+  .fxm-item { padding: 10px; gap: 8px; }
+  .fxm-side__name { font-size: .75rem; }
+  .fxm-score { font-size: .9375rem; }
+  .fxm-cd, .fxm-done, .fxm-date { font-size: .625rem; padding: 3px 8px; }
+  .fxm-wa { font-size: .625rem; padding: 6px 8px; }
+  .fxm-wa span { font-size: .625rem; }
+  .fxm-btn { font-size: .625rem; padding: 7px 8px; }
+  .fxm-btn span { display: none; }
+  .fxm-btn i { font-size: .75rem; }
 }
-
-@media (min-width: 481px) and (max-width: 640px) {
-  .fx-main { grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); }
-  .fx-team__name { font-size: .8125rem; }
-}
-
-/* Très petit écran : admin buttons reprennent le texte */
 @media (max-width: 360px) {
-  .fx-admin__btn span { display: inline; }
-  .fx-admin__btn { padding: 6px 8px; font-size: .5625rem; }
+  .fxm-btn span { display: inline; }
+  .fxm-side__name { font-size: .6875rem; }
 }
 </style>
